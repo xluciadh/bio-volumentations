@@ -1,0 +1,12 @@
+Prerequisites : 
+    - You need to know the basics of HTML
+
+Step 1 : 
+    - Open the file index.html located in docs/_build/html/index.html to see what the documentation looks like in your web browser.
+
+Step 2 : 
+    - Open the file index.html located in docs/_build/html/index.html with your preferred text editor.
+
+Step 3 : 
+    - Make changes to the documentation (index.html) as desired, while ensuring that you adhere to the HTML syntax.
+    - You can also modify the file volumentations_biomedicine.augmentations.html if you wish to change the documentation of the functions.

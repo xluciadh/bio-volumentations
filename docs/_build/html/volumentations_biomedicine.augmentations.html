@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en">
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>volumentations_biomedicine.augmentations.transforms module &mdash; volumentations_biomedicine  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to volumentations_biomedicine’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            volumentations_biomedicine
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Augumentations</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">volumentations_biomedicine</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">volumentations_biomedicine.augmentations.transforms module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/volumentations_biomedicine.augmentations.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-volumentations_biomedicine.augmentations.transforms">
+<span id="volumentations-biomedicine-augmentations-transforms-module"></span><h1>volumentations_biomedicine.augmentations.transforms module<a class="headerlink" href="#module-volumentations_biomedicine.augmentations.transforms" title="Permalink to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.AffineTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">AffineTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angle_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[15,</span> <span class="pre">15,</span> <span class="pre">15]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translantion_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scaling_coef</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_back</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#AffineTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.AffineTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Rotation around spatial axes.</p>
+<p>Rotation around each axis is chosen randomly from given interval in angle_limit. If a float X is given instead of
+for given axis then it becomes interval [-X, X]. If scaling_coef is used, it should be list with length equal 3.
+For closer clook at the interpolation, border_mode, ival and mval take a look at the scipy.ndimage.affine_transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>angle_limit</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>] </em><em>| </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Contains intervals in degrees from which angle of rotation is
+chosen, for corresponding axis. Defaults to [(-15, 15),(-15, 15),(-15, 15)].</p></li>
+<li><p><strong>translantion_limit</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>]</em><em>, </em><em>| </em><em>int</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – List of length equal to the number of axes -1
+(minus channel), each element controls translation in this axis. This list consists of intervals,
+from which, it is then randomly chosen the translation vector. Defaults to None.</p></li>
+<li><p><strong>scaling_coef</strong> (<em>List</em><em>[</em><em>float</em><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – List which contains scaling coefficients to make
+the image data isotropic in spatial dimensions. Length of list needs to be 3(number of spatial axes)
+as only spatial dimensions are scaled. If scaling_coef is set to None, there is no scalling.
+Recommended for anisotropic data and if one of spatial axis have significantly lower amount of
+samples. Defaults to None.</p></li>
+<li><p><strong>scale_back</strong> (<em>bool</em><em>, </em><em>optional</em>) – If scaling_coef is not None, then image is scaled back, to be anisotropic. Defaults to True.</p></li>
+<li><p><strong>interpolation</strong> (<em>Int</em><em>, </em><em>optional</em>) – The order of spline interpolation. Defaults to 1.</p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode parameter determines how the input array is extended beyond its boundaries. Defaults to ‘constant’.</p></li>
+<li><p><strong>ival</strong> (<em>float</em><em>, </em><em>optional</em>) – Value to fill past edges of image if mode is ‘constant’. Defaults to 0.</p></li>
+<li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – Value to fill past edges of mask if mode is ‘constant’. Defaults to 0.</p></li>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If ignore_index is float, then transformation of mask is done with
+border_mode = “constant” and mval = ignore_index. If ignore_index is None, then it does nothing. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.AffineTransform.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#AffineTransform.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.AffineTransform.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.AffineTransform.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translate</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#AffineTransform.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.AffineTransform.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.AffineTransform.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#AffineTransform.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.AffineTransform.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.CenterCrop">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">CenterCrop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#CenterCrop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.CenterCrop" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Crops center region of the input. Size of this crop is given by shape.</p>
+<p>Unlike CenterCrop from Albumentations, this transform pads the input in dimensions
+where the input is smaller than the crop-shape with numpy.pad, for which are border_mode, ival and mval.</p>
+<p><a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.pad.html">https://numpy.org/doc/stable/reference/generated/numpy.pad.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>Tuple</em><em>[</em><em>int</em><em>]</em><em>) </em><em>Final shape of input</em><em>, </em><em>expected without first axis of image</em><em> (</em><em>representing channels</em>) – </p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – border mode used for numpy.pad. Defaults to “reflect”.</p></li>
+<li><p><strong>ival</strong> (<em>Tuple</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – values used for ‘constant’ or ‘linear_ramp’ for image. Defaults to (0, 0).</p></li>
+<li><p><strong>mval</strong> (<em>Tuple</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – values used for ‘constant’ or ‘linear_ramp’ for mask. Defaults to (0, 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If ignore_index is float, then transformation of mask is done with
+border_mode = “constant” and mval = ignore_index. If ignore_index is None, then it does nothing. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.CenterCrop.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#CenterCrop.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.CenterCrop.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.CenterCrop.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#CenterCrop.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.CenterCrop.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Contiguous">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Contiguous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Contiguous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Contiguous" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Contiguous.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Contiguous.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Contiguous.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.ElasticTransform">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">ElasticTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">deformation_limits</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0.25)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'constant'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#ElasticTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.ElasticTransform" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.ElasticTransform.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#ElasticTransform.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.ElasticTransform.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.ElasticTransform.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigmas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#ElasticTransform.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.ElasticTransform.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.ElasticTransform.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#ElasticTransform.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.ElasticTransform.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Flip">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Flip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Flip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Flip" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Flips input around specified axes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axes</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – List of axes around which is flip done. Defaults to [1,2,3].</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Flip.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Flip.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Flip.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Flip.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Flip.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Flip.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Flip.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Flip.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Flip.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Float">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Float" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Float.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Float.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Float.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GaussianBlur">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">GaussianBlur</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GaussianBlur"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GaussianBlur" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Performs gaussian blur on the image.</p>
+<p>Sigma parameter determines the strength of gaussian blur. There is no blurring between channels.
+By default there is no blurring also on time dimension. If given single number, channels and axes are blurred
+with same strength. If given tuple, blurring is performed with same effect over channels, but on each axis differently.
+If given List, each channel is blurred differently, according to the element inside list.</p>
+<p>For more information about border_mode and cval check scipy.ndimage.gaussian_filter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sigma</strong> (<em>float</em><em>, </em><em>Tuple</em><em>(</em><em>float</em><em>)</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>(</em><em>float</em><em>) </em><em>| </em><em>float</em><em>] </em><em>, </em><em>optional</em>) – Determines strength of the blurring.
+List must have length equal to the number of channels. Tuple should have same number elements as number of axes - 1. Defaults to 0.8.</p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode parameter determines how the input array is extended beyond its boundaries. Defaults to “reflect”.</p></li>
+<li><p><strong>cval</strong> (<em>float</em><em>, </em><em>optional</em>) – Value to fill past edges of image if mode is ‘constant’. Defaults to 0.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GaussianBlur.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GaussianBlur.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GaussianBlur.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GaussianNoise">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">GaussianNoise</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">var_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.001,</span> <span class="pre">0.1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GaussianNoise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GaussianNoise" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Adds gaussian noise to the image.</p>
+<p>Noise is drawn from the normal distribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>var_limit</strong> (<em>tuple</em><em>, </em><em>optional</em>) – variance of normal distribution is randomly chosen from this interval. Defaults to (0.001, 0.1).</p></li>
+<li><p><strong>mean</strong> (<em>float</em><em>, </em><em>optional</em>) – mean of normal distribution. Defaults to 0.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GaussianNoise.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GaussianNoise.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GaussianNoise.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GaussianNoise.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GaussianNoise.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GaussianNoise.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GridDropout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">GridDropout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_size_min</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit_size_max</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes_number_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes_number_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes_number_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_fill_value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GridDropout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GridDropout" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GridDropout.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GridDropout.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GridDropout.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GridDropout.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">holes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GridDropout.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GridDropout.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GridDropout.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GridDropout.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GridDropout.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.GridDropout.get_transform_init_args_names">
+<span class="sig-name descname"><span class="pre">get_transform_init_args_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#GridDropout.get_transform_init_args_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.GridDropout.get_transform_init_args_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.HistogramEqualization">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">HistogramEqualization</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">256</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#HistogramEqualization"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.HistogramEqualization" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Performs equalization of histogram.</p>
+<p>This equalization is done channel-wise, meaning that each channel is equalized separately.
+Images are normalized over both spatial and temporal domains together. The output is in the range [0,1].</p>
+<p>This transformation is performed with <a class="reference external" href="https://scikit-image.org/docs/stable/api/skimage.exposure.html#skimage.exposure.equalize_hist">https://scikit-image.org/docs/stable/api/skimage.exposure.html#skimage.exposure.equalize_hist</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bins</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of bins for image histogram. Defaults to 256.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.HistogramEqualization.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#HistogramEqualization.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.HistogramEqualization.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Normalize">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Normalize" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Normalize image channels to the given mean and std.</p>
+<p>Normalization is performed channel-wise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> (<em>float</em><em> | </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Value of desired mean. If it is list, then it should have
+same length as number of channels, and each value corresponds to the desired mean in respective channel. Defaults to 0.</p></li>
+<li><p><strong>std</strong> (<em>float</em><em> | </em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Value of desired std. If it is list, then it should have
+same length as number of channels, and each value corresponds to the desired std in respective channel. Defaults to 1.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Normalize.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Normalize.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Normalize.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.NormalizeMeanStd">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">NormalizeMeanStd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mean</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">std</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#NormalizeMeanStd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.NormalizeMeanStd" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Normalization of image by given mean and std.</p>
+<p>For a single channel image normalization is applied by the formula <span class="math notranslate nohighlight">\(img = (img - mean) / std\)</span>.</p>
+<p>If image contains more channels, then for each channel previous formula is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mean</strong> (<em>float</em><em> | </em><em>List</em><em>[</em><em>float</em><em>]</em>) – Mean of image. If there are more channels, then it should be list of means for each channel.</p></li>
+<li><p><strong>std</strong> (<em>float</em><em> | </em><em>List</em><em>[</em><em>float</em><em>]</em>) – Std of image. If there are more channels, then it should be list of stds for each channel.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.NormalizeMeanStd.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">image</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#NormalizeMeanStd.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.NormalizeMeanStd.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Pad">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pad_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'constant'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Sequence</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Pad" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Pads the input.</p>
+<p>Input is padded based on pad_size. If pad_size is only one number, all spatial axes are padded on both sides
+with this number. If it is tuple, then it has same behaviour as pad_size except sides are padded with different
+number of pixels. If it is List, then it must have 3 items, which define padding for each spatial dimension
+separately (in either of the ways described above). If the List is shorter, remaining axes are padded with 0.</p>
+<p>For other parameters check <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.pad.html">https://numpy.org/doc/stable/reference/generated/numpy.pad.html</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pad_size</strong> (<em>int</em><em> | </em><em>Tuple</em><em>[</em><em>int</em><em>] </em><em>| </em><em>List</em><em>[</em><em>int</em><em> | </em><em>Tuple</em><em>[</em><em>int</em><em>]</em><em>]</em>) – Determines number of pixels to be padded. Tuple should be of size 2.
+List should be of size equal to the image axes - 1 (channel axis).</p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – numpy.pad parameter . Defaults to ‘constant’.</p></li>
+<li><p><strong>value</strong> (<em>float</em><em> | </em><em>Sequence</em><em>, </em><em>optional</em>) – value for image if needed by chosen border_mode. Defaults to 0.</p></li>
+<li><p><strong>mask_value</strong> (<em>float</em><em> | </em><em>Sequence</em><em>, </em><em>optional</em>) – value for mask if needed by chosen border_mode. Defaults to 0.</p></li>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If ignore_index is float, then transformation of mask is done with
+border_mode = “constant” and mval = ignore_index. If ignore_index is None, then it does nothing. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Pad.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Pad.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Pad.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Pad.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Pad.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Pad.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomBrightnessContrast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">brightness_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">contrast_limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomBrightnessContrast"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Randomly change brightness and contrast of the input image.</p>
+<p>Unlike RandomBrightnessContrast from Albumentations, this transform is using
+formula  <span class="math notranslate nohighlight">\(f(a) = (c+1) * a + b\)</span>, where c is contrast and b is brightness.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>brightness_limit</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>) </em><em>| </em><em>float</em><em>, </em><em>optional</em>) – Interval from which change in brightness is taken.
+If limit is a single float, the interval will be (-limit, limit). If change in brightness is 0,
+brightness won`t change. Defaults to 0.2.</p></li>
+<li><p><strong>contrast_limit</strong> (<em>(</em><em>float</em><em>, </em><em>float</em><em>) </em><em>| </em><em>float</em><em>, </em><em>optional</em>) – Interval from which change in contrast is taken.
+If limit is a single float, the interval will be (-limit, limit). If change in contrast is 0,
+contrast won`t change. Defaults to 0.2.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomBrightnessContrast.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomBrightnessContrast.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast.get_transform_init_args_names">
+<span class="sig-name descname"><span class="pre">get_transform_init_args_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomBrightnessContrast.get_transform_init_args_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomBrightnessContrast.get_transform_init_args_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomCrop">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomCrop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomCrop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomCrop" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Randomly crops region from input. Size of this crop is given by shape.</p>
+<p>Unlike RandomCrop from Albumentations, this transform pads the input in dimensions
+where the input is smaller than the crop-shape with numpy.pad, for which are border_mode, ival and mval.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>Tuple</em><em>[</em><em>int</em><em>]</em><em>) </em><em>Final shape of input</em><em>, </em><em>expected without first axis of image</em><em> (</em><em>representing channels</em>) – </p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – border mode used for numpy.pad. Defaults to “reflect”.</p></li>
+<li><p><strong>ival</strong> (<em>Tuple</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – values used for ‘constant’ or ‘linear_ramp’ for image. Defaults to (0, 0).</p></li>
+<li><p><strong>mval</strong> (<em>Tuple</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – values used for ‘constant’ or ‘linear_ramp’ for mask. Defaults to (0, 0).</p></li>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If ignore_index is float, then transformation of mask is done with
+border_mode = “constant” and mval = ignore_index. If ignore_index is None, then it does nothing. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomCrop.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0,</span> <span class="pre">0,</span> <span class="pre">0])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomCrop.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomCrop.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomCrop.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">crop_start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0,</span> <span class="pre">0,</span> <span class="pre">0])</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomCrop.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomCrop.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomCrop.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomCrop.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomCrop.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomDropPlane">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomDropPlane</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plane_drop_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0,)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomDropPlane"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomDropPlane" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Randomly drop some planes in axis randomly chosen from ‘axes’ input array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plane_drop_prob</strong> (<em>float</em>) – float value in (0.0, 1.0) range. Default: 0.1</p></li>
+<li><p><strong>axes</strong> (<em>tuple</em>) – 0</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – probability of applying the transform. Default: 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>uint8, float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomDropPlane.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomDropPlane.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomDropPlane.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomDropPlane.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indexes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomDropPlane.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomDropPlane.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomDropPlane.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomDropPlane.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomDropPlane.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomFlip">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomFlip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes_to_choose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomFlip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomFlip" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Flips a input around a tuple of axes randomly chosen from the input list of axis combinations.</p>
+<p>If axes_to_choose to choose is None, random subset of spatial axes is chosen.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axes_to_choose</strong> (<em>List</em><em>[</em><em>Tuple</em><em>[</em><em>int</em><em>]</em><em>] or </em><em>None</em><em>, </em><em>optional</em>) – Randomly chooses tuple of axes from list around
+which to flip input. If None then a random subset of spatial axes is chosen. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomFlip.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomFlip.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomFlip.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomFlip.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomFlip.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomFlip.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomFlip.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomFlip.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomFlip.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomGamma">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomGamma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gamma_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.8,</span> <span class="pre">1.2)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomGamma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomGamma" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Performs gamma transform with a randomly selected gamma.</p>
+<p>Gamma is randomly selected from interval given by gamma_limit. If the values in image are not in [0,1] interval
+then this transformation is skipped.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gamma_limit</strong> (<em>Tuple</em><em>(</em><em>float</em><em>)</em><em>, </em><em>optional</em>) – Interval from which gamma is selected. Defaults to (0.8, 1.20).</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomGamma.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gamma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomGamma.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomGamma.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomGamma.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomGamma.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomGamma.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomGamma.get_transform_init_args_names">
+<span class="sig-name descname"><span class="pre">get_transform_init_args_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomGamma.get_transform_init_args_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomGamma.get_transform_init_args_names" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomGaussianBlur">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomGaussianBlur</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_of_interval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomGaussianBlur"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomGaussianBlur" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></p>
+<p>Performs gaussian blur on the image with a random strength blurring.</p>
+<p>Behaves similarly to GaussianBlur, sigma has same format, but each number in sigma creates
+interval [start_of_interval, sigma_number], from which random number is chosen.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sigma</strong> (<em>float</em><em>, </em><em>Tuple</em><em>(</em><em>float</em><em>)</em><em>, </em><em>List</em><em>[</em><em>Tuple</em><em>(</em><em>float</em><em>) </em><em>| </em><em>float</em><em>, </em><em>optional</em>) – Determines end of interval from which strength of blurring is chosen. Defaults to 0.8.</p></li>
+<li><p><strong>start_of_interval</strong> (<em>float</em><em>, </em><em>optional</em>) – Determines start of interval from which strength of blurring is chosen. Defaults to 0.</p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – The mode parameter determines how the input array is extended beyond its boundaries. Defaults to “reflect”.</p></li>
+<li><p><strong>cval</strong> (<em>float</em><em>, </em><em>optional</em>) – Value to fill past edges of image if mode is ‘constant’. Defaults to 0.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomGaussianBlur.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomGaussianBlur.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomGaussianBlur.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomGaussianBlur.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomGaussianBlur.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomGaussianBlur.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomRotate90">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomRotate90</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[1,</span> <span class="pre">2,</span> <span class="pre">3]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle_axis</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomRotate90"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomRotate90" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Rotation of input by 0/90/180/270 degrees in spatial dimensions.</p>
+<p>Input is being rotated around the specified axes. For example if axes = [3,2],
+then input is rotated around 3 axis (1 and 2 axes are changing)
+and afterwards it is rotated around 2 axis(1 and 3 axes are changing).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>axes</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – list of axes around which input is rotated and also determines
+order if shuffle_axis is false. Ignoring axes which are not in this list [1,2,3].
+Number in axes do not need to be unique. Defaults to [1, 2, 3].</p></li>
+<li><p><strong>shuffle_axis</strong> (<em>bool</em><em>, </em><em>optional</em>) – If set to True, order of rotations is random. Defaults to False.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomRotate90.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_around</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomRotate90.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomRotate90.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomRotate90.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotation_around</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomRotate90.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomRotate90.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomRotate90.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomRotate90.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomRotate90.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomScale">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">RandomScale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale_limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0.9,</span> <span class="pre">1.1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomScale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomScale" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Randomly rescale input by the given scale.</p>
+<p>Under the hood, <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html</a> is being used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scale_limit</strong> (<em>float</em><em> | </em><em>Tuple</em><em>[</em><em>float</em><em>] </em><em>| </em><em>List</em><em>[</em><em>Tuple</em><em>[</em><em>float</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – Value by which the input should be scaled.
+If there is single value, then all spatial dimensions are scaled by it.
+If input is tuple, it creates interval from which the single value for scaling will be chosen.
+If input is list it should have length of number axes of input - 1 (- channel dimension) and
+contains tuple of 2 elements. All dimensions except for channel one
+are scaled by the number from the interval given by tuple. If there is one less dimensions then
+last dimension(time) is not scaled. Defaults to (0.9, 1.1).</p></li>
+<li><p><strong>interpolation</strong> (<em>int</em><em>, </em><em>optional</em>) – order of spline interpolation for image. Defaults to 1.</p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – points outside image are filled according to the this mode.. Defaults to ‘reflect’.</p></li>
+<li><p><strong>ival</strong> (<em>float</em><em>, </em><em>optional</em>) – value outside of image when the border_mode is chosen to be “constant”. Defaults to 0.</p></li>
+<li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – value outside of mask when the border_mode is chosen to be “constant”. Defaults to 0.</p></li>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If ignore_index is float, then transformation of mask is done with
+border_mode = “constant” and mval = ignore_index. If ignore_index is None, then it does nothing. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 0.5.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomScale.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomScale.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomScale.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomScale.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomScale.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomScale.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.RandomScale.get_params">
+<span class="sig-name descname"><span class="pre">get_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#RandomScale.get_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.RandomScale.get_params" title="Permalink to this definition"></a></dt>
+<dd><p>shared parameters for one apply. (usually random values)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Resize">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Resize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">anti_aliasing_downsample</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Resize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Resize" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Resize input to the given shape.</p>
+<p>Resize input using skimage resize function. Shape is expected without channel dimensions. If there is one less dimension,
+than expected then size of last dimension(time) is unchanged. Interpolation, border_mode, ival, mval and anti_aliasing_downsample
+are arguments for <a class="reference external" href="https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize">https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<em>tuple of ints</em>) – shape of desired image without channel dimension. If inputed with one less dimensions,
+it is expected that it is time dimensions and is copied from image.</p></li>
+<li><p><strong>interpolation</strong> (<em>int</em><em>, </em><em>optional</em>) – order of spline interpolation for image. Defaults to 1.</p></li>
+<li><p><strong>border_mode</strong> (<em>string</em><em>, </em><em>optional</em>) – points outside image are filled according to the this mode. Defaults to ‘reflect’.</p></li>
+<li><p><strong>ival</strong> (<em>float</em><em>, </em><em>optional</em>) – value outside of image when the border_mode is chosen to be “constant”. Defaults to 0.</p></li>
+<li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – value outside of mask when the border_mode is chosen to be “constant”. Defaults to 0.</p></li>
+<li><p><strong>anti_aliasing_downsample</strong> (<em>bool</em><em>, </em><em>optional</em>) – controls if the gaussian filter should be used on image before downsampling, recommended. Defaults to True.</p></li>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If ignore_index is float, then transformation of mask is done with
+border_mode = “constant” and mval = ignore_index. If ignore_index is None, then it does nothing. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Resize.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Resize.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Resize.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Resize.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Resize.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Resize.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Scale">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">volumentations_biomedicine.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Scale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scale_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Scale"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Scale" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></p>
+<p>Rescale input by the given scale.</p>
+<p>Rescaling is done by function zoom from scipy. If scale_factor is float, spatial dimensions are scaled by this number.
+If it is list, then it is expected without channel dimensions. If there is one less dimension, than expected then size of last dimensions(time) is unchanged.
+Check <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html</a> for additional arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scale_factor</strong> (<em>float</em><em>|</em><em>List</em><em>[</em><em>float</em><em>]</em><em>, </em><em>optional</em>) – Value by which the input should be scaled. If
+there is single value, then all spatial dimensions are scaled by it. If
+input is list then all dimensions except for channel one are scaled by it. If
+there is one less dimensions then last dimension(time) is not scaled. Defaults to 1.</p></li>
+<li><p><strong>interpolation</strong> (<em>int</em><em>, </em><em>optional</em>) – order of spline interpolation for image.. Defaults to 1.</p></li>
+<li><p><strong>border_mode</strong> (<em>str</em><em>, </em><em>optional</em>) – points outside image are filled according to the this mode. Defaults to ‘reflect’.</p></li>
+<li><p><strong>ival</strong> (<em>float</em><em>, </em><em>optional</em>) – value outside of image when the border_mode is chosen to be “constant”. Defaults to 0.</p></li>
+<li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – value outside of mask when the border_mode is chosen to be “constant”. Defaults to 0.</p></li>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – If ignore_index is float, then transformation of mask is done with
+border_mode = “constant” and mval = ignore_index. If ignore_index is None, then it does nothing. Defaults to None.</p></li>
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – always apply transformation in composition. Defaults to False.</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying transformation in composition. Defaults to 1.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+<dt>Image types:</dt><dd><p>float32</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Scale.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Scale.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Scale.apply" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="volumentations_biomedicine.augmentations.transforms.Scale.apply_to_mask">
+<span class="sig-name descname"><span class="pre">apply_to_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/volumentations_biomedicine/augmentations/transforms.html#Scale.apply_to_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#volumentations_biomedicine.augmentations.transforms.Scale.apply_to_mask" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to volumentations_biomedicine’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Samuel Šuľan.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

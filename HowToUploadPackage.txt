@@ -1,0 +1,37 @@
+Links/resources: 
+  - an easy Tutorial: https://www.youtube.com/watch?v=tEFkHEKypLI&t=563s
+  - pypi uploading packages: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+  - pypi FAQ (directs to "Administration of projects"): https://pypi.org/help/#administration
+
+Prerequisites: 
+  - Have an account in PyPi
+  - Choose a package name that is not already taken.
+  - Have the code of the package directly on your local machine.
+  - Install Twine with : pip3 install twine
+
+Step 1 (Library Structure) : 
+  - Have an __init__.py in your package folder
+  - Have an setup.py at same level as your package
+    Example of how your folder should look like:
+      .
+      ├── bio_volumentations (Package Folder)
+      │   ├── __init__.py
+      │   ├── 100IterationsTest.txt
+      │   ├── ...
+      └── setup.py
+
+  - Ensure that your `setup.py` does not upload a version that has already been uploaded in the past.
+
+Setup 2 (Upload):
+  - When you are in the folder containing `setup.py` and your package, use the following command in your terminal to generate package files: python3 setup.py sdist bdist_wheel
+    Example of how your folder should look like after the command:
+    .
+    ├── bio_volumentations
+    ├── bio_volumentations.egg-info
+    ├── build
+    ├── dist
+    └── setup.py
+
+  - To upload the package, use this command in your terminal (in the same folder as the previous command): twine upload dist/*
+  - Then, enter your API Token to upload the package (You can find this in your PyPi Account settings).
+  - Your package is now uploaded to PyPi.
