@@ -1,11 +1,13 @@
 # ============================================================================================= #
-#  Author:       Pavel Iakubovskii, ZFTurbo, ashawkey, Dominik Müller, Lucia Hradecká           #
+#  Author:       Pavel Iakubovskii, ZFTurbo, ashawkey, Dominik Müller,                          #
+#                Samuel Šuľan, Lucia Hradecká, Filip Lux                                        #
 #  Copyright:    albumentations:    : https://github.com/albumentations-team                    #
 #                Pavel Iakubovskii  : https://github.com/qubvel                                 #
 #                ZFTurbo            : https://github.com/ZFTurbo                                #
 #                ashawkey           : https://github.com/ashawkey                               #
 #                Dominik Müller     : https://github.com/muellerdo                              #
-#                Lucia Hradecká     : https://gitlab.fi.muni.cz/xdupkan/                        #
+#                Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #
+#                Filip Lux          : lux.filip@gmail.com                                       #
 #                                                                                               #
 #  Volumentations History:                                                                      #
 #       - Original:                 https://github.com/albumentations-team/albumentations       #
@@ -13,7 +15,7 @@
 #       - Continued Development:    https://github.com/ZFTurbo/volumentations                   #
 #       - Enhancements:             https://github.com/qubvel/volumentations                    #
 #       - Further Enhancements:     https://github.com/muellerdo/volumentations                 #
-#       - Biomedical Enhancements:  https://gitlab.fi.muni.cz/xdupkan/volumentations/           #
+#       - Biomedical Enhancements:  https://gitlab.fi.muni.cz/cbia/bio-volumentations           #
 #                                                                                               #
 #  MIT License.                                                                                 #
 #                                                                                               #
@@ -35,6 +37,7 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE                #
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
+
 from .volumentations_biomedicine.augmentations.transforms import *
 from .volumentations_biomedicine.conversion.transforms import *
 from .volumentations_biomedicine.core.composition import *

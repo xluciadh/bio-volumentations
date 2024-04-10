@@ -1,6 +1,6 @@
 # ============================================================================================= #
 #  Author:       Pavel Iakubovskii, ZFTurbo, ashawkey, Dominik Müller,                          #
-#                Samuel Šulan, Lucia Hradecká, Filip Lux                                        #
+#                Samuel Šuľan, Lucia Hradecká, Filip Lux                                        #
 #  Copyright:    albumentations:    : https://github.com/albumentations-team                    #
 #                Pavel Iakubovskii  : https://github.com/qubvel                                 #
 #                ZFTurbo            : https://github.com/ZFTurbo                                #
