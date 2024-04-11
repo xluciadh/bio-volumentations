@@ -495,7 +495,7 @@ class CenterCrop(DualTransform):
         return F.center_crop(img, self.shape, self.border_mode, self.ival, False)
 
     def apply_to_mask(self, mask, **params):
-        return F.center_crop(mask, self.shape, self.mask_mode, self.mval, False)
+        return F.center_crop(mask, self.shape, self.mask_mode, self.mval, True)
 
     def __repr__(self):
         return f'CenterCrop({self.shape}, {self.always_apply}, {self.p})'
@@ -996,7 +996,7 @@ class Pad(DualTransform):
             self.mask_mode = "constant"
             self.mval = ignore_index
 
-    def apply(self, img, **parms):
+    def apply(self, img, **params):
         return F.pad_pixels(img, self.pad_size, self.border_mode, self.ival)
 
     def apply_to_mask(self, mask, **params):
@@ -1038,315 +1038,24 @@ class Normalize(ImageOnlyTransform):
 
 
 class Contiguous(DualTransform):
-    def apply(self, image):
+    def apply(self, image, **params):
         return np.ascontiguousarray(image)
+
+    def apply_to_mask(self, mask, **params):
+        return np.ascontiguousarray(mask)
 
     def __repr__(self):
         return f'Contiguous()'
 
 
-
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-# taken transforms from forks, not implemented #####################
-# shouldnt work, except for Float() ################################
-####################################################################
-####################################################################
-####################################################################
-
-
-
-# not sure what should be end goal for this transformation 
-# but currecntly used as a transform which is always called at the start of Compose
 class Float(DualTransform):
-    def apply(self, image):
-        # TODO this should change value range to (0,1) from the original dtype' value range. Have a look at the code
-        #  below and function F.to_float(), F.from_float()
-
-        # if isinstance(image, np.float32):
-        #     # assume the image already has correct value range (0,1)
-        #     return image
-        #
-        # # change value range to (0,1)
-        # if issubclass(image.dtype.type, numbers.Integral):
-        #     dtype_info = np.iinfo(image.dtype)
-        # else:
-        #     dtype_info = np.finfo(image.dtype)
-        #
-        # if dtype_info.min == 0:
-        #     return image.astype(np.float32) / dtype_info.max
-        #
-        # return ((image.astype(np.float32) / (-dtype_info.min)) / 2) + 0.5
-
+    def apply(self, image, **params):
         return image.astype(np.float32)
+
+    def apply_to_mask(self, mask, **params):
+        return mask.astype(np.float32)
 
     def __repr__(self):
         return f'Float()'
 
-
-class ElasticTransform(DualTransform):
-    def __init__(self, deformation_limits=(0, 0.25), interpolation=1, border_mode='constant', value=0, mask_value=0,
-                 always_apply=False, p=0.5):
-        super().__init__(always_apply, p)
-        self.deformation_limits = deformation_limits
-        self.interpolation = interpolation
-        self.border_mode = border_mode
-        self.value = value
-        self.mask_value = mask_value
-
-    def apply(self, img, sigmas, alphas, random_state=None):
-        return F.elastic_transform(img, sigmas, alphas, interpolation=self.interpolation, random_state=random_state,
-                                   border_mode=self.border_mode, value=self.value)
-
-    def apply_to_mask(self, img, sigmas, alphas, random_state=None):
-        return F.elastic_transform(img, sigmas, alphas, interpolation=0, random_state=random_state,
-                                   border_mode=self.border_mode, value=self.mask_value)
-
-    def get_params(self, **data):
-        image = data["image"]  # [H, W, D]
-        random_state = random.randint(0, 10000)
-        deformation = random.uniform(*self.deformation_limits)
-        sigmas = [deformation * x for x in image.shape[:3]]
-        alphas = [random.uniform(x / 8, x / 2) for x in sigmas]
-        return {
-            "random_state": random_state,
-            "sigmas": sigmas,
-            "alphas": alphas,
-        }
-
-    def __repr__(self):
-        return f'ElasticTransform({self.deformation_limits}, {self.interpolation}, {self.border_mode}, {self.value}, ' \
-               f'{self.mask_value}, {self.always_apply}, {self.p})'
-
-
-# TODO from shape variables to shape arrays
-
-#Its here, so it wont show in documentation.
-
-    """GridDropout, drops out rectangular regions of an image and the corresponding mask in a grid fashion.
-        Args:
-        ratio (float): the ratio of the mask holes to the unit_size (same for horizontal and vertical directions).
-            Must be between 0 and 1. Default: 0.5.
-        unit_size_min (int): minimum size of the grid unit. Must be between 2 and the image shorter edge.
-            If 'None', holes_number_x and holes_number_y are used to setup the grid. Default: `None`.
-        unit_size_max (int): maximum size of the grid unit. Must be between 2 and the image shorter edge.
-            If 'None', holes_number_x and holes_number_y are used to setup the grid. Default: `None`.
-        holes_number_x (int): the number of grid units in x direction. Must be between 1 and image width//2.
-            If 'None', grid unit width is set as image_width//10. Default: `None`.
-        holes_number_y (int): the number of grid units in y direction. Must be between 1 and image height//2.
-            If `None`, grid unit height is set equal to the grid unit width or image height, whatever is smaller.
-        holes_number_z (int): the number of grid units in z direction. Must be between 1 and image depth//2.
-            If `None`, grid unit depth is set equal to the grid unit width or image height, whatever is smaller.
-        shift_x (int): offsets of the grid start in x direction from (0,0) coordinate.
-            Clipped between 0 and grid unit_width - hole_width. Default: 0.
-        shift_y (int): offsets of the grid start in y direction from (0,0) coordinate.
-            Clipped between 0 and grid unit height - hole_height. Default: 0.
-        shift_z (int): offsets of the grid start in z direction from (0,0) coordinate.
-            Clipped between 0 and grid unit depth - hole_depth. Default: 0.
-        random_offset (boolean): weather to offset the grid randomly between 0 and grid unit size - hole size
-            If 'True', entered shift_x, shift_y, shift_z are ignored and set randomly. Default: `False`.
-        fill_value (int): value for the dropped pixels. Default = 0
-        mask_fill_value (int): value for the dropped pixels in mask.
-            If `None`, tranformation is not applied to the mask. Default: `None`.
-    Targets:
-        image, mask
-    Image types:
-        uint8, float32
-    References:
-        https://arxiv.org/abs/2001.04086
-    """
-
-class GridDropout(DualTransform):
-
-    def __init__(
-            self,
-            ratio: float = 0.5,
-            unit_size_min: int = None,
-            unit_size_max: int = None,
-            holes_number_x: int = None,
-            holes_number_y: int = None,
-            holes_number_z: int = None,
-            shift_x: int = 0,
-            shift_y: int = 0,
-            shift_z: int = 0,
-            random_offset: bool = False,
-            fill_value: int = 0,
-            mask_fill_value: int = None,
-            always_apply: bool = False,
-            p: float = 0.5,
-    ):
-        super().__init__(always_apply, p)
-        self.ratio = ratio
-        self.unit_size_min = unit_size_min
-        self.unit_size_max = unit_size_max
-        self.holes_number_x = holes_number_x
-        self.holes_number_y = holes_number_y
-        self.holes_number_z = holes_number_z
-        self.shift_x = shift_x
-        self.shift_y = shift_y
-        self.shift_z = shift_z
-        self.random_offset = random_offset
-        self.fill_value = fill_value
-        self.mask_fill_value = mask_fill_value
-        if not 0 < self.ratio <= 1:
-            raise ValueError("ratio must be between 0 and 1.")
-
-    def apply(self, image, holes=(), **params):
-        return F.cutout(image, holes, self.fill_value)
-
-    def apply_to_mask(self, image, holes=(), **params):
-        if self.mask_fill_value is None:
-            return image
-
-        return F.cutout(image, holes, self.mask_fill_value)
-
-    def get_params(self, **data):
-        img = data["image"]
-        height, width, depth = img.shape[:3]
-        # set grid using unit size limits
-        if self.unit_size_min and self.unit_size_max:
-            if not 2 <= self.unit_size_min <= self.unit_size_max:
-                raise ValueError(
-                    "Max unit size should be >= min size, both at least 2 pixels.")
-            if self.unit_size_max > min(height, width):
-                raise ValueError(
-                    "Grid size limits must be within the shortest image edge.")
-            unit_width = random.randint(
-                self.unit_size_min, self.unit_size_max + 1)
-            unit_height = unit_width
-            unit_depth = unit_width
-        else:
-            # set grid using holes numbers
-            if self.holes_number_x is None:
-                unit_width = max(2, width // 10)
-            else:
-                if not 1 <= self.holes_number_x <= width // 2:
-                    raise ValueError(f"The hole_number_x must be between 1 and image width//2 ({width//2}), "
-                                     f"but was {self.holes_number_x}.")
-                unit_width = width // self.holes_number_x
-            if self.holes_number_y is None:
-                unit_height = max(min(unit_width, height), 2)
-            else:
-                if not 1 <= self.holes_number_y <= height // 2:
-                    raise ValueError(f"The hole_number_y must be between 1 and image height//2 ({height//2}), "
-                                     f"but was {self.holes_number_y}.")
-                unit_height = height // self.holes_number_y
-            if self.holes_number_z is None:
-                unit_depth = max(min(unit_height, depth), 2)
-            else:
-                if not 1 <= self.holes_number_z <= depth // 2:
-                    raise ValueError(f"The hole_number_z must be between 1 and image depth//2 ({depth//2}), "
-                                     f"but was {self.holes_number_z}.")
-                unit_depth = depth // self.holes_number_z
-
-        hole_width = int(unit_width * self.ratio)
-        hole_height = int(unit_height * self.ratio)
-        hole_depth = int(unit_depth * self.ratio)
-        # min 1 pixel and max unit length - 1
-        hole_width = min(max(hole_width, 1), unit_width - 1)
-        hole_height = min(max(hole_height, 1), unit_height - 1)
-        hole_depth = min(max(hole_depth, 1), unit_depth - 1)
-        # set offset of the grid
-        if self.shift_x is None:
-            shift_x = 0
-        else:
-            shift_x = min(max(0, self.shift_x), unit_width - hole_width)
-        if self.shift_y is None:
-            shift_y = 0
-        else:
-            shift_y = min(max(0, self.shift_y), unit_height - hole_height)
-        if self.shift_z is None:
-            shift_z = 0
-        else:
-            shift_z = min(max(0, self.shift_z), unit_depth - hole_depth)
-        if self.random_offset:
-            shift_x = random.randint(0, unit_width - hole_width)
-            shift_y = random.randint(0, unit_height - hole_height)
-            shift_z = random.randint(0, unit_depth - hole_depth)
-        holes = []
-        for i in range(width // unit_width + 1):
-            for j in range(height // unit_height + 1):
-                for k in range(depth // unit_depth + 1):
-                    x1 = min(shift_x + unit_width * i, width)
-                    y1 = min(shift_y + unit_height * j, height)
-                    z1 = min(shift_z + unit_depth * j, depth)
-                    x2 = min(x1 + hole_width, width)
-                    y2 = min(y1 + hole_height, height)
-                    z2 = min(z1 + hole_depth, depth)
-                    holes.append((x1, y1, z1, x2, y2, z2))
-
-        return {"holes": holes}
-
-    def get_transform_init_args_names(self):
-        return (
-            "ratio",
-            "unit_size_min",
-            "unit_size_max",
-            "holes_number_x",
-            "holes_number_y",
-            "shift_x",
-            "shift_y",
-            "mask_fill_value",
-            "random_offset",
-        )
-
-    def __repr__(self):
-        return f'GridDropout({self.ratio}, {self.unit_size_min}, {self.unit_size_max}, {self.holes_number_x}, ' \
-               f'{self.holes_number_y}, {self.holes_number_z}, {self.shift_x}, {self.shift_y}, {self.shift_z}, ' \
-               f'{self.random_offset}, {self.fill_value}, {self.mask_fill_value}, {self.always_apply}, {self.p})'
-
-
-class RandomDropPlane(DualTransform):
-    """Randomly drop some planes in axis randomly chosen from 'axes' input array.
-
-    Args:
-        plane_drop_prob (float): float value in (0.0, 1.0) range. Default: 0.1
-        axes (tuple). Default: 0
-        p (float): probability of applying the transform. Default: 1.
-
-    Targets:
-        image, mask
-
-    Image types:
-        uint8, float32
-    """
-
-    def __init__(
-            self,
-            plane_drop_prob=0.1,
-            axes=(0,),
-            always_apply=False,
-            p=1.0
-    ):
-        super().__init__(always_apply, p)
-        self.plane_drop_prob = plane_drop_prob
-        self.axes = axes
-
-    def get_params(self, **data):
-        img = data["image"]
-        # TODO add choosing axis randomly from all spatial axes like in flip if axes is initially None
-        axis = random.choice(self.axes)
-        r = img.shape[axis]
-        indexes = []
-        for i in range(r):
-            if random.uniform(0, 1) > self.plane_drop_prob:
-                indexes.append(i)
-        if len(indexes) == 0:
-            indexes.append(0)
-
-        return {
-            "indexes": indexes, "axis": axis,
-        }
-
-    def apply(self, img, indexes=(), axis=0, **params):
-        return np.take(img, indexes, axis=axis)
-
-    def apply_to_mask(self, mask, indexes=(), axis=0, **params):
-        return np.take(mask, indexes, axis=axis)
-
-    def __repr__(self):
-        return f'RandomDropPlane({self.plane_drop_prob}, {self.axes}, {self.always_apply}, {self.p})'
 
