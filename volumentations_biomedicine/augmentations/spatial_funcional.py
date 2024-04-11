@@ -34,8 +34,7 @@ DEBUG = False
 
 SITK_interpolation = {
     0: 'sitkNearestNeighbor',
-    1: 'sitkLinear',
-    2: 'sitkLinear'   # placeholder
+    1: 'sitkLinear'
 }
 
 

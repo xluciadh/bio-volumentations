@@ -57,6 +57,14 @@ MAX_VALUES_BY_DTYPE = {
     np.dtype("float32"): 1.0,
 }
 
+# SITK interpolations
+SITK_interpolation = {
+    0: 'sitkNearestNeighbor',
+    1: 'sitkLinear',
+    2: 'sitkBSpline',
+    3: 'sitkGaussian'
+}
+
 """
 vol: [C, D, H, W (, T)]
 
@@ -459,7 +467,7 @@ def affine(img: np.array,
            degrees: TypeTripletFloat = (0, 0, 0),
            scales: TypeTripletFloat = (1, 1, 1),
            translation: TypeTripletFloat = (0, 0, 0),
-           interpolation: str = 'sitkLinear',
+           interpolation: int = 1,
            border_mode: str = 'constant',
            value: float = 0,
            spacing: TypeTripletFloat = (1, 1, 1)):
@@ -475,7 +483,7 @@ def affine(img: np.array,
 
     return apply_sitk_transform(img,
                                 sitk_transform=transform,
-                                interpolation=interpolation,
+                                interpolation=SITK_interpolation[interpolation],
                                 default_value=value,
                                 spacing=spacing)
 

@@ -86,7 +86,8 @@ class PoissonNoise(ImageOnlyTransform):
     """Adds poisson noise to the image.
 
         Args:
-            intensity_limit (tuple, optional): Defaults to (0.001, 0.1).
+            intensity_limit (tuple): Range to sample expected intensity of added poisson noise.
+                Defaults to (1, 10).
     """
     def __init__(self,
                  intensity_limit=(1, 10),
@@ -178,7 +179,7 @@ class Scale(DualTransform):
                 Defaults to 1.
             interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
             border_mode (str, optional): points outside image are filled according to this mode.
-                Defaults to 'reflect'.
+                Defaults to 'constant'.
             ival (float, optional): value outside of image when the border_mode is chosen to be "constant".
                 Defaults to 0.
             mval (float, optional): value outside of mask when the border_mode is chosen to be "constant".
@@ -194,15 +195,15 @@ class Scale(DualTransform):
             float32
     """
     def __init__(self, scales: Union[float, TypeTripletFloat] = 1,
-                 interpolation: str = 'sitkLinear', spacing: Union[float, TypeTripletFloat] = None,
+                 interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
                  border_mode: str = 'reflect', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 1):
         super().__init__(always_apply, p)
         self.scale = parse_coefs(scales, identity_element=1.)
-        self.interpolation = interpolation
+        self.interpolation: int = interpolation
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
-        self.border_mode = border_mode
-        self.mask_mode = border_mode
+        self.border_mode = border_mode              # not implemented
+        self.mask_mode = border_mode                # not implemented
         self.ival = ival
         self.mval = mval
         if not (ignore_index is None):
@@ -218,7 +219,7 @@ class Scale(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 'sitkNearestNeighbor'
+        interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=self.scale,
                         interpolation=interpolation,
@@ -238,9 +239,8 @@ class RandomScale(DualTransform):
         Args:
             scaling_limit (float | Tuple[float] | List[Tuple[float]], optional): Limits of scaling factors.
                 Must be either of: S, (S1, S2), (S_Z, S_Y, S_X), or (S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)
-                If it is a float, then all spatial dimensions are scaled by a random number drawn uniformly from
+                If it is a float S, then all spatial dimensions are scaled by a random number drawn uniformly from
                  the interval [1-S, 1+S] (equivalent to inputting (1-S, 1+S, 1-S, 1+S, 1-S, 1+S)).
-
                 If it is a tuple of 2 numbers, then all spatial dimensions are scaled by a random number drawn uniformly
                  from the interval [S1, S2] (equivalent to inputting (S1, S2, S1, S2, S1, S2)).
                 If it is a tuple of 3 numbers, then an interval [1-S_a, 1+S_a] is constructed for each spatial
@@ -250,8 +250,8 @@ class RandomScale(DualTransform):
                  respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
                 The unspecified dimensions (C and T) are not affected. Defaults to (0.9, 1.1).
             interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
-            border_mode (str, optional): points outside image are filled according to the this mode.
-                Defaults to 'reflect'.
+            border_mode (str, optional): values outside image domain are filled according to the mode.
+                Defaults to 'constant'.
             ival (float, optional): value outside of image when the border_mode is chosen to be "constant".
                 Defaults to 0.
             mval (float, optional): value outside of mask when the border_mode is chosen to be "constant".
@@ -268,12 +268,12 @@ class RandomScale(DualTransform):
             float32
     """      
     def __init__(self, scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.9, 1.1),
-                 interpolation: str = 'sitkLinear', spacing: Union[float, TypeTripletFloat] = None,
+                 interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
                  border_mode: str = 'reflect', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit)
-        self.interpolation: str = interpolation
+        self.interpolation: int = interpolation
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
         self.border_mode = border_mode
         self.mask_mode = border_mode
@@ -301,7 +301,7 @@ class RandomScale(DualTransform):
 
     def apply_to_mask(self, mask, **params):
 
-        interpolation = 'sitkNearestNeighbor'
+        interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=params["scale"],
                         interpolation=interpolation,
@@ -584,9 +584,8 @@ class RandomAffineTransform(DualTransform):
             spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.
                 Must be either of: S, (S1, S2, S3), or None.
                 If `None`, equivalent to (1, 1, 1).
-                If a float, equivalent to (S, S, S).
-                If a tuple with 3 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
-                each spatial axis.
+                If a float S, equivalent to (S, S, S).
+                If a tuple with 3 items, the scale is (S1, S2, S3).
                 Defaults to None.
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.
             interpolation (Int, optional): The order of spline interpolation. Defaults to 1.
@@ -609,15 +608,15 @@ class RandomAffineTransform(DualTransform):
                  scaling_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
                  spacing: Union[float, TypeTripletFloat] = None,
                  change_to_isotropic: bool = False,
-                 interpolation: str = 'sitkLinear',
-                 border_mode: str = 'reflect', ival: float = 0, mval: float = 0, 
+                 interpolation: int = 1,
+                 border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.angle_limit: TypeSextetFloat = parse_limits(angle_limit, identity_element=0)
         self.translation_limit: TypeSextetFloat = parse_limits(translation_limit, identity_element=0)
         self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, identity_element=1)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1)
-        self.interpolation: str = interpolation        # not used
+        self.interpolation: int = interpolation
         self.border_mode = border_mode                 # not used
         self.mask_mode = border_mode                   # not used
         self.ival = ival
@@ -641,13 +640,13 @@ class RandomAffineTransform(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         
-        interpolation = 'sitkNearestNeighbor'
+        interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=params["scale"],
                         degrees=params["angles"],
                         translation=params["translation"],
                         interpolation=interpolation,
-                        border_mode=self.border_mode,
+                        border_mode=self.mask_mode,
                         value=self.ival,
                         spacing=self.spacing)
 
@@ -702,7 +701,7 @@ class AffineTransform(DualTransform):
                  scale: TypeTripletFloat = (1, 1, 1),
                  spacing: TypeTripletFloat = (1, 1, 1),
                  change_to_isotropic: bool = False,
-                 interpolation: str = 'sitkLinear',
+                 interpolation: int = 1,
                  border_mode: str = 'reflect', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
@@ -710,7 +709,7 @@ class AffineTransform(DualTransform):
         self.translation: TypeTripletFloat = parse_coefs(translation, identity_element=0)
         self.scale: TypeTripletFloat = parse_coefs(scale, identity_element=1)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1)
-        self.interpolation: str = interpolation        # not used
+        self.interpolation: int = interpolation
         self.border_mode = border_mode                 # not used
         self.mask_mode = border_mode                   # not used
         self.ival = ival
@@ -733,13 +732,13 @@ class AffineTransform(DualTransform):
 
     def apply_to_mask(self, mask, **params):
 
-        interpolation = 'sitkNearestNeighbor'
+        interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=self.scale,
                         degrees=self.angles,
                         translation=self.translation,
                         interpolation=interpolation,
-                        border_mode=self.border_mode,
+                        border_mode=self.mask_mode,
                         value=self.ival,
                         spacing=self.spacing)
 
