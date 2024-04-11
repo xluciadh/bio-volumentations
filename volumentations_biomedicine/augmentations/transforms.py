@@ -50,13 +50,11 @@ from .utils import parse_limits, parse_coefs, to_tuple
 
 # Potential upgrade : different sigmas for different channels
 class GaussianNoise(ImageOnlyTransform):
-    """Adds gaussian noise to the image.
-
-        Noise is drawn from the normal distribution. 
+    """Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.
 
         Args:
             var_limit (tuple, optional): variance of normal distribution is randomly chosen from this interval.
-            Defaults to (0.001, 0.1).
+              Defaults to (0.001, 0.1).
             mean (float, optional): mean of normal distribution. Defaults to 0.
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
@@ -86,9 +84,9 @@ class GaussianNoise(ImageOnlyTransform):
 
 class PoissonNoise(ImageOnlyTransform):
     """Adds poisson noise to the image.
-            Args:
-            intensity_limit (tuple, optional):
-            Defaults to (0.001, 0.1).
+
+        Args:
+            intensity_limit (tuple, optional): Defaults to (0.001, 0.1).
     """
     def __init__(self,
                  intensity_limit=(1, 10),
@@ -111,14 +109,13 @@ class PoissonNoise(ImageOnlyTransform):
 class Resize(DualTransform):
     """Resize input to the given shape.
 
-        Resize input using skimage resize function. Shape is expected without channel dimensions. If there is one less
-        dimension, than expected then size of last dimension(time) is unchanged. Interpolation, border_mode, ival,
-        mval and anti_aliasing_downsample are arguments for
-        https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize
+        Internally, the skimage `resize` function is used. The `interpolation`, `border_mode`, `ival`, `mval`,
+         and `anti_aliasing_downsample` arguments are forwarded to it. More details at:
+        https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize.
 
         Args:
-            shape (tuple of ints): shape of desired image without channel dimension. If inputed with one less
-                dimensions, it is expected that it is time dimensions and is copied from image.
+            shape (tuple of ints): the desired image shape. Must be of either of: (Z, Y, X) or (Z, Y, X, T).
+                The unspecified dimensions (C and possibly T) are not affected.
             interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
             border_mode (string, optional): points outside image are filled according to this mode.
                 Defaults to 'reflect'.
@@ -173,16 +170,12 @@ class Resize(DualTransform):
 class Scale(DualTransform):
     """Rescale input by the given scale.
 
-        Rescaling is done by function zoom from scipy. If scale_factor is float, spatial dimensions are scaled by this
-        number. If it is list, then it is expected without channel dimensions. If there is one less dimension, than
-        expected, the size of last dimensions(time) is unchanged.
-        Check https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html for additional arguments.
-
         Args:
-            scales (float|List[float], optional): Value by which the input should be scaled. If
-                there is single value, then all spatial dimensions are scaled by it. If 
-                input is list then all dimensions except for channel one are scaled by it. If 
-                there is one less dimensions then last dimension(time) is not scaled. Defaults to 1.
+            scales (float|List[float], optional): Value by which the input should be scaled.
+                Must be either of: S, [S_Z, S_Y, S_X], or [S_Z, S_Y, S_X, S_T].
+                If it is a float, then all spatial dimensions are scaled by it (S is equivalent to [S, S, S]).
+                The unspecified dimensions (C and possibly T) are not affected.
+                Defaults to 1.
             interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
             border_mode (str, optional): points outside image are filled according to this mode.
                 Defaults to 'reflect'.
@@ -238,19 +231,24 @@ class Scale(DualTransform):
                f'{self.always_apply}, {self.p})'
 
 
+# TODO cannot rescale T dimension
 class RandomScale(DualTransform):
-    """Randomly rescale input by the given scale.
-
-        Under the hood, https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.zoom.html is being used.
+    """Randomly rescale input.
 
         Args:
-            scaling_limit (float | Tuple[float] | List[Tuple[float]], optional): Limit of scaling factors.
-                If there is single value, then all spatial dimensions are scaled by it. 
-                If input is tuple, it creates interval from which the single value for scaling will be chosen. 
-                If input is list it should have length of number axes of input - 1 (- channel dimension) and 
-                contains tuple of 2 elements. All dimensions except for channel one 
-                are scaled by the number from the interval given by tuple. If there is one less dimensions then
-                last dimension(time) is not scaled. Defaults to (0.9, 1.1).
+            scaling_limit (float | Tuple[float] | List[Tuple[float]], optional): Limits of scaling factors.
+                Must be either of: S, (S1, S2), (S_Z, S_Y, S_X), or (S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)
+                If it is a float, then all spatial dimensions are scaled by a random number drawn uniformly from
+                 the interval [1-S, 1+S] (equivalent to inputting (1-S, 1+S, 1-S, 1+S, 1-S, 1+S)).
+
+                If it is a tuple of 2 numbers, then all spatial dimensions are scaled by a random number drawn uniformly
+                 from the interval [S1, S2] (equivalent to inputting (S1, S2, S1, S2, S1, S2)).
+                If it is a tuple of 3 numbers, then an interval [1-S_a, 1+S_a] is constructed for each spatial
+                 dimension and the scale is randomly drawn from it
+                 (equivalent to inputting (1-S_Z, 1+S_Z, 1-S_Y, 1+S_Y, 1-S_X, 1+S_X)).
+                If it is a tuple of 6 numbers, the scales for individual spatial dimensions are randomly drawn from the
+                 respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
+                The unspecified dimensions (C and T) are not affected. Defaults to (0.9, 1.1).
             interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
             border_mode (str, optional): points outside image are filled according to the this mode.
                 Defaults to 'reflect'.
@@ -316,17 +314,14 @@ class RandomScale(DualTransform):
 
 
 class RandomRotate90(DualTransform):
-    """Rotation of input by 0/90/180/270 degrees in spatial dimensions.
-
-        Input is being rotated around the specified axes. For example if axes = [3,2], 
-        then input is rotated around 3 axis (1 and 2 axes are changing)
-        and afterward it is rotated around 2 axis(1 and 3 axes are changing).
+    """Rotation of input by 0, 90, 180, or 270 degrees around the specified spatial axes.
 
         Args:
-            axes (List[int], optional): list of axes around which input is rotated and also determines 
-                order if shuffle_axis is false. Ignoring axes which are not in this list [1,2,3]. 
-                Number in axes do not need to be unique. Defaults to [1, 2, 3].
-            shuffle_axis (bool, optional): If set to True, order of rotations is random. Defaults to False.
+            axes (List[int], optional): list of axes around which the input is rotated (recognised axis symbols are
+                1 for Z, 2 for Y, and 3 for X). A single axis can occur multiple times in the list.
+                If `shuffle_axis` is `False`, the order of axes determines the order of transformations.
+                Defaults to [1, 2, 3].
+            shuffle_axis (bool, optional): If set to `True`, order of rotations is random. Defaults to False.
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
         Targets:
@@ -378,10 +373,11 @@ class RandomRotate90(DualTransform):
 
 
 class Flip(DualTransform):
-    """Flips input around specified axes. 
+    """Flip input around the specified spatial axes.
 
         Args:
-            axes (List[int], optional): List of axes around which is flip done. Defaults to [1,2,3].
+            axes (List[int], optional): list of axes around which is flip done (recognised axis symbols are
+                1 for Z, 2 for Y, and 3 for X). Defaults to [1,2,3].
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 1.
         Targets:
@@ -411,15 +407,17 @@ class Flip(DualTransform):
         return f'Flip({self.axes}, {self.always_apply}, {self.p})'
 
 
+# TODO include possibility to pick empty combination = no flipping
 class RandomFlip(DualTransform):
-    """Flips a input around a tuple of axes randomly chosen from the input list of axis combinations.
-
-        If axes_to_choose to choose is None, random subset of spatial axes is chosen.
+    """Flip input around a set of axes randomly chosen from the input list of axis combinations.
 
         Args:
-        
-            axes_to_choose (List[Tuple[int]] or None, optional): Randomly chooses tuple of axes from list around 
-                which to flip input. If None then a random subset of spatial axes is chosen. Defaults to None.
+            axes_to_choose (List[Tuple[int]] or None, optional): a list of axis combinations from which one option
+                is randomly chosen (recognised axis symbols are 1 for Z, 2 for Y, and 3 for X).
+                The image will be flipped around all axes in the chosen combination.
+                If None, a random subset of spatial axes is chosen, corresponding to inputting
+                [(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)].
+                Defaults to None.
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
         Targets:
@@ -442,6 +440,7 @@ class RandomFlip(DualTransform):
         
         if self.axes is None or len(self.axes) == 0:
             # Pick random combination of axes to flip
+            # TODO include possibility to pick empty combination = no flipping
             combinations = [(1,), (2,), (3,), (1, 2),
                             (1, 3), (2, 3), (1, 2, 3)]
             axes = random.choice(combinations)
@@ -455,20 +454,21 @@ class RandomFlip(DualTransform):
 
 
 class CenterCrop(DualTransform):
-    """Crops center region of the input. Size of this crop is given by shape.
+    """Crops the central region of the input of given size.
           
         Unlike CenterCrop from Albumentations, this transform pads the input in dimensions 
-        where the input is smaller than the crop-shape with numpy.pad, for which are border_mode, ival and mval.
-
-        https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`
+        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:
+        https://numpy.org/doc/stable/reference/generated/numpy.pad.html.
 
         Args:
-            shape (Tuple[int]) Final shape of input, expected without first axis of image (representing channels): 
+            shape (Tuple[int]): the desired shape of input.
+                Must be either of: [Z, Y, X] or [Z, Y, X, T].
             border_mode (str, optional): border mode used for numpy.pad. Defaults to "reflect".
             ival (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for image. Defaults to (0, 0).
             mval (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for mask. Defaults to (0, 0).
-            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with 
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
+            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with
+                `border_mode = "constant"` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.
                 Defaults to None.
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 1.
@@ -502,20 +502,20 @@ class CenterCrop(DualTransform):
 
 
 class RandomCrop(DualTransform):
-    """Randomly crops region from input. Size of this crop is given by shape.
+    """Randomly crops a region of given size from the input.
 
-        Unlike RandomCrop from Albumentations, this transform pads the input in dimensions 
-        where the input is smaller than the crop-shape with numpy.pad, for which are border_mode, ival and mval.
-
-
+        Unlike RandomCrop from Albumentations, this transform pads the input in dimensions
+        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`
+        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:
+        https://numpy.org/doc/stable/reference/generated/numpy.pad.html.
 
         Args:
-            shape (Tuple[int]) Final shape of input, expected without first axis of image (representing channels): 
+            shape (Tuple[int]): the desired shape of input. Must be either of: [Z, Y, X] or [Z, Y, X, T].
             border_mode (str, optional): border mode used for numpy.pad. Defaults to "reflect".
             ival (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for image. Defaults to (0, 0).
             mval (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for mask. Defaults to (0, 0).
-            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with 
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
+            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with
+                `border_mode = "constant"` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.
                 Defaults to None.
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 1.
@@ -555,24 +555,39 @@ class RandomCrop(DualTransform):
 
 
 class RandomAffineTransform(DualTransform):
-    """Rotation around spatial axes.
-
-        Rotation around each axis is chosen randomly from given interval in angle_limit. If a float X is given instead,
-        for given axis then it becomes interval [-X, X]. If scaling_coef is used, it should be list with length equal 3. 
+    """Affine transformation of the input image with randomly chosen parameters.
 
         Args:
-            angle_limit (List[Tuple[float] | float], optional): Contains intervals in degrees from which angle of
-                rotation is chosen, for corresponding axis. Defaults to [(-15, 15),(-15, 15),(-15, 15)].
-            translation_limit (List[Tuple[int], | int] | None, optional): List of length equal to the number of axes -1
-                (minus channel), each element controls translation in this axis. This list consists of intervals,
-                from which, it is then randomly chosen the translation vector. Defaults to None.
-            scaling_limit (List[Tuple[float] | float): Contains intervals in degrees from which angle of rotation is
-                chosen, for corresponding axis. Defaults to [(-15, 15),(-15, 15),(-15, 15)]. Scale 1.2 in axis
-            spacing (List[float] | None, optional): List which contains scaling coefficients to make
-                the image data isotropic in spatial dimensions. Length of list needs to be 3(number of spatial axes)
-                as only spatial dimensions are scaled. If scaling_coef is set to None, there is no scalling.
-                Recommended for anisotropic data and if one of spatial axis have significantly lower amount of
-                samples. Defaults to None.
+            angle_limit (Tuple[float] | float, optional): intervals in degrees from which angles of
+                rotation for the spatial axes are chosen.
+                Must be either of: A, (A1, A2), or (A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2).
+                If a float, equivalent to (-A, A, -A, A, -A, A).
+                If a tuple with 2 items, equivalent to (A1, A2, A1, A2, A1, A2).
+                If a tuple with 6 items, angle of rotation is randomly chosen from an interval [A_a1, A_a2] for each
+                spatial axis.
+                Defaults to (15, 15, 15).
+            translation_limit (Tuple[int] | int | None, optional): intervals from which the translation parameters
+                for the spatial axes are chosen.
+                Must be either of: T, (T1, T2), or (T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2).
+                If a float, equivalent to (-T, T, -T, T, -T, T).
+                If a tuple with 2 items, equivalent to (T1, T2, T1, T2, T1, T2).
+                If a tuple with 6 items, the translation parameter is randomly chosen from an interval [T_a1, T_a2] for
+                each spatial axis.
+                Defaults to (0, 0, 0).
+            scaling_limit (Tuple[float] | float, optional): intervals from which the scales for the spatial axes are chosen.
+                Must be either of: S, (S1, S2), or (S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2).
+                If a float, equivalent to (1-S, 1+S, 1-S, 1+S, 1-S, 1+S).
+                If a tuple with 2 items, equivalent to (S1, S2, S1, S2, S1, S2).
+                If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
+                each spatial axis.
+                Defaults to (0.2, 0.2, 0.2).
+            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.
+                Must be either of: S, (S1, S2, S3), or None.
+                If `None`, equivalent to (1, 1, 1).
+                If a float, equivalent to (S, S, S).
+                If a tuple with 3 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
+                each spatial axis.
+                Defaults to None.
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.
             interpolation (Int, optional): The order of spline interpolation. Defaults to 1.
             border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
@@ -651,24 +666,21 @@ class RandomAffineTransform(DualTransform):
 
 
 class AffineTransform(DualTransform):
-    """Rotation around spatial axes.
-
-        Rotation around each axis is chosen randomly from given interval in angle_limit. If a float X is given instead
-        for given axis then it becomes interval [-X, X]. If scaling_coef is used, it should be list with length equal 3.
+    """Affine transformation of the input image with given parameters.
 
         Args:
-            angles (List[Tuple[float] | float], optional): Contains intervals in degrees from which angle of
-                rotation is chosen, for corresponding axis. Defaults to (0, 0, 0).
-            translation (List[Tuple[int], | int] | None, optional): List of length equal to the number of axes -1
-                (minus channel), each element controls translation in this axis. This list consists of intervals,
-                from which, it is then randomly chosen the translation vector. Defaults to (0, 0, 0).
-            scale (List[Tuple[float]] | float): Contains intervals in degrees from which angle of rotation is
-                chosen, for corresponding axis. Defaults to (1, 1, 1).
-            spacing (List[float] | None, optional): List which contains scaling coefficients to make
-                the image data isotropic in spatial dimensions. Length of list needs to be 3(number of spatial axes)
-                as only spatial dimensions are scaled. If scaling_coef is set to None, there is no scalling.
-                Recommended for anisotropic data and if one of spatial axis have significantly lower amount of
-                samples. Defaults to (1, 1, 1).
+            angles (Tuple[float], optional): angles of rotation for the spatial axes.
+                Must be: (A_Z, A_Y, A_X).
+                Defaults to (0, 0, 0).
+            translation (Tuple[float], optional): translation vector for the spatial axes.
+                Must be: (T_Z, T_Y, T_X).
+                Defaults to (0, 0, 0).
+            scale (Tuple[float], optional): scales for the spatial axes.
+                Must be: (S_Z, S_Y, S_X).
+                Defaults to (1, 1, 1).
+            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.
+                Must be: (S1, S2, S3).
+                Defaults to (1, 1, 1).
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.
             interpolation (Int, optional): The order of spline interpolation. Defaults to 1.
             border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
@@ -734,17 +746,16 @@ class AffineTransform(DualTransform):
 
 # TODO create checks (mean, std, got good shape, and etc.), what if given list but only one channel, and reverse.
 class NormalizeMeanStd(ImageOnlyTransform):
-    """Normalization of image by given mean and std.
+    """Normalize image values to have mean 0 and standard deviation 1, given channel-wise means and standard deviations.
 
-        For a single channel image normalization is applied by the formula :math:`img = (img - mean) / std`.
-        
-        If image contains more channels, then for each channel previous formula is used.
+        For a single-channel image, the normalization is applied by the formula: :math:`img = (img - mean) / std`.
+        If the image contains more channels, then the previous formula is used for each channel separately.
+
+        It is recommended to input dataset-wide means and standard deviations.
 
         Args:
-            mean (float | List[float]): Mean of image. If there are more channels, then it should be list of means
-                for each channel.
-            std (float | List[float]): Std of image. If there are more channels, then it should be list of stds
-                for each channel.
+            mean (float | List[float]): channel-wise image mean. Must be either of: M, (M_1, M_2, ..., M_C).
+            std (float | List[float]): channel-wise image standard deviation. Must be either of: S, (S_1, S_2, ..., S_C).
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 1.
         Targets:
@@ -768,19 +779,21 @@ class NormalizeMeanStd(ImageOnlyTransform):
 
 
 class GaussianBlur(ImageOnlyTransform):
-    """Performs gaussian blur on the image.
+    """Performs Gaussian blur on the image. In case of a multi-channel image, individual channels are blured separately.
 
-        Sigma parameter determines the strength of gaussian blur. There is no blurring between channels. 
-        By default, there is no blurring also on time dimension. If given single number, channels and axes are blurred
-        with same strength. If given tuple, blurring is performed with same effect over channels, but on each axis
-        differently. If given List, each channel is blurred differently, according to the element inside list.
-
-        For more information about border_mode and cval check scipy.ndimage.gaussian_filter.
+        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,
+         arguments are forwarded to it. More details at:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.
 
         Args:
-            sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Determines strength of the blurring. 
-                List must have length equal to the number of channels. Tuple should have same number elements as
-                number of axes - 1. Defaults to 0.8.
+            sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Gaussian sigma.
+                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],
+                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or
+                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].
+                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).
+                If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.
+                If a list, sigmas for each channel must be specified either as a single number or as a tuple.
+                Defaults to 0.8.
             border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
                 boundaries. Defaults to "reflect".
             cval (float, optional):  Value to fill past edges of image if mode is 'constant'. Defaults to 0.
@@ -805,15 +818,26 @@ class GaussianBlur(ImageOnlyTransform):
 
 
 class RandomGaussianBlur(ImageOnlyTransform):
-    """Performs gaussian blur on the image with a random strength blurring.
+    """Performs Gaussian blur on the image with a random strength blurring.
+        In case of a multi-channel image, individual channels are blured separately.
 
-        Behaves similarly to GaussianBlur, sigma has same format, but each number in sigma creates 
-        interval [start_of_interval, sigma_number], from which random number is chosen. 
+        Behaves similarly to GaussianBlur. The Gaussian sigma is randomly drawn from
+        the interval [min_sigma, s] for the respective s from max_sigma for each channel and dimension.
+
+        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,
+         arguments are forwarded to it. More details at:
+        https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.
 
         Args:
-            max_sigma (float, Tuple(float), List[Tuple(float) | float, optional): Determines end of interval from which
-                strength of blurring is chosen. Defaults to 0.8.
-            start_of_interval (float, optional): Determines start of interval from which strength of blurring is chosen.
+            max_sigma (float, Tuple(float), List[Tuple(float) | float] , optional): maximum Gaussian sigma.
+                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],
+                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or
+                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].
+                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).
+                If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.
+                If a list, sigmas for each channel must be specified either as a single number or as a tuple.
+                Defaults to 0.8.
+            min_sigma (float, optional): minimum Gaussian sigma. It is the same for all channels and dimensions.
                 Defaults to 0.
             border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
                 boundaries. Defaults to "reflect".
@@ -826,11 +850,11 @@ class RandomGaussianBlur(ImageOnlyTransform):
             float32
     """
     def __init__(self, max_sigma: Union[float, TypeTripletFloat] = 0.8,
-                 start_of_interval: float = 0, border_mode: str = "reflect", cval: float = 0,
+                 min_sigma: float = 0, border_mode: str = "reflect", cval: float = 0,
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.max_sigma = parse_coefs(max_sigma)
-        self.start_of_interval = start_of_interval
+        self.min_sigma = min_sigma
         self.border_mode = border_mode
         self.cval = cval
 
@@ -838,29 +862,26 @@ class RandomGaussianBlur(ImageOnlyTransform):
         return F.gaussian_blur(img, params["sigma"], self.border_mode, self.cval)
 
     def get_params(self, **data):
-        if isinstance(self.sigma, (float, int)):
-            sigma = random.uniform(self.start_of_interval, self.sigma)
-        elif isinstance(self.sigma, tuple):
-            sigma = tuple([random.uniform(self.start_of_interval, self.sigma[i]) for i in range(len(self.sigma))])
+        if isinstance(self.max_sigma, (float, int)):
+            sigma = random.uniform(self.min_sigma, self.max_sigma)
+        elif isinstance(self.max_sigma, tuple):
+            sigma = tuple([random.uniform(self.min_sigma, self.max_sigma[i]) for i in range(len(self.max_sigma))])
         else:
             sigma = []
-            for channel in self.sigma:
+            for channel in self.max_sigma:
                 if isinstance(channel, (float, int)):
-                    sigma.append(random.uniform(self.start_of_interval, channel))
+                    sigma.append(random.uniform(self.min_sigma, channel))
                 else:
-                    sigma.append(tuple([random.uniform(self.start_of_interval, channel) for i in range(len(channel))]))
+                    sigma.append(tuple([random.uniform(self.min_sigma, channel) for i in range(len(channel))]))
         return {"sigma": sigma}
 
 
 class RandomGamma(ImageOnlyTransform):
-    """Performs gamma transform with a randomly selected gamma.
-
-        Gamma is randomly selected from interval given by gamma_limit. If the values in image are not in [0,1] interval
-        then this transformation is skipped.
-
+    """Performs the gamma transform with a randomly chosen gamma. If image values (in any channel) are outside
+        the [0,1] interval, this transformation is skipped.
 
         Args:
-            gamma_limit (Tuple(float), optional): Interval from which gamma is selected. Defaults to (0.8, 1.20).
+            gamma_limit (Tuple(float), optional): interval from which gamma is selected. Defaults to (0.8, 1.2).
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
         Targets:
@@ -868,7 +889,7 @@ class RandomGamma(ImageOnlyTransform):
         Image types:
             float32
     """
-    def __init__(self, gamma_limit: Tuple[float] = (0.8, 1.20),
+    def __init__(self, gamma_limit: Tuple[float] = (0.8, 1.2),
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.gamma_limit = gamma_limit
@@ -879,10 +900,6 @@ class RandomGamma(ImageOnlyTransform):
     def get_params(self, **data):
         return {"gamma": random.uniform(self.gamma_limit[0], self.gamma_limit[1])}
 
-    @staticmethod
-    def get_transform_init_args_names():
-        return "gamma_limit", "eps"
-
     def __repr__(self):
         return f'RandomGamma({self.gamma_limit}, {self.always_apply}, {self.p})'
 
@@ -890,16 +907,19 @@ class RandomGamma(ImageOnlyTransform):
 class RandomBrightnessContrast(ImageOnlyTransform):
     """Randomly change brightness and contrast of the input image.
 
-        Unlike RandomBrightnessContrast from Albumentations, this transform is using
-        formula  :math:`f(a) = (c+1) * a + b`, where c is contrast and b is brightness.
+        Unlike RandomBrightnessContrast from Albumentations, this transform is using the
+        formula :math:`f(a) = (c+1) * a + b`, where :math:`c` is contrast and :math:`b` is brightness.
 
         Args:
-            brightness_limit ((float, float) | float, optional): Interval from which change in brightness is taken.
-                If limit is a single float, the interval will be (-limit, limit). If change in brightness is 0,
-                brightness won`t change. Defaults to 0.2.
-            contrast_limit ((float, float) | float, optional): Interval from which change in contrast is taken.
-                If limit is a single float, the interval will be (-limit, limit). If change in contrast is 0,
-                contrast won`t change. Defaults to 0.2.
+            brightness_limit ((float, float) | float, optional): interval from which the change in brightness is
+                randomly drawn. Must be either of: B, (B1, B2).
+                If a float, the interval will be (-B, B).
+                If the change in brightness is 0, the brightness will not change.
+                Defaults to 0.2.
+            contrast_limit ((float, float) | float, optional): interval from which the change in contrast is
+                randomly drawn. Must be either of: C, (C1, C2).
+                If a float, the interval will be (-C, C). If the change in contrast is 1,
+                the contrast will not change. Defaults to 0.2.
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
         Targets:
@@ -921,23 +941,16 @@ class RandomBrightnessContrast(ImageOnlyTransform):
             "beta": 0.0 + random.uniform(self.brightness_limit[0], self.brightness_limit[1]),
         }
 
-    @staticmethod
-    def get_transform_init_args_names():
-        return "brightness_limit", "contrast_limit"
-
     def __repr__(self):
         return f'RandomBrightnessContrast({self.brightness_limit}, {self.contrast_limit},  ' \
                f'{self.always_apply}, {self.p})'
 
 
 class HistogramEqualization(ImageOnlyTransform):
-    """Performs equalization of histogram.
+    """Performs equalization of histogram. The equalization is done channel-wise, meaning that each channel is equalized
+        separately.
 
-        This equalization is done channel-wise, meaning that each channel is equalized separately. 
-        Images are normalized over both spatial and temporal domains together. The output is in the range [0,1].
-
-        This transformation is performed with
-        https://scikit-image.org/docs/stable/api/skimage.exposure.html#skimage.exposure.equalize_hist
+        Warning! Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].
 
         Args:
             bins (int, optional): Number of bins for image histogram. Defaults to 256.
@@ -957,9 +970,9 @@ class HistogramEqualization(ImageOnlyTransform):
 
 
 class Pad(DualTransform):
-    """Pads the input.
+    """Pads the input based on pad_size.
 
-        Input is padded based on pad_size. If pad_size is only one number, all spatial axes are padded on both sides
+        If pad_size is a single number, all spatial axes are padded on both sides
         with this number. If it is tuple, then it has same behaviour as pad_size except sides are padded with different 
         number of pixels. If it is List, then it must have 3 items, which define padding for each spatial dimension
         separately (in either of the ways described above). If the List is shorter, remaining axes are padded with 0. 
@@ -967,9 +980,15 @@ class Pad(DualTransform):
         For other parameters check https://numpy.org/doc/stable/reference/generated/numpy.pad.html    
 
         Args:
-            pad_size (int | Tuple[int] | List[int | Tuple[int]]): Determines number of pixels to be padded.
-                Tuple should be of size 2. List should be of size equal to the image axes - 1 (channel axis).
-            border_mode (str, optional): numpy.pad parameter . Defaults to 'constant'.
+            pad_size (int | Tuple[int] | List[int | Tuple[int]]): number of pixels padded to the edges of each axis.
+                Must be either of: P, (P1, P2), [P_Z, P_Y, P_X], [P_Z, P_Y, P_X, P_T],
+                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)], or
+                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2), (P_T1, P_T2)].
+                If an integer, it is equivalent to [(P, P), (P, P), (P, P)].
+                If a tuple, it is equivalent to [(P1, P2), (P1, P2), (P1, P2)].
+                If a list, it must specify padding for all spatial dimensions and possibly also for the time dimension.
+                The unspecified dimensions (C and possibly T) are not affected.
+            border_mode (str, optional): `numpy.pad` parameter . Defaults to 'constant'.
             ival (float | Sequence, optional): value for image if needed by chosen border_mode. Defaults to 0.
             mval (float | Sequence, optional): value for mask if needed by chosen border_mode. Defaults to 0.
             ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with 
@@ -1008,15 +1027,13 @@ class Pad(DualTransform):
 
 
 class Normalize(ImageOnlyTransform):
-    """Normalize image channels to the given mean and std.
-
-        Normalization is performed channel-wise. 
+    """Change image mean and standard deviation to the given values (channel-wise).
 
         Args:
-            mean (float | List[float], optional): Value of desired mean. If it is list, then it should have
-             same length as number of channels, and each value corresponds to the desired mean in respective channel. Defaults to 0.
-            std (float | List[float], optional): Value of desired std. If it is list, then it should have
-             same length as number of channels, and each value corresponds to the desired std in respective channel. Defaults to 1.
+            mean (float | List[float], optional): the desired channel-wise means.
+                Must be either of: M, [M_1, M_2, ..., M_C]. Defaults to 0.
+            std (float | List[float], optional): the desired channel-wise standard deviations.
+                Must be either of: S, [S_1, S_2, ..., S_C]. Defaults to 1.
             always_apply (bool, optional): always apply transformation in composition. Defaults to False.
             p (float, optional): chance of applying transformation in composition. Defaults to 1.
         Targets:
@@ -1038,6 +1055,8 @@ class Normalize(ImageOnlyTransform):
 
 
 class Contiguous(DualTransform):
+    """Transform the image data to a contiguous array.
+    """
     def apply(self, image, **params):
         return np.ascontiguousarray(image)
 
@@ -1049,6 +1068,8 @@ class Contiguous(DualTransform):
 
 
 class Float(DualTransform):
+    """Change datatype to np.float32 without changing the image values.
+    """
     def apply(self, image, **params):
         return image.astype(np.float32)
 
@@ -1057,5 +1078,3 @@ class Float(DualTransform):
 
     def __repr__(self):
         return f'Float()'
-
-

@@ -1,113 +1,69 @@
 import unittest
 import numpy as np
-from volumentations.augmentations.transforms import *
+from ...augmentations.transforms import *
+from ...core.composition import Compose
 
 
-class TestIncreaseDimensionality(unittest.TestCase):
-    def test_increase(self):
-        sh = (36, 200, 250)
-        img = np.empty(sh + (3,))
-        tr = IncreaseDimensionality(6)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertIsInstance(res_image, np.ndarray)
-        self.assertTupleEqual(tuple(res_image.shape), sh + (3, 1, 1))
+class TestResize(unittest.TestCase):
+    def test_1(self):
+        tr = Compose([Resize(shape=(20, 20, 20))])
 
-        lbl = np.empty(sh)
-        result = tr(force_apply=True, targets=[['image'], ['mask']], image=img, mask=lbl)
-        res_image = result['image']
-        res_label = result['mask']
-        self.assertIsInstance(res_image, np.ndarray)
-        self.assertTupleEqual(tuple(res_image.shape), sh + (3, 1, 1))
-        self.assertIsInstance(res_label, np.ndarray)
-        self.assertTupleEqual(tuple(res_label.shape), sh + (1, 1))
+        img = np.empty((30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (1, 20, 20, 20))
 
-    def test_decrease(self):
-        sh = (36, 200, 250, 4)
-        img = np.empty(sh)
-        tr = IncreaseDimensionality(3)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertIsInstance(res_image, np.ndarray)
-        self.assertTupleEqual(tuple(res_image.shape), sh)
-        self.assertListEqual(res_image.tolist(), img.tolist())
+        img = np.empty((1, 30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (1, 20, 20, 20))
 
-        sh = (36, 200, 250)
-        img = np.empty(sh)
-        tr = IncreaseDimensionality(1)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertIsInstance(res_image, np.ndarray)
-        self.assertTupleEqual(tuple(res_image.shape), sh)
-        self.assertListEqual(res_image.tolist(), img.tolist())
+        img = np.empty((4, 30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (4, 20, 20, 20))
 
-    def test_no_change(self):
-        sh = (36, 200, 250)
-        img = np.empty(sh)
-        tr = IncreaseDimensionality(3)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertIsInstance(res_image, np.ndarray)
-        self.assertTupleEqual(tuple(res_image.shape), sh)
-        self.assertListEqual(res_image.tolist(), img.tolist())
+        img = np.empty((4, 30, 30, 30, 5))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (4, 20, 20, 20, 5))
 
-        img = np.empty(sh + (3,))
-        lbl = np.empty(sh)
-        tr = IncreaseDimensionality(4)
-        result = tr(force_apply=True, targets=[['image'], ['mask']], image=img, mask=lbl)
-        res_image = result['image']
-        res_label = result['mask']
-        self.assertIsInstance(res_image, np.ndarray)
-        self.assertTupleEqual(tuple(res_image.shape), sh + (3,))
-        self.assertIsInstance(res_label, np.ndarray)
-        self.assertTupleEqual(tuple(res_label.shape), sh)
+    def test_2(self):
+        tr = Compose([Resize(shape=(20, 20, 20, 6))])
 
-    def test_negative(self):
-        sh = (36, 200, 250)
-        img = np.empty(sh)
-        tr = IncreaseDimensionality(-1)
-        result = tr(force_apply=True, targets=[['image']], image=img)
-        res_image = result['image']
-        self.assertIsInstance(res_image, np.ndarray)
-        self.assertTupleEqual(tuple(res_image.shape), sh)
-        self.assertListEqual(res_image.tolist(), img.tolist())
+        # when arguments are incorrect, should print warning and output the unchanged input image
+        img = np.empty((30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (1, 30, 30, 30))
+
+        img = np.empty((1, 30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (1, 30, 30, 30))
+
+        img = np.empty((4, 30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (4, 30, 30, 30))
+
+        img = np.empty((4, 30, 30, 30, 5))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (4, 20, 20, 20, 6))
 
 
-class TestNormalizeMeanStd(unittest.TestCase):
-    def test_random_data3d(self):
-        sh = (36, 200, 250)
-        img = np.random.rand(*sh)
-        tr = NormalizeMeanStd(mean=[img.mean()], std=[img.std()], max_pixel_value=1)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertFalse(np.all(np.equal(img, res_image)))
+class TestPad(unittest.TestCase):
+    def test_1(self):
+        tr = Compose([Pad(2)])
 
-    def test_random_data4d(self):
-        sh = (36, 200, 250, 4)
-        img = np.random.rand(*sh)
-        tr = NormalizeMeanStd(mean=[img.mean(axis=(0, 1, 2))], std=[img.std(axis=(0, 1, 2))], max_pixel_value=1)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertFalse(np.all(np.equal(img, res_image)))
+        img = np.empty((30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (1, 34, 34, 34))
 
-    def test_constant_data(self):
-        sh = (36, 200, 250)
-        img = np.ones(sh)
-        tr = NormalizeMeanStd(mean=[1], std=[0], max_pixel_value=1)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertTrue(np.all(np.equal(res_image, np.zeros_like(img))))
+        img = np.empty((1, 30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (1, 34, 34, 34))
 
-        sh = (36, 200, 250)
-        img = np.ones(sh + (2,))
-        tr = NormalizeMeanStd(mean=[1, 0.5], std=[0, 0], max_pixel_value=1)
-        res_image = tr(force_apply=True, targets=[['image']], image=img)['image']
-        self.assertTrue(np.all(np.equal(res_image[..., 0], np.zeros(sh))))
-        self.assertTrue(np.all(np.equal(res_image[..., 1], np.zeros(sh) + 0.5)))
+        img = np.empty((4, 30, 30, 30))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (4, 34, 34, 34))
 
-    def test_random_data4d_labels(self):
-        sh = (36, 200, 250, 4)
-        img = np.random.rand(*sh)
-        lbl = np.random.rand(*sh[:3])
-        tr = NormalizeMeanStd(mean=[img.mean(axis=(0, 1, 2))], std=[img.std(axis=(0, 1, 2))], max_pixel_value=1)
-        result = tr(force_apply=True, targets=[['image'], ['mask']], image=img, mask=lbl)
-        res_image = result['image']
-        res_label = result['mask']
-        self.assertFalse(np.all(np.equal(img, res_image)))
-        self.assertTrue(np.all(np.equal(lbl, res_label)))
+        img = np.empty((4, 30, 30, 30, 5))
+        tr_img = tr(image=img)['image']
+        self.assertTupleEqual(tr_img.shape, (4, 34, 34, 34, 5))
 
 
 if __name__ == '__main__':

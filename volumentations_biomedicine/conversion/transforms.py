@@ -46,8 +46,12 @@ from warnings import warn
 
 
 class ConversionToFormat(DualTransform):
+    """Check the very basic assumptions about the input images.
+
+        Adds channel dimension to the 3D images without it. Checks that shapes of individual target types are
+        consistent (to some extent).
+    """
     def __init__(self, always_apply: bool = False, p: float = 1):
-        """Adds channel dimension to the 3D images without it"""
         super().__init__(always_apply,p)
 
     def __call__(self, force_apply, targets, **data):
@@ -91,6 +95,8 @@ class ConversionToFormat(DualTransform):
 
 
 class NoConversion(DualTransform):
+    """Identity.
+    """
     def __init__(self):
         super().__init__()
 
@@ -102,25 +108,3 @@ class NoConversion(DualTransform):
 
     def __repr__(self):
         return f'NoConversion()'
-
-
-'''
-class ToTensor(DualTransform):
-    """Convert image and masks to `torch.Tensor` with standard pytorch format: `CDHW(T)` for images, 'DHW(T)' for masks.
-    Args:
-        always_apply (bool): Indicates whether this transformation should be always applied. Default: True.
-        p (float): Probability of applying the transform. Default: 1.0.
-    """
-
-    def __init__(self, always_apply=True, p=1.0):
-        super(ToTensor, self).__init__(always_apply=always_apply, p=p)
-
-    def apply(self, img, **params):
-        return torch.from_numpy(img)
-
-    def apply_to_mask(self, mask, **params):
-        return torch.from_numpy(mask)
-
-    def __repr__(self):
-        return f'ToTensor({self.always_apply}, {self.p})'
-'''

@@ -48,6 +48,8 @@ VERBOSE = False
 
 
 class Transform:
+    """The base class.
+    """
     def __init__(self, always_apply=False, p=0.5):
         assert 0 <= p <= 1
         self.p = p
@@ -69,9 +71,7 @@ class Transform:
         return data
 
     def get_params(self, **data):
-        """
-        shared parameters for one apply. (usually random values)
-        """
+        # Shared parameters for one apply (usually random values).
         return {}
 
     def apply(self, volume, **params):
@@ -79,6 +79,8 @@ class Transform:
 
 
 class DualTransform(Transform):
+    """The base class of transforms applied to all target types.
+    """
     def __call__(self, force_apply, targets, **data):
         if force_apply or self.always_apply or random.random() < self.p:
             params = self.get_params(**data)
@@ -106,8 +108,8 @@ class DualTransform(Transform):
 
 
 class ImageOnlyTransform(Transform):
-    """Transform applied to image only."""
-
+    """The base class of transforms applied to the `image` target only.
+    """
     @property
     def targets(self):
         return {"image": self.apply}
