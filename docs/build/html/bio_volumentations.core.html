@@ -82,18 +82,22 @@
 <dt class="sig sig-object py" id="bio_volumentations.core.composition.Compose">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.core.composition.</span></span><span class="sig-name descname"><span class="pre">Compose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transforms</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(['image'],</span> <span class="pre">['mask'],</span> <span class="pre">['float_mask'])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conversion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/core/composition.html#Compose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.core.composition.Compose" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Compose a list of transforms into a callable transformation pipeline.</p>
+<p>Compose a list of transformations into a callable transformation pipeline.</p>
 <p>In addition, basic input image checks and conversions are performed. Optionally, datatype conversion
 (e.g. from <code class="docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> to <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) is performed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>transforms</strong> (<em>List</em><em>[</em><a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.Transform" title="bio_volumentations.core.transforms_interface.Transform"><em>Transform</em></a><em>]</em>) – a list of transforms.</p></li>
-<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – chance of applying the whole pipeline. Defaults to 1.</p></li>
-<li><p><strong>targets</strong> (<em>Tuple</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>List</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – a list of targets.
-Defaults to ([‘image’], [‘mask’], [‘float_mask’]).</p></li>
-<li><p><strong>conversion</strong> (<a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.Transform" title="bio_volumentations.core.transforms_interface.Transform"><em>Transform</em></a><em> | </em><em>None</em><em>, </em><em>optional</em>) – image datatype conversion transform, applied after the transformations.
-Defaults to None.</p></li>
+<li><p><strong>transforms</strong> (<em>List</em><em>[</em><a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.Transform" title="bio_volumentations.core.transforms_interface.Transform"><em>Transform</em></a><em>]</em>) – List of transforms (objects of type <code class="docutils literal notranslate"><span class="pre">Transform</span></code>).</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying the whole pipeline.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</p></li>
+<li><p><strong>targets</strong> (<em>Tuple</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>] </em><em>| </em><em>List</em><em>[</em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em><em>, </em><em>optional</em>) – <p>List of targets.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">(['image'],</span> <span class="pre">['mask'],</span> <span class="pre">['float_mask'])</span></code>.</p>
+</p></li>
+<li><p><strong>conversion</strong> (<a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.Transform" title="bio_volumentations.core.transforms_interface.Transform"><em>Transform</em></a><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>Image datatype conversion transform, applied after the transformations.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</p></li>
 </ul>
 </dd>
 </dl>
@@ -111,7 +115,11 @@ Defaults to None.</p></li>
 <dt class="sig sig-object py" id="bio_volumentations.core.transforms_interface.DualTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.core.transforms_interface.</span></span><span class="sig-name descname"><span class="pre">DualTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/core/transforms_interface.html#DualTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.core.transforms_interface.DualTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.Transform" title="bio_volumentations.core.transforms_interface.Transform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></a></p>
-<p>The base class of transforms applied to all target types.</p>
+<p>The base class of transformations applied to all target types.</p>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.core.transforms_interface.DualTransform.apply_to_float_mask">
 <span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">float_mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/core/transforms_interface.html#DualTransform.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.core.transforms_interface.DualTransform.apply_to_float_mask" title="Link to this definition"></a></dt>
@@ -128,7 +136,11 @@ Defaults to None.</p></li>
 <dt class="sig sig-object py" id="bio_volumentations.core.transforms_interface.ImageOnlyTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.core.transforms_interface.</span></span><span class="sig-name descname"><span class="pre">ImageOnlyTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/core/transforms_interface.html#ImageOnlyTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.core.transforms_interface.ImageOnlyTransform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.Transform" title="bio_volumentations.core.transforms_interface.Transform"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transform</span></code></a></p>
-<p>The base class of transforms applied to the <cite>image</cite> target only.</p>
+<p>The base class of transformations applied to the <cite>image</cite> target only.</p>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image</p>
+</dd>
+</dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="bio_volumentations.core.transforms_interface.ImageOnlyTransform.targets">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">targets</span></span><a class="headerlink" href="#bio_volumentations.core.transforms_interface.ImageOnlyTransform.targets" title="Link to this definition"></a></dt>
@@ -140,7 +152,19 @@ Defaults to None.</p></li>
 <dt class="sig sig-object py" id="bio_volumentations.core.transforms_interface.Transform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.core.transforms_interface.</span></span><span class="sig-name descname"><span class="pre">Transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/core/transforms_interface.html#Transform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.core.transforms_interface.Transform" title="Link to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>The base class.</p>
+<p>The base class for transformations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">0.5</span></code>.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.core.transforms_interface.Transform.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/core/transforms_interface.html#Transform.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.core.transforms_interface.Transform.apply" title="Link to this definition"></a></dt>

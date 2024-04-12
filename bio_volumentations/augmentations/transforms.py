@@ -152,8 +152,10 @@ class Resize(DualTransform):
                 downsampling. Recommended. 
                 
                 Defaults to ``True``.
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with 
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
                 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -164,7 +166,7 @@ class Resize(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, shape: tuple, interpolation: int = 1, border_mode: str = 'reflect', ival: float = 0,
                  mval: float = 0, anti_aliasing_downsample: bool = True, ignore_index: Union[float, None] = None,
@@ -189,6 +191,11 @@ class Resize(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         return F.resize(mask, input_new_shape=self.shape, interpolation=0,
+                        border_mode=self.mask_mode, cval=self.mval, anti_aliasing_downsample=False,
+                        mask=True)
+
+    def apply_to_float_mask(self, mask, **params):
+        return F.resize(mask, input_new_shape=self.shape, interpolation=self.interpolation,
                         border_mode=self.mask_mode, cval=self.mval, anti_aliasing_downsample=False,
                         mask=True)
         
@@ -233,8 +240,10 @@ class Scale(DualTransform):
             mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -243,8 +252,9 @@ class Scale(DualTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``1``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, scales: Union[float, TypeTripletFloat] = 1,
                  interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
@@ -270,12 +280,19 @@ class Scale(DualTransform):
                         value=self.ival,
                         spacing=self.spacing)
 
-    # TODO implement linear/cubic interpolation for float_mask
     def apply_to_mask(self, mask, **params):
         interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=self.scale,
                         interpolation=interpolation,
+                        border_mode=self.mask_mode,
+                        value=self.mval,
+                        spacing=self.spacing)
+
+    def apply_to_float_mask(self, mask, **params):
+        return F.affine(mask,
+                        scales=self.scale,
+                        interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
                         spacing=self.spacing)
@@ -339,8 +356,10 @@ class RandomScale(DualTransform):
 
                 Defaults to ``0``.
 
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
 
                 Defaults to ``None``.
 
@@ -353,7 +372,7 @@ class RandomScale(DualTransform):
                 Defaults to ``0.5``.
 
         Targets:
-            image, mask
+            image, mask, float_mask
     """      
     def __init__(self, scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.9, 1.1),
                  interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
@@ -388,11 +407,18 @@ class RandomScale(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-
         interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=params["scale"],
                         interpolation=interpolation,
+                        border_mode=self.mask_mode,
+                        value=self.mval,
+                        spacing=self.spacing)
+
+    def apply_to_float_mask(self, mask, **params):
+        return F.affine(mask,
+                        scales=params["scale"],
+                        interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
                         spacing=self.spacing)
@@ -419,8 +445,9 @@ class RandomRotate90(DualTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``0.5``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, axes: List[int] = None, shuffle_axis: bool = False,
                  always_apply: bool = False, p: float = 0.5):
@@ -470,7 +497,7 @@ class Flip(DualTransform):
 
         Args:
             axes (List[int], optional): List of axes around which is flip done. Recognised axis symbols are
-                ``1`` for Z, ``2`` for Y, and `3` for X.
+                ``1`` for Z, ``2`` for Y, and ``3`` for X.
 
                 Defaults to ``[1,2,3]``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -479,8 +506,9 @@ class Flip(DualTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``1``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, axes: List[int] = None, always_apply=False, p=1):
         super().__init__(always_apply, p)
@@ -523,8 +551,9 @@ class RandomFlip(DualTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``0.5``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, always_apply=False, p=0.5):
         super().__init__(always_apply, p)
@@ -577,8 +606,10 @@ class CenterCrop(DualTransform):
                 Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
 
                 Defaults to ``(0, 0)``.
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -587,8 +618,9 @@ class CenterCrop(DualTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``1``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, shape: Tuple[int], border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
@@ -637,8 +669,10 @@ class RandomCrop(DualTransform):
                 Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
 
                 Defaults to ``(0, 0)``.
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -647,8 +681,9 @@ class RandomCrop(DualTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``1``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, shape: tuple, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
@@ -748,8 +783,10 @@ class RandomAffineTransform(DualTransform):
             mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -758,8 +795,9 @@ class RandomAffineTransform(DualTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``0.5``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, angle_limit: Union[float, TypePairFloat, TypeSextetFloat] = (15, 15, 15),
                  translation_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0, 0, 0),
@@ -786,7 +824,6 @@ class RandomAffineTransform(DualTransform):
             self.mval = ignore_index
 
     def apply(self, img, **params):
-        
         return F.affine(img,
                         scales=params["scale"],
                         degrees=params["angles"],
@@ -797,7 +834,6 @@ class RandomAffineTransform(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        
         interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=params["scale"],
@@ -805,7 +841,17 @@ class RandomAffineTransform(DualTransform):
                         translation=params["translation"],
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
-                        value=self.ival,
+                        value=self.mval,
+                        spacing=self.spacing)
+
+    def apply_to_float_mask(self, mask, **params):
+        return F.affine(mask,
+                        scales=params["scale"],
+                        degrees=params["angles"],
+                        translation=params["translation"],
+                        interpolation=self.interpolation,
+                        border_mode=self.mask_mode,
+                        value=self.mval,
                         spacing=self.spacing)
 
     def get_params(self, **data):
@@ -843,7 +889,7 @@ class AffineTransform(DualTransform):
                 Defaults to ``(1, 1, 1)``.
             spacing (Tuple[float, float, float], optional): Voxel spacing for individual spatial dimensions.
 
-                Must be: `(S1, S2, S3)`` (a scale for each spatial dimension must be given).
+                Must be: ``(S1, S2, S3)`` (a scale for each spatial dimension must be given).
 
                 Defaults to ``(1, 1, 1)``.
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
@@ -861,8 +907,10 @@ class AffineTransform(DualTransform):
             mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -873,7 +921,7 @@ class AffineTransform(DualTransform):
                 Defaults to ``0.5``.
 
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, angles: TypeTripletFloat = (0, 0, 0),
                  translation: TypeTripletFloat = (0, 0, 0),
@@ -910,7 +958,6 @@ class AffineTransform(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-
         interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
                         scales=self.scale,
@@ -918,7 +965,17 @@ class AffineTransform(DualTransform):
                         translation=self.translation,
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
-                        value=self.ival,
+                        value=self.mval,
+                        spacing=self.spacing)
+
+    def apply_to_float_mask(self, mask, **params):
+        return F.affine(mask,
+                        scales=self.scale,
+                        degrees=self.angles,
+                        translation=self.translation,
+                        interpolation=self.interpolation,
+                        border_mode=self.mask_mode,
+                        value=self.mval,
                         spacing=self.spacing)
 
 
@@ -940,10 +997,11 @@ class NormalizeMeanStd(ImageOnlyTransform):
                 Must be either of: ``S``, ``(S_1, S_2, ..., S_C)``.
             always_apply (bool, optional): Always apply this transformation in composition. 
             
-                Defaults to ``False``.
+                Defaults to ``True``.
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``1``.
+
         Targets:
             image
     """
@@ -963,7 +1021,7 @@ class NormalizeMeanStd(ImageOnlyTransform):
 
 
 class GaussianBlur(ImageOnlyTransform):
-    """Performs Gaussian blur on the image. In case of a multi-channel image, individual channels are blured separately.
+    """Performs Gaussian blurring of the image. In case of a multi-channel image, individual channels are blured separately.
 
         Internally, the ``scipy.ndimage.gaussian_filter`` function is used. The ``border_mode`` and ``cval``
         arguments are forwarded to it. More details at:
@@ -995,6 +1053,7 @@ class GaussianBlur(ImageOnlyTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``0.5``.
+
         Targets:
             image
     """
@@ -1051,6 +1110,7 @@ class RandomGaussianBlur(ImageOnlyTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``0.5``.
+
         Targets:
             image
     """
@@ -1095,6 +1155,7 @@ class RandomGamma(ImageOnlyTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``0.5``.
+
         Targets:
             image
     """
@@ -1142,6 +1203,7 @@ class RandomBrightnessContrast(ImageOnlyTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``0.5``.
+
         Targets:
             image
     """
@@ -1168,7 +1230,7 @@ class HistogramEqualization(ImageOnlyTransform):
     """Performs equalization of histogram. The equalization is done channel-wise, meaning that each channel is equalized
         separately.
 
-        **Warning!** Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].
+        **Warning! Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].**
 
         Args:
             bins (int, optional): Number of bins for image histogram.
@@ -1180,6 +1242,7 @@ class HistogramEqualization(ImageOnlyTransform):
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``1``.
+
         Targets:
             image
     """
@@ -1219,22 +1282,25 @@ class Pad(DualTransform):
                 Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
 
                 Defaults to ``0``.
-            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. 
+                
+                If ``None``, this argument is ignored.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
             
-                Defaults to ``False``.
+                Defaults to ``True``.
             p (float, optional): Chance of applying this transformation in composition. 
             
-                Defaults to ``0.5``.
+                Defaults to ``1``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
     def __init__(self, pad_size: Union[int, Tuple[int],  List[Union[int, Tuple[int]]]], border_mode: str = 'constant',
                  ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
-                 ignore_index: Union[float, None] = None, always_apply: bool = False, p : float = 1):
+                 ignore_index: Union[float, None] = None, always_apply: bool = True, p : float = 1):
         super().__init__(always_apply, p)
         self.pad_size = pad_size
         self.border_mode = border_mode
@@ -1273,10 +1339,11 @@ class Normalize(ImageOnlyTransform):
                 Defaults to ``1``.
             always_apply (bool, optional): Always apply this transformation in composition. 
             
-                Defaults to ``False``.
+                Defaults to ``True``.
             p (float, optional): Chance of applying this transformation in composition. 
             
                 Defaults to ``1``.
+
         Targets:
             image
     """
@@ -1296,9 +1363,20 @@ class Normalize(ImageOnlyTransform):
 class Contiguous(DualTransform):
     """Transform the image data to a contiguous array.
 
+        Args:
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``True``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``1``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
+    def __init__(self, always_apply: bool = True, p: float = 1.0):
+        super().__init__(always_apply, p)
+
     def apply(self, image, **params):
         return np.ascontiguousarray(image)
 
@@ -1306,15 +1384,26 @@ class Contiguous(DualTransform):
         return np.ascontiguousarray(mask)
 
     def __repr__(self):
-        return f'Contiguous()'
+        return f'Contiguous({self.always_apply}, {self.p})'
 
 
 class Float(DualTransform):
     """Change datatype to ``np.float32`` without changing intensities.
 
+        Args:
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``True``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``1``.
+
         Targets:
-            image, mask
+            image, mask, float_mask
     """
+    def __init__(self, always_apply: bool = True, p: float = 1.0):
+        super().__init__(always_apply, p)
+
     def apply(self, image, **params):
         return image.astype(np.float32)
 
@@ -1322,4 +1411,5 @@ class Float(DualTransform):
         return mask.astype(np.float32)
 
     def __repr__(self):
-        return f'Float()'
+        return f'Float({self.always_apply}, {self.p})'
+

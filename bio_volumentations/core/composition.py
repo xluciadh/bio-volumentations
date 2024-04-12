@@ -45,18 +45,23 @@ from ..conversion import transforms as CT
 
 
 class Compose:
-    """Compose a list of transforms into a callable transformation pipeline.
+    """Compose a list of transformations into a callable transformation pipeline.
 
     In addition, basic input image checks and conversions are performed. Optionally, datatype conversion
     (e.g. from ``numpy.ndarray`` to ``torch.Tensor``) is performed.
 
     Args:
-        transforms (List[Transform]): a list of transforms.
-        p (float, optional): chance of applying the whole pipeline. Defaults to 1.
-        targets (Tuple[List[str]] | List[List[str]], optional): a list of targets.
-            Defaults to (['image'], ['mask'], ['float_mask']).
-        conversion (Transform | None, optional): image datatype conversion transform, applied after the transformations.
-            Defaults to None.
+        transforms (List[Transform]): List of transforms (objects of type ``Transform``).
+
+        p (float, optional): Chance of applying the whole pipeline.
+
+            Defaults to ``1``.
+        targets (Tuple[List[str]] | List[List[str]], optional): List of targets.
+
+            Defaults to ``(['image'], ['mask'], ['float_mask'])``.
+        conversion (Transform | None, optional): Image datatype conversion transform, applied after the transformations.
+
+            Defaults to ``None``.
     """
     def __init__(self, transforms, p=1.0, targets=(['image'], ['mask'], ['float_mask']), conversion=None):
         assert 0 <= p <= 1

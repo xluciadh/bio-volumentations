@@ -248,8 +248,10 @@
 <span class="sd">                downsampling. Recommended. </span>
 <span class="sd">                </span>
 <span class="sd">                Defaults to ``True``.</span>
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with </span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 <span class="sd">                </span>
 <span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
@@ -260,7 +262,7 @@
 <span class="sd">                Defaults to ``1``.</span>
 
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;reflect&#39;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">anti_aliasing_downsample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -290,6 +292,14 @@
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Resize.apply_to_mask">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">input_new_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span> <span class="n">anti_aliasing_downsample</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Resize.apply_to_float_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Resize.apply_to_float_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_float_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">input_new_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
                         <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span> <span class="n">anti_aliasing_downsample</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
@@ -338,8 +348,10 @@
 <span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
 
 <span class="sd">                Defaults to ``0``.</span>
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
@@ -348,8 +360,9 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scales</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                  <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -378,7 +391,6 @@
                         <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
 
 
-    <span class="c1"># TODO implement linear/cubic interpolation for float_mask</span>
 <div class="viewcode-block" id="Scale.apply_to_mask">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Scale.apply_to_mask">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
@@ -386,6 +398,17 @@
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
                         <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
                         <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Scale.apply_to_float_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Scale.apply_to_float_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_float_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
                         <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
                         <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
                         <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
@@ -453,8 +476,10 @@
 
 <span class="sd">                Defaults to ``0``.</span>
 
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 
@@ -467,7 +492,7 @@
 <span class="sd">                Defaults to ``0.5``.</span>
 
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaling_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">),</span>
                  <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -510,11 +535,21 @@
 <div class="viewcode-block" id="RandomScale.apply_to_mask">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomScale.apply_to_mask">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-
         <span class="n">interpolation</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># refers to &#39;sitkNearestNeighbor&#39;</span>
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
                         <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
                         <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomScale.apply_to_float_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomScale.apply_to_float_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_float_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
                         <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
                         <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
                         <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
@@ -545,8 +580,9 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shuffle_axis</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
@@ -608,7 +644,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            axes (List[int], optional): List of axes around which is flip done. Recognised axis symbols are</span>
-<span class="sd">                ``1`` for Z, ``2`` for Y, and `3` for X.</span>
+<span class="sd">                ``1`` for Z, ``2`` for Y, and ``3`` for X.</span>
 
 <span class="sd">                Defaults to ``[1,2,3]``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
@@ -617,8 +653,9 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
@@ -673,8 +710,9 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes_to_choose</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
@@ -739,8 +777,10 @@
 <span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
 
 <span class="sd">                Defaults to ``(0, 0)``.</span>
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
@@ -749,8 +789,9 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                  <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -808,8 +849,10 @@
 <span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
 
 <span class="sd">                Defaults to ``(0, 0)``.</span>
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
@@ -818,8 +861,9 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                  <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -931,8 +975,10 @@
 <span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
 
 <span class="sd">                Defaults to ``0``.</span>
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
@@ -941,8 +987,9 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
                  <span class="n">translation_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -971,7 +1018,6 @@
 <div class="viewcode-block" id="RandomAffineTransform.apply">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply">[docs]</a>
     <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-        
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span>
                         <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
                         <span class="n">degrees</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;angles&quot;</span><span class="p">],</span>
@@ -985,7 +1031,6 @@
 <div class="viewcode-block" id="RandomAffineTransform.apply_to_mask">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply_to_mask">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-        
         <span class="n">interpolation</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># refers to &#39;sitkNearestNeighbor&#39;</span>
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
                         <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
@@ -993,7 +1038,20 @@
                         <span class="n">translation</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;translation&quot;</span><span class="p">],</span>
                         <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
                         <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
-                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomAffineTransform.apply_to_float_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply_to_float_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_float_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
+                        <span class="n">degrees</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;angles&quot;</span><span class="p">],</span>
+                        <span class="n">translation</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;translation&quot;</span><span class="p">],</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
                         <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
 
 
@@ -1038,7 +1096,7 @@
 <span class="sd">                Defaults to ``(1, 1, 1)``.</span>
 <span class="sd">            spacing (Tuple[float, float, float], optional): Voxel spacing for individual spatial dimensions.</span>
 
-<span class="sd">                Must be: `(S1, S2, S3)`` (a scale for each spatial dimension must be given).</span>
+<span class="sd">                Must be: ``(S1, S2, S3)`` (a scale for each spatial dimension must be given).</span>
 
 <span class="sd">                Defaults to ``(1, 1, 1)``.</span>
 <span class="sd">            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.</span>
@@ -1056,8 +1114,10 @@
 <span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
 
 <span class="sd">                Defaults to ``0``.</span>
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
@@ -1068,7 +1128,7 @@
 <span class="sd">                Defaults to ``0.5``.</span>
 
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                  <span class="n">translation</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -1110,7 +1170,6 @@
 <div class="viewcode-block" id="AffineTransform.apply_to_mask">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.AffineTransform.apply_to_mask">[docs]</a>
     <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
-
         <span class="n">interpolation</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># refers to &#39;sitkNearestNeighbor&#39;</span>
         <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
                         <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
@@ -1118,7 +1177,20 @@
                         <span class="n">translation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">,</span>
                         <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
                         <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
-                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AffineTransform.apply_to_float_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.AffineTransform.apply_to_float_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_float_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                        <span class="n">degrees</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">,</span>
+                        <span class="n">translation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">,</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
                         <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
 </div>
 
@@ -1144,10 +1216,11 @@
 <span class="sd">                Must be either of: ``S``, ``(S_1, S_2, ..., S_C)``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
 <span class="sd">            </span>
-<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">                Defaults to ``True``.</span>
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1173,7 +1246,7 @@
 <div class="viewcode-block" id="GaussianBlur">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.GaussianBlur">[docs]</a>
 <span class="k">class</span> <span class="nc">GaussianBlur</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs Gaussian blur on the image. In case of a multi-channel image, individual channels are blured separately.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs Gaussian blurring of the image. In case of a multi-channel image, individual channels are blured separately.</span>
 
 <span class="sd">        Internally, the ``scipy.ndimage.gaussian_filter`` function is used. The ``border_mode`` and ``cval``</span>
 <span class="sd">        arguments are forwarded to it. More details at:</span>
@@ -1205,6 +1278,7 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1267,6 +1341,7 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1320,6 +1395,7 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1376,6 +1452,7 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1411,7 +1488,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs equalization of histogram. The equalization is done channel-wise, meaning that each channel is equalized</span>
 <span class="sd">        separately.</span>
 
-<span class="sd">        **Warning!** Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].</span>
+<span class="sd">        **Warning! Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].**</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            bins (int, optional): Number of bins for image histogram.</span>
@@ -1423,6 +1500,7 @@
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1468,22 +1546,25 @@
 <span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
 
 <span class="sd">                Defaults to ``0``.</span>
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. </span>
+<span class="sd">                </span>
+<span class="sd">                If ``None``, this argument is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
 <span class="sd">            </span>
-<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">                Defaults to ``True``.</span>
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
-<span class="sd">                Defaults to ``0.5``.</span>
+<span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>  <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]],</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span>
                  <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                 <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span> <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+                 <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span> <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pad_size</span> <span class="o">=</span> <span class="n">pad_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
@@ -1531,10 +1612,11 @@
 <span class="sd">                Defaults to ``1``.</span>
 <span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
 <span class="sd">            </span>
-<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">                Defaults to ``True``.</span>
 <span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
 <span class="sd">            </span>
 <span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1560,9 +1642,20 @@
 <span class="k">class</span> <span class="nc">Contiguous</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform the image data to a contiguous array.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``True``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
 <div class="viewcode-block" id="Contiguous.apply">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Contiguous.apply">[docs]</a>
     <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
@@ -1576,7 +1669,7 @@
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Contiguous()&#39;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Contiguous(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
 
 
 
@@ -1585,9 +1678,20 @@
 <span class="k">class</span> <span class="nc">Float</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Change datatype to ``np.float32`` without changing intensities.</span>
 
+<span class="sd">        Args:</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``True``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+
 <span class="sd">        Targets:</span>
-<span class="sd">            image, mask</span>
+<span class="sd">            image, mask, float_mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+
 <div class="viewcode-block" id="Float.apply">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Float.apply">[docs]</a>
     <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
@@ -1601,7 +1705,8 @@
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Float()&#39;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Float(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
 
 </pre></div>
 

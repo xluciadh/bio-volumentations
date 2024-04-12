@@ -40,15 +40,21 @@
 
 
 import random
-import numpy as np
-from typing import Sequence, Tuple
 
 # DEBUG only flag
 VERBOSE = False
 
 
 class Transform:
-    """The base class.
+    """The base class for transformations.
+
+        Args:
+            always_apply (bool, optional): Always apply this transformation.
+
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation.
+
+                Defaults to ``0.5``.
     """
     def __init__(self, always_apply=False, p=0.5):
         assert 0 <= p <= 1
@@ -79,8 +85,12 @@ class Transform:
 
 
 class DualTransform(Transform):
-    """The base class of transforms applied to all target types.
+    """The base class of transformations applied to all target types.
+
+        Targets:
+            image, mask
     """
+
     def __call__(self, force_apply, targets, **data):
         if force_apply or self.always_apply or random.random() < self.p:
             params = self.get_params(**data)
@@ -108,7 +118,10 @@ class DualTransform(Transform):
 
 
 class ImageOnlyTransform(Transform):
-    """The base class of transforms applied to the `image` target only.
+    """The base class of transformations applied to the `image` target only.
+
+        Targets:
+            image
     """
     @property
     def targets(self):

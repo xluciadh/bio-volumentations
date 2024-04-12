@@ -50,13 +50,24 @@ class ConversionToFormat(DualTransform):
 
         Adds channel dimension to the 3D images without it. Checks that shapes of individual target types are
         consistent (to some extent).
+
+        Args:
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``True``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``1``.
+
+        Targets:
+            image, mask
     """
-    def __init__(self, always_apply: bool = False, p: float = 1):
-        super().__init__(always_apply,p)
+    def __init__(self, always_apply: bool = True, p: float = 1):
+        super().__init__(always_apply, p)
 
     def __call__(self, force_apply, targets, **data):
         if force_apply or self.always_apply or random.random() < self.p:
-            params = self.get_params(**data)
+            # params = self.get_params(**data)
 
             img_shape = []
             mask_shape = []
@@ -90,15 +101,29 @@ class ConversionToFormat(DualTransform):
     def apply_to_mask(self, mask, **params):
         return mask
 
+    def apply_to_float_mask(self, mask, **params):
+        return mask
+
     def __repr__(self):
-        return f'ConversionToFormat()'
+        return f'ConversionToFormat({self.always_apply}, {self.p})'
 
 
 class NoConversion(DualTransform):
     """An identity transform.
+
+        Args:
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``True``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``1``.
+
+        Targets:
+            image, mask
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(self, always_apply: bool = True, p: float = 1):
+        super().__init__(always_apply, p)
 
     def apply(self, volume, **params):
         return volume
@@ -106,5 +131,8 @@ class NoConversion(DualTransform):
     def apply_to_mask(self, mask, **params):
         return mask
 
+    def apply_to_float_mask(self, mask, **params):
+        return mask
+
     def __repr__(self):
-        return f'NoConversion()'
+        return f'NoConversion({self.always_apply}, {self.p})'

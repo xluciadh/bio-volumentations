@@ -128,13 +128,24 @@
 
 <span class="sd">        Adds channel dimension to the 3D images without it. Checks that shapes of individual target types are</span>
 <span class="sd">        consistent (to some extent).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``True``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_apply</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">force_apply</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span> <span class="ow">or</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">:</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_params</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+            <span class="c1"># params = self.get_params(**data)</span>
 
             <span class="n">img_shape</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">mask_shape</span> <span class="o">=</span> <span class="p">[]</span>
@@ -174,8 +185,14 @@
         <span class="k">return</span> <span class="n">mask</span></div>
 
 
+<div class="viewcode-block" id="ConversionToFormat.apply_to_float_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.conversion.transforms.ConversionToFormat.apply_to_float_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_float_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;ConversionToFormat()&#39;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;ConversionToFormat(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
 
 
 
@@ -183,9 +200,20 @@
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.conversion.transforms.NoConversion">[docs]</a>
 <span class="k">class</span> <span class="nc">NoConversion</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;An identity transform.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``True``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
 
 <div class="viewcode-block" id="NoConversion.apply">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.conversion.transforms.NoConversion.apply">[docs]</a>
@@ -199,8 +227,14 @@
         <span class="k">return</span> <span class="n">mask</span></div>
 
 
+<div class="viewcode-block" id="NoConversion.apply_to_float_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.conversion.transforms.NoConversion.apply_to_float_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_float_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;NoConversion()&#39;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;NoConversion(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
 
 </pre></div>
 

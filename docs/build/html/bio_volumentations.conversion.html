@@ -80,14 +80,35 @@
 <span id="bio-volumentations-conversion-transforms-module"></span><h2>bio_volumentations.conversion.transforms module<a class="headerlink" href="#module-bio_volumentations.conversion.transforms" title="Link to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="bio_volumentations.conversion.transforms.ConversionToFormat">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.conversion.transforms.</span></span><span class="sig-name descname"><span class="pre">ConversionToFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#ConversionToFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.ConversionToFormat" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.conversion.transforms.</span></span><span class="sig-name descname"><span class="pre">ConversionToFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#ConversionToFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.ConversionToFormat" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.DualTransform" title="bio_volumentations.core.transforms_interface.DualTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></a></p>
 <p>Check the very basic assumptions about the input images.</p>
 <p>Adds channel dimension to the 3D images without it. Checks that shapes of individual target types are
 consistent (to some extent).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.conversion.transforms.ConversionToFormat.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#ConversionToFormat.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.ConversionToFormat.apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bio_volumentations.conversion.transforms.ConversionToFormat.apply_to_float_mask">
+<span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#ConversionToFormat.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.ConversionToFormat.apply_to_float_mask" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -99,12 +120,33 @@ consistent (to some extent).</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bio_volumentations.conversion.transforms.NoConversion">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.conversion.transforms.</span></span><span class="sig-name descname"><span class="pre">NoConversion</span></span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#NoConversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.NoConversion" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.conversion.transforms.</span></span><span class="sig-name descname"><span class="pre">NoConversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#NoConversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.NoConversion" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.DualTransform" title="bio_volumentations.core.transforms_interface.DualTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></a></p>
 <p>An identity transform.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Targets:</dt><dd><p>image, mask</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.conversion.transforms.NoConversion.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">volume</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#NoConversion.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.NoConversion.apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bio_volumentations.conversion.transforms.NoConversion.apply_to_float_mask">
+<span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#NoConversion.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.NoConversion.apply_to_float_mask" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">

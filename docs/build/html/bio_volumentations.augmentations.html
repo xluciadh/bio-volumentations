@@ -100,7 +100,7 @@
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></code>.</p>
 </p></li>
 <li><p><strong>spacing</strong> (<em>Tuple</em><em>[</em><em>float</em><em>, </em><em>float</em><em>, </em><em>float</em><em>]</em><em>, </em><em>optional</em>) – <p>Voxel spacing for individual spatial dimensions.</p>
-<p>Must be: <cite>(S1, S2, S3)`</cite> (a scale for each spatial dimension must be given).</p>
+<p>Must be: <code class="docutils literal notranslate"><span class="pre">(S1,</span> <span class="pre">S2,</span> <span class="pre">S3)</span></code> (a scale for each spatial dimension must be given).</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></code>.</p>
 </p></li>
 <li><p><strong>change_to_isotropic</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Change data from anisotropic to isotropic.</p>
@@ -118,8 +118,9 @@
 <li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Value of <cite>mask</cite> voxels outside of the <cite>mask</cite> domain. Only applied when <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code>.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -132,12 +133,17 @@
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.AffineTransform.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#AffineTransform.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.AffineTransform.apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.AffineTransform.apply_to_float_mask">
+<span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#AffineTransform.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.AffineTransform.apply_to_float_mask" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -173,8 +179,9 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 Only applied when <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> or <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'linear_ramp'</span></code>.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0)</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -187,7 +194,7 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -204,11 +211,23 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.Contiguous">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Contiguous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Contiguous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Contiguous" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Contiguous</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Contiguous"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Contiguous" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.DualTransform" title="bio_volumentations.core.transforms_interface.DualTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></a></p>
 <p>Transform the image data to a contiguous array.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -232,7 +251,7 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>axes</strong> (<em>List</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – <p>List of axes around which is flip done. Recognised axis symbols are
-<code class="docutils literal notranslate"><span class="pre">1</span></code> for Z, <code class="docutils literal notranslate"><span class="pre">2</span></code> for Y, and <cite>3</cite> for X.</p>
+<code class="docutils literal notranslate"><span class="pre">1</span></code> for Z, <code class="docutils literal notranslate"><span class="pre">2</span></code> for Y, and <code class="docutils literal notranslate"><span class="pre">3</span></code> for X.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">[1,2,3]</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -245,7 +264,7 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -267,11 +286,23 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.Float">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Float" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Float"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Float" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.DualTransform" title="bio_volumentations.core.transforms_interface.DualTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></a></p>
 <p>Change datatype to <code class="docutils literal notranslate"><span class="pre">np.float32</span></code> without changing intensities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+</p></li>
+<li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation in composition.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -290,7 +321,7 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.GaussianBlur">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">GaussianBlur</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sigma</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'reflect'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#GaussianBlur"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.GaussianBlur" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.ImageOnlyTransform" title="bio_volumentations.core.transforms_interface.ImageOnlyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></a></p>
-<p>Performs Gaussian blur on the image. In case of a multi-channel image, individual channels are blured separately.</p>
+<p>Performs Gaussian blurring of the image. In case of a multi-channel image, individual channels are blured separately.</p>
 <p>Internally, the <code class="docutils literal notranslate"><span class="pre">scipy.ndimage.gaussian_filter</span></code> function is used. The <code class="docutils literal notranslate"><span class="pre">border_mode</span></code> and <code class="docutils literal notranslate"><span class="pre">cval</span></code>
 arguments are forwarded to it. More details at:
 <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html">https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html</a>.</p>
@@ -377,7 +408,7 @@ arguments are forwarded to it. More details at:
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.ImageOnlyTransform" title="bio_volumentations.core.transforms_interface.ImageOnlyTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImageOnlyTransform</span></code></a></p>
 <p>Performs equalization of histogram. The equalization is done channel-wise, meaning that each channel is equalized
 separately.</p>
-<p><strong>Warning!</strong> Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].</p>
+<p><strong>Warning! Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].</strong></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -421,7 +452,7 @@ separately.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
-<p>Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </p></li>
 <li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation in composition.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
@@ -458,7 +489,7 @@ If the image contains more channels, then the previous formula is used for each 
 <p>Must be either of: <code class="docutils literal notranslate"><span class="pre">S</span></code>, <code class="docutils literal notranslate"><span class="pre">(S_1,</span> <span class="pre">S_2,</span> <span class="pre">...,</span> <span class="pre">S_C)</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
-<p>Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </p></li>
 <li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation in composition.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
@@ -479,7 +510,7 @@ If the image contains more channels, then the previous formula is used for each 
 
 <dl class="py class">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.Pad">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pad_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'constant'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Pad" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">Pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pad_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'constant'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Sequence</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Pad" title="Link to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="modules2.html#bio_volumentations.core.transforms_interface.DualTransform" title="bio_volumentations.core.transforms_interface.DualTransform"><code class="xref py py-class docutils literal notranslate"><span class="pre">DualTransform</span></code></a></p>
 <p>Pads the input.</p>
 <dl class="field-list simple">
@@ -505,21 +536,22 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 Only applied when <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> or <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'linear_ramp'</span></code>.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
-<p>Defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </p></li>
 <li><p><strong>p</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Chance of applying this transformation in composition.</p>
-<p>Defaults to <code class="docutils literal notranslate"><span class="pre">0.5</span></code>.</p>
+<p>Defaults to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
 </p></li>
 </ul>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -626,8 +658,9 @@ each spatial axis.</p>
 <li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Value of <cite>mask</cite> voxels outside of the <cite>mask</cite> domain. Only applied when <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code>.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -640,12 +673,17 @@ each spatial axis.</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.RandomAffineTransform.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#RandomAffineTransform.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.RandomAffineTransform.apply_to_float_mask">
+<span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#RandomAffineTransform.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply_to_float_mask" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -733,8 +771,9 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 Only applied when <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> or <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'linear_ramp'</span></code>.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">(0,</span> <span class="pre">0)</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -747,7 +786,7 @@ Only applied when <code class="docutils literal notranslate"><span class="pre">b
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -792,7 +831,7 @@ The image will be flipped around all axes in the chosen combination.</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -932,7 +971,7 @@ If <code class="docutils literal notranslate"><span class="pre">shuffle_axis</sp
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
@@ -993,8 +1032,9 @@ respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].</p>
 <li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Value of <cite>mask</cite> voxels outside of the <cite>mask</cite> domain. Only applied when <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code>.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -1007,12 +1047,17 @@ respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.RandomScale.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#RandomScale.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.RandomScale.apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.RandomScale.apply_to_float_mask">
+<span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#RandomScale.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.RandomScale.apply_to_float_mask" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1059,8 +1104,9 @@ and <code class="docutils literal notranslate"><span class="pre">anti_aliasing_d
 downsampling. Recommended.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -1073,12 +1119,17 @@ downsampling. Recommended.</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.Resize.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Resize.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Resize.apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.Resize.apply_to_float_mask">
+<span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Resize.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Resize.apply_to_float_mask" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -1121,8 +1172,9 @@ downsampling. Recommended.</p>
 <li><p><strong>mval</strong> (<em>float</em><em>, </em><em>optional</em>) – <p>Value of <cite>mask</cite> voxels outside of the <cite>mask</cite> domain. Only applied when <code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code>.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">0</span></code>.</p>
 </p></li>
-<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is a float, then transformation of <cite>mask</cite> is done with
-<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>. If <code class="docutils literal notranslate"><span class="pre">ignore_index</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, its value is ignored.</p>
+<li><p><strong>ignore_index</strong> (<em>float</em><em> | </em><em>None</em><em>, </em><em>optional</em>) – <p>If a float, then transformation of <cite>mask</cite> is done with
+<code class="docutils literal notranslate"><span class="pre">border_mode</span> <span class="pre">=</span> <span class="pre">'constant'</span></code> and <code class="docutils literal notranslate"><span class="pre">mval</span> <span class="pre">=</span> <span class="pre">ignore_index</span></code>.</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">None</span></code>, this argument is ignored.</p>
 <p>Defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
 </p></li>
 <li><p><strong>always_apply</strong> (<em>bool</em><em>, </em><em>optional</em>) – <p>Always apply this transformation in composition.</p>
@@ -1135,12 +1187,17 @@ downsampling. Recommended.</p>
 </dd>
 </dl>
 <dl class="simple">
-<dt>Targets:</dt><dd><p>image, mask</p>
+<dt>Targets:</dt><dd><p>image, mask, float_mask</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.Scale.apply">
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Scale.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Scale.apply" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.Scale.apply_to_float_mask">
+<span class="sig-name descname"><span class="pre">apply_to_float_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mask</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">params</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#Scale.apply_to_float_mask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.Scale.apply_to_float_mask" title="Link to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
