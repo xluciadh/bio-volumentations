@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from volumentations_biomedicine.core.composition import Compose
-import volumentations_biomedicine.augmentations.transforms as transforms
+from bio_volumentations.core.composition import Compose
+import bio_volumentations.augmentations.transforms as transforms
 
 
 class TestComposeConversion(unittest.TestCase):

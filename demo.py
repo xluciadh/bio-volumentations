@@ -24,8 +24,8 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
-from volumentations_biomedicine.core.composition import *
-from volumentations_biomedicine.augmentations import *
+from bio_volumentations.core.composition import *
+from bio_volumentations.augmentations import *
 
 from devel import *
 

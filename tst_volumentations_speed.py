@@ -1,8 +1,8 @@
 # coding: utf-8
 __author__ = 'ZFTurbo: https://kaggle.com/zfturbo'
 
-from volumentations_biomedicine.core.composition import Compose
-from volumentations_biomedicine.augmentations.transforms import RandomAffineTransform
+from bio_volumentations.core.composition import Compose
+from bio_volumentations.augmentations.transforms import RandomAffineTransform
 
 import time
 import numpy as np

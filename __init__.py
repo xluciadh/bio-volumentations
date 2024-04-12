@@ -38,8 +38,8 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
-from .volumentations_biomedicine.augmentations.transforms import *
-from .volumentations_biomedicine.conversion.transforms import *
-from .volumentations_biomedicine.core.composition import *
-from .volumentations_biomedicine.core.transforms_interface import *
+from .bio_volumentations.augmentations.transforms import *
+from .bio_volumentations.conversion.transforms import *
+from .bio_volumentations.core.composition import *
+from .bio_volumentations.core.transforms_interface import *
 
