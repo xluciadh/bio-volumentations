@@ -239,30 +239,59 @@ class RandomScale(DualTransform):
 
         Args:
             scaling_limit (float | Tuple[float] | List[Tuple[float]], optional): Limits of scaling factors.
-                Must be either of: S, (S1, S2), (S_Z, S_Y, S_X), or (S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)
-                If it is a float S, then all spatial dimensions are scaled by a random number drawn uniformly from
-                 the interval [1-S, 1+S] (equivalent to inputting (1-S, 1+S, 1-S, 1+S, 1-S, 1+S)).
+
+                Must be either of: ``S``, ``(S1, S2)``, ``(S_Z, S_Y, S_X)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
+
+                If it is a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from
+                the interval [1-S, 1+S] (equivalent to inputting ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``).
+
                 If it is a tuple of 2 numbers, then all spatial dimensions are scaled by a random number drawn uniformly
-                 from the interval [S1, S2] (equivalent to inputting (S1, S2, S1, S2, S1, S2)).
+                from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).
+
                 If it is a tuple of 3 numbers, then an interval [1-S_a, 1+S_a] is constructed for each spatial
-                 dimension and the scale is randomly drawn from it
-                 (equivalent to inputting (1-S_Z, 1+S_Z, 1-S_Y, 1+S_Y, 1-S_X, 1+S_X)).
+                dimension and the scale is randomly drawn from it
+                (equivalent to inputting ``(1-S_Z, 1+S_Z, 1-S_Y, 1+S_Y, 1-S_X, 1+S_X)``).
+
                 If it is a tuple of 6 numbers, the scales for individual spatial dimensions are randomly drawn from the
-                 respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
-                The unspecified dimensions (C and T) are not affected. Defaults to (0.9, 1.1).
-            interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
-            border_mode (str, optional): values outside image domain are filled according to the mode.
-                Defaults to 'constant'.
-            ival (float, optional): value outside of image when the border_mode is chosen to be "constant".
-                Defaults to 0.
-            mval (float, optional): value outside of mask when the border_mode is chosen to be "constant".
-                Defaults to 0.
-            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with 
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
-                Defaults to None.
-            spacing (TripleFloats | float | None)
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+                respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
+
+                The unspecified dimensions (C and T) are not affected.
+
+                Defaults to ``(0.9, 1.1)``.
+
+            interpolation (int, optional): Order of spline interpolation for the image.
+
+                Defaults to ``1``.
+
+            spacing (TripleFloats | float | None): TBA
+
+                Defaults to ``None``.
+
+            border_mode (str, optional): Values outside image domain are filled according to the mode.
+
+                Defaults to ``'constant'``.
+
+            ival (float, optional): Value outside of image when the border_mode is chosen to be ``'constant'``.
+
+                Defaults to ``0``.
+
+            mval (float, optional): Value outside of mask when the border_mode is chosen to be "constant".
+
+                Defaults to ``0``.
+
+            ignore_index (float | None, optional): If ``ignore_index`` is float, then transformation of mask is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, then it does nothing.
+
+                Defaults to ``None``.
+
+            always_apply (bool, optional): Always apply transformation in composition.
+
+                Defaults to ``False``.
+
+            p (float, optional): Chance of applying transformation in composition.
+
+                Defaults to ``0.5``.
+
         Targets:
             image, mask
         Image types:

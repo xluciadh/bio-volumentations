@@ -95,7 +95,7 @@ class ConversionToFormat(DualTransform):
 
 
 class NoConversion(DualTransform):
-    """Identity.
+    """An identity transform.
     """
     def __init__(self):
         super().__init__()

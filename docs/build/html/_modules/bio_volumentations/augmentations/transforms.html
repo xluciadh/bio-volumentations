@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bio_volumentations.augmentations.transforms &mdash; bio-volumentations 1.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            bio-volumentations
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules2.html">Bio-Volumentations Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributions.html">Copyright</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">bio-volumentations</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">bio_volumentations.augmentations.transforms</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for bio_volumentations.augmentations.transforms</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ============================================================================================= #</span>
+<span class="c1">#  Author:       Pavel Iakubovskii, ZFTurbo, ashawkey, Dominik Müller,                          #</span>
+<span class="c1">#                Samuel Šuľan, Lucia Hradecká, Filip Lux                                        #</span>
+<span class="c1">#  Copyright:    albumentations:    : https://github.com/albumentations-team                    #</span>
+<span class="c1">#                Pavel Iakubovskii  : https://github.com/qubvel                                 #</span>
+<span class="c1">#                ZFTurbo            : https://github.com/ZFTurbo                                #</span>
+<span class="c1">#                ashawkey           : https://github.com/ashawkey                               #</span>
+<span class="c1">#                Dominik Müller     : https://github.com/muellerdo                              #</span>
+<span class="c1">#                Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #</span>
+<span class="c1">#                Filip Lux          : lux.filip@gmail.com                                       #</span>
+<span class="c1">#                                                                                               #</span>
+<span class="c1">#  Volumentations History:                                                                      #</span>
+<span class="c1">#       - Original:                 https://github.com/albumentations-team/albumentations       #</span>
+<span class="c1">#       - 3D Conversion:            https://github.com/ashawkey/volumentations                  #</span>
+<span class="c1">#       - Continued Development:    https://github.com/ZFTurbo/volumentations                   #</span>
+<span class="c1">#       - Enhancements:             https://github.com/qubvel/volumentations                    #</span>
+<span class="c1">#       - Further Enhancements:     https://github.com/muellerdo/volumentations                 #</span>
+<span class="c1">#       - Biomedical Enhancements:  https://gitlab.fi.muni.cz/cbia/bio-volumentations           #</span>
+<span class="c1">#                                                                                               #</span>
+<span class="c1">#  MIT License.                                                                                 #</span>
+<span class="c1">#                                                                                               #</span>
+<span class="c1">#  Permission is hereby granted, free of charge, to any person obtaining a copy                 #</span>
+<span class="c1">#  of this software and associated documentation files (the &quot;Software&quot;), to deal                #</span>
+<span class="c1">#  in the Software without restriction, including without limitation the rights                 #</span>
+<span class="c1">#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell                    #</span>
+<span class="c1">#  copies of the Software, and to permit persons to whom the Software is                        #</span>
+<span class="c1">#  furnished to do so, subject to the following conditions:                                     #</span>
+<span class="c1">#                                                                                               #</span>
+<span class="c1">#  The above copyright notice and this permission notice shall be included in all               #</span>
+<span class="c1">#  copies or substantial portions of the Software.                                              #</span>
+<span class="c1">#                                                                                               #</span>
+<span class="c1">#  THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR                   #</span>
+<span class="c1">#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                     #</span>
+<span class="c1">#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                  #</span>
+<span class="c1">#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                       #</span>
+<span class="c1">#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                #</span>
+<span class="c1">#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE                #</span>
+<span class="c1">#  SOFTWARE.                                                                                    #</span>
+<span class="c1"># ============================================================================================= #</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">..core.transforms_interface</span> <span class="kn">import</span> <span class="n">DualTransform</span><span class="p">,</span> <span class="n">ImageOnlyTransform</span>
+<span class="kn">from</span> <span class="nn">..augmentations</span> <span class="kn">import</span> <span class="n">functional</span> <span class="k">as</span> <span class="n">F</span>
+<span class="kn">from</span> <span class="nn">..random_utils</span> <span class="kn">import</span> <span class="n">uniform</span><span class="p">,</span> <span class="n">sample_range_uniform</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">..typing</span> <span class="kn">import</span> <span class="n">TypeSextetFloat</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">,</span> <span class="n">TypePairFloat</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">parse_limits</span><span class="p">,</span> <span class="n">parse_coefs</span><span class="p">,</span> <span class="n">to_tuple</span>
+
+
+<span class="c1"># Potential upgrade : different sigmas for different channels</span>
+<div class="viewcode-block" id="GaussianNoise">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.GaussianNoise">[docs]</a>
+<span class="k">class</span> <span class="nc">GaussianNoise</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            var_limit (tuple, optional): variance of normal distribution is randomly chosen from this interval.</span>
+<span class="sd">              Defaults to (0.001, 0.1).</span>
+<span class="sd">            mean (float, optional): mean of normal distribution. Defaults to 0.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_limit</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="n">mean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var_limit</span> <span class="o">=</span> <span class="n">var_limit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+
+<div class="viewcode-block" id="GaussianNoise.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.GaussianNoise.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">gaussian_noise</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">],</span> <span class="n">mean</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GaussianNoise.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.GaussianNoise.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var_limit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">var</span> <span class="o">**</span> <span class="mf">0.5</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">sigma</span><span class="p">}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;GaussianNoise(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">var_limit</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="PoissonNoise">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.PoissonNoise">[docs]</a>
+<span class="k">class</span> <span class="nc">PoissonNoise</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds poisson noise to the image.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            intensity_limit (tuple): Range to sample expected intensity of added poisson noise.</span>
+<span class="sd">                Defaults to (1, 10).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                 <span class="n">intensity_limit</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intensity_limit</span> <span class="o">=</span> <span class="n">intensity_limit</span>
+
+<div class="viewcode-block" id="PoissonNoise.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.PoissonNoise.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">poisson_noise</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">intensity</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="PoissonNoise.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.PoissonNoise.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">intensity</span> <span class="o">=</span> <span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intensity_limit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">intensity_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;intensity&quot;</span><span class="p">:</span> <span class="n">intensity</span><span class="p">}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;PoissonNoise(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<span class="c1"># TODO anti_aliasing_downsample keep parameter or remove?</span>
+<div class="viewcode-block" id="Resize">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Resize">[docs]</a>
+<span class="k">class</span> <span class="nc">Resize</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resize input to the given shape.</span>
+
+<span class="sd">        Internally, the skimage `resize` function is used. The `interpolation`, `border_mode`, `ival`, `mval`,</span>
+<span class="sd">         and `anti_aliasing_downsample` arguments are forwarded to it. More details at:</span>
+<span class="sd">        https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape (tuple of ints): the desired image shape. Must be of either of: (Z, Y, X) or (Z, Y, X, T).</span>
+<span class="sd">                The unspecified dimensions (C and possibly T) are not affected.</span>
+<span class="sd">            interpolation (int, optional): order of spline interpolation for image. Defaults to 1.</span>
+<span class="sd">            border_mode (string, optional): points outside image are filled according to this mode.</span>
+<span class="sd">                Defaults to &#39;reflect&#39;.</span>
+<span class="sd">            ival (float, optional): value outside of image when the border_mode is chosen to be &quot;constant&quot;.</span>
+<span class="sd">                Defaults to 0.</span>
+<span class="sd">            mval (float, optional): value outside of mask when the border_mode is chosen to be &quot;constant&quot;.</span>
+<span class="sd">                Defaults to 0.</span>
+<span class="sd">            anti_aliasing_downsample (bool, optional): controls if the gaussian filter should be used on image before</span>
+<span class="sd">                downsampling, recommended. Defaults to True.</span>
+<span class="sd">            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
+<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;reflect&#39;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">anti_aliasing_downsample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span> <span class="o">=</span> <span class="n">interpolation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">mval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">anti_aliasing_downsample</span> <span class="o">=</span> <span class="n">anti_aliasing_downsample</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ignore_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="Resize.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Resize.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">input_new_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">anti_aliasing_downsample</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">anti_aliasing_downsample</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Resize.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Resize.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">input_new_shape</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span> <span class="n">cval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span> <span class="n">anti_aliasing_downsample</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                        <span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+        
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Resize(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="si">}</span><span class="s1"> , </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="si">}</span><span class="s1">,&#39;</span> \
+               <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">anti_aliasing_downsample</span><span class="si">}</span><span class="s1">,   </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="Scale">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Scale">[docs]</a>
+<span class="k">class</span> <span class="nc">Scale</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rescale input by the given scale.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            scales (float|List[float], optional): Value by which the input should be scaled.</span>
+<span class="sd">                Must be either of: S, [S_Z, S_Y, S_X], or [S_Z, S_Y, S_X, S_T].</span>
+<span class="sd">                If it is a float, then all spatial dimensions are scaled by it (S is equivalent to [S, S, S]).</span>
+<span class="sd">                The unspecified dimensions (C and possibly T) are not affected.</span>
+<span class="sd">                Defaults to 1.</span>
+<span class="sd">            interpolation (int, optional): order of spline interpolation for image. Defaults to 1.</span>
+<span class="sd">            border_mode (str, optional): points outside image are filled according to this mode.</span>
+<span class="sd">                Defaults to &#39;constant&#39;.</span>
+<span class="sd">            ival (float, optional): value outside of image when the border_mode is chosen to be &quot;constant&quot;.</span>
+<span class="sd">                Defaults to 0.</span>
+<span class="sd">            mval (float, optional): value outside of mask when the border_mode is chosen to be &quot;constant&quot;.</span>
+<span class="sd">                Defaults to 0.</span>
+<span class="sd">            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
+<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scales</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">scales</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">interpolation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">spacing</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>              <span class="c1"># not implemented</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span>                <span class="c1"># not implemented</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">mval</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ignore_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="Scale.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Scale.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+    <span class="c1"># TODO implement linear/cubic interpolation for float_mask</span>
+<div class="viewcode-block" id="Scale.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Scale.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">interpolation</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># refers to &#39;sitkNearestNeighbor&#39;</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Scale(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="si">}</span><span class="s1">,&#39;</span> \
+               <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<span class="c1"># TODO cannot rescale T dimension</span>
+<div class="viewcode-block" id="RandomScale">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomScale">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomScale</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Randomly rescale input.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            scaling_limit (float | Tuple[float] | List[Tuple[float]], optional): Limits of scaling factors.</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S1, S2)``, ``(S_Z, S_Y, S_X)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.</span>
+
+<span class="sd">                If it is a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from</span>
+<span class="sd">                the interval [1-S, 1+S] (equivalent to inputting ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``).</span>
+
+<span class="sd">                If it is a tuple of 2 numbers, then all spatial dimensions are scaled by a random number drawn uniformly</span>
+<span class="sd">                from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).</span>
+
+<span class="sd">                If it is a tuple of 3 numbers, then an interval [1-S_a, 1+S_a] is constructed for each spatial</span>
+<span class="sd">                dimension and the scale is randomly drawn from it</span>
+<span class="sd">                (equivalent to inputting ``(1-S_Z, 1+S_Z, 1-S_Y, 1+S_Y, 1-S_X, 1+S_X)``).</span>
+
+<span class="sd">                If it is a tuple of 6 numbers, the scales for individual spatial dimensions are randomly drawn from the</span>
+<span class="sd">                respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].</span>
+
+<span class="sd">                The unspecified dimensions (C and T) are not affected.</span>
+
+<span class="sd">                Defaults to ``(0.9, 1.1)``.</span>
+
+<span class="sd">            interpolation (int, optional): Order of spline interpolation for the image.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+
+<span class="sd">            spacing (TripleFloats | float | None): TBA</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to the mode.</span>
+
+<span class="sd">                Defaults to ``&#39;constant&#39;``.</span>
+
+<span class="sd">            ival (float, optional): Value outside of image when the border_mode is chosen to be ``&#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+
+<span class="sd">            mval (float, optional): Value outside of mask when the border_mode is chosen to be &quot;constant&quot;.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is float, then transformation of mask is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, then it does nothing.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+
+<span class="sd">            always_apply (bool, optional): Always apply transformation in composition.</span>
+
+<span class="sd">                Defaults to ``False``.</span>
+
+<span class="sd">            p (float, optional): Chance of applying transformation in composition.</span>
+
+<span class="sd">                Defaults to ``0.5``.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>      
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaling_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">),</span>
+                 <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_limit</span><span class="p">:</span> <span class="n">TypeSextetFloat</span> <span class="o">=</span> <span class="n">parse_limits</span><span class="p">(</span><span class="n">scaling_limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">interpolation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">spacing</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mf">1.</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">mval</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ignore_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="RandomScale.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomScale.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+        <span class="c1"># set parameters of the transform</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">sample_range_uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_limit</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="n">scale</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="RandomScale.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomScale.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomScale.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomScale.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+        <span class="n">interpolation</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># refers to &#39;sitkNearestNeighbor&#39;</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RandomScale(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_limit</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="RandomRotate90">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomRotate90">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomRotate90</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotation of input by 0, 90, 180, or 270 degrees around the specified spatial axes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axes (List[int], optional): list of axes around which the input is rotated (recognised axis symbols are</span>
+<span class="sd">                1 for Z, 2 for Y, and 3 for X). A single axis can occur multiple times in the list.</span>
+<span class="sd">                If `shuffle_axis` is `False`, the order of axes determines the order of transformations.</span>
+<span class="sd">                Defaults to [1, 2, 3].</span>
+<span class="sd">            shuffle_axis (bool, optional): If set to `True`, order of rotations is random. Defaults to False.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shuffle_axis</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuffle_axis</span> <span class="o">=</span> <span class="n">shuffle_axis</span>
+
+<div class="viewcode-block" id="RandomRotate90.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomRotate90.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">factor</span><span class="p">,</span> <span class="n">axes</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;factor&quot;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;rotation_around&quot;</span><span class="p">]):</span>
+            <span class="n">img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">factor</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="n">axes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">img</span></div>
+
+
+<div class="viewcode-block" id="RandomRotate90.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomRotate90.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;rotation_around&quot;</span><span class="p">])):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;factor&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">axes</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">params</span><span class="p">[</span><span class="s2">&quot;rotation_around&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;rotation_around&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">mask</span></div>
+
+
+<div class="viewcode-block" id="RandomRotate90.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomRotate90.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+
+        <span class="c1"># Rotate by all axis by default</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="c1"># Create all combinations for rotating</span>
+        <span class="n">axes_to_rotate</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)}</span>
+        <span class="n">rotation_around</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">axes_to_rotate</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">rotation_around</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">axes_to_rotate</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1"># shuffle order of axis</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuffle_axis</span><span class="p">:</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">rotation_around</span><span class="p">)</span>
+
+        <span class="c1"># choose angle to rotate</span>
+        <span class="n">factor</span> <span class="o">=</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rotation_around</span><span class="p">))]</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;factor&quot;</span><span class="p">:</span> <span class="n">factor</span><span class="p">,</span>
+                <span class="s2">&quot;rotation_around&quot;</span><span class="p">:</span> <span class="n">rotation_around</span><span class="p">}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RandomRotate90(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="Flip">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Flip">[docs]</a>
+<span class="k">class</span> <span class="nc">Flip</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flip input around the specified spatial axes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axes (List[int], optional): list of axes around which is flip done (recognised axis symbols are</span>
+<span class="sd">                1 for Z, 2 for Y, and 3 for X). Defaults to [1,2,3].</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">axes</span>
+
+<div class="viewcode-block" id="Flip.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Flip.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Flip.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Flip.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="c1"># Mask has no dimension channel</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">[</span><span class="n">item</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">]])</span></div>
+
+
+<div class="viewcode-block" id="Flip.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Flip.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;axes&quot;</span><span class="p">:</span> <span class="n">axes</span><span class="p">}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Flip(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<span class="c1"># TODO include possibility to pick empty combination = no flipping</span>
+<div class="viewcode-block" id="RandomFlip">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomFlip">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomFlip</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flip input around a set of axes randomly chosen from the input list of axis combinations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axes_to_choose (List[Tuple[int]] or None, optional): a list of axis combinations from which one option</span>
+<span class="sd">                is randomly chosen (recognised axis symbols are 1 for Z, 2 for Y, and 3 for X).</span>
+<span class="sd">                The image will be flipped around all axes in the chosen combination.</span>
+<span class="sd">                If None, a random subset of spatial axes is chosen, corresponding to inputting</span>
+<span class="sd">                [(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)].</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes_to_choose</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="o">=</span> <span class="n">axes_to_choose</span>
+
+<div class="viewcode-block" id="RandomFlip.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomFlip.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="RandomFlip.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomFlip.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="c1"># Mask has no dimension channel</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">[</span><span class="n">item</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;axes&quot;</span><span class="p">]])</span></div>
+
+
+<div class="viewcode-block" id="RandomFlip.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomFlip.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Pick random combination of axes to flip</span>
+            <span class="c1"># TODO include possibility to pick empty combination = no flipping</span>
+            <span class="n">combinations</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">1</span><span class="p">,),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,),</span> <span class="p">(</span><span class="mi">3</span><span class="p">,),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                            <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">combinations</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Pick a random choice from input</span>
+            <span class="n">axes</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;axes&quot;</span><span class="p">:</span> <span class="n">axes</span><span class="p">}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Flip(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">axes</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="CenterCrop">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.CenterCrop">[docs]</a>
+<span class="k">class</span> <span class="nc">CenterCrop</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Crops the central region of the input of given size.</span>
+<span class="sd">          </span>
+<span class="sd">        Unlike CenterCrop from Albumentations, this transform pads the input in dimensions </span>
+<span class="sd">        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`</span>
+<span class="sd">        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:</span>
+<span class="sd">        https://numpy.org/doc/stable/reference/generated/numpy.pad.html.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape (Tuple[int]): the desired shape of input.</span>
+<span class="sd">                Must be either of: [Z, Y, X] or [Z, Y, X, T].</span>
+<span class="sd">            border_mode (str, optional): border mode used for numpy.pad. Defaults to &quot;reflect&quot;.</span>
+<span class="sd">            ival (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for image. Defaults to (0, 0).</span>
+<span class="sd">            mval (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for mask. Defaults to (0, 0).</span>
+<span class="sd">            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with</span>
+<span class="sd">                `border_mode = &quot;constant&quot;` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                 <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">intc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">mval</span>
+        
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ignore_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="CenterCrop.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.CenterCrop.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">center_crop</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CenterCrop.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.CenterCrop.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">center_crop</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;CenterCrop(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="RandomCrop">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomCrop">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomCrop</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Randomly crops a region of given size from the input.</span>
+
+<span class="sd">        Unlike RandomCrop from Albumentations, this transform pads the input in dimensions</span>
+<span class="sd">        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`</span>
+<span class="sd">        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:</span>
+<span class="sd">        https://numpy.org/doc/stable/reference/generated/numpy.pad.html.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            shape (Tuple[int]): the desired shape of input. Must be either of: [Z, Y, X] or [Z, Y, X, T].</span>
+<span class="sd">            border_mode (str, optional): border mode used for numpy.pad. Defaults to &quot;reflect&quot;.</span>
+<span class="sd">            ival (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for image. Defaults to (0, 0).</span>
+<span class="sd">            mval (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for mask. Defaults to (0, 0).</span>
+<span class="sd">            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with</span>
+<span class="sd">                `border_mode = &quot;constant&quot;` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                 <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">intc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">mval</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ignore_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="RandomCrop.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomCrop.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">crop_start</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">random_crop</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">crop_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomCrop.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomCrop.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">crop_start</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">random_crop</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">crop_start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomCrop.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomCrop.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;crop_start&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+        <span class="p">}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RandomCrop(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="RandomAffineTransform">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomAffineTransform">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomAffineTransform</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Affine transformation of the input image with randomly chosen parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            angle_limit (Tuple[float] | float, optional): intervals in degrees from which angles of</span>
+<span class="sd">                rotation for the spatial axes are chosen.</span>
+<span class="sd">                Must be either of: A, (A1, A2), or (A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2).</span>
+<span class="sd">                If a float, equivalent to (-A, A, -A, A, -A, A).</span>
+<span class="sd">                If a tuple with 2 items, equivalent to (A1, A2, A1, A2, A1, A2).</span>
+<span class="sd">                If a tuple with 6 items, angle of rotation is randomly chosen from an interval [A_a1, A_a2] for each</span>
+<span class="sd">                spatial axis.</span>
+<span class="sd">                Defaults to (15, 15, 15).</span>
+<span class="sd">            translation_limit (Tuple[int] | int | None, optional): intervals from which the translation parameters</span>
+<span class="sd">                for the spatial axes are chosen.</span>
+<span class="sd">                Must be either of: T, (T1, T2), or (T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2).</span>
+<span class="sd">                If a float, equivalent to (-T, T, -T, T, -T, T).</span>
+<span class="sd">                If a tuple with 2 items, equivalent to (T1, T2, T1, T2, T1, T2).</span>
+<span class="sd">                If a tuple with 6 items, the translation parameter is randomly chosen from an interval [T_a1, T_a2] for</span>
+<span class="sd">                each spatial axis.</span>
+<span class="sd">                Defaults to (0, 0, 0).</span>
+<span class="sd">            scaling_limit (Tuple[float] | float, optional): intervals from which the scales for the spatial axes are chosen.</span>
+<span class="sd">                Must be either of: S, (S1, S2), or (S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2).</span>
+<span class="sd">                If a float, equivalent to (1-S, 1+S, 1-S, 1+S, 1-S, 1+S).</span>
+<span class="sd">                If a tuple with 2 items, equivalent to (S1, S2, S1, S2, S1, S2).</span>
+<span class="sd">                If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for</span>
+<span class="sd">                each spatial axis.</span>
+<span class="sd">                Defaults to (0.2, 0.2, 0.2).</span>
+<span class="sd">            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.</span>
+<span class="sd">                Must be either of: S, (S1, S2, S3), or None.</span>
+<span class="sd">                If `None`, equivalent to (1, 1, 1).</span>
+<span class="sd">                If a float S, equivalent to (S, S, S).</span>
+<span class="sd">                If a tuple with 3 items, the scale is (S1, S2, S3).</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.</span>
+<span class="sd">            interpolation (Int, optional): The order of spline interpolation. Defaults to 1.</span>
+<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
+<span class="sd">                boundaries. Defaults to &#39;constant&#39;.</span>
+<span class="sd">            ival (float, optional): Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
+<span class="sd">            mval (float, optional): Value to fill past edges of mask if mode is &#39;constant&#39;. Defaults to 0.</span>
+<span class="sd">            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
+<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+                 <span class="n">translation_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                 <span class="n">scaling_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">),</span>
+                 <span class="n">spacing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">change_to_isotropic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angle_limit</span><span class="p">:</span> <span class="n">TypeSextetFloat</span> <span class="o">=</span> <span class="n">parse_limits</span><span class="p">(</span><span class="n">angle_limit</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translation_limit</span><span class="p">:</span> <span class="n">TypeSextetFloat</span> <span class="o">=</span> <span class="n">parse_limits</span><span class="p">(</span><span class="n">translation_limit</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling_limit</span><span class="p">:</span> <span class="n">TypeSextetFloat</span> <span class="o">=</span> <span class="n">parse_limits</span><span class="p">(</span><span class="n">scaling_limit</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">spacing</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">interpolation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>                 <span class="c1"># not used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span>                   <span class="c1"># not used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">mval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_scale</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">change_to_isotropic</span>
+
+        <span class="k">if</span> <span class="n">ignore_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="RandomAffineTransform.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
+                        <span class="n">degrees</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;angles&quot;</span><span class="p">],</span>
+                        <span class="n">translation</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;translation&quot;</span><span class="p">],</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomAffineTransform.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        
+        <span class="n">interpolation</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># refers to &#39;sitkNearestNeighbor&#39;</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;scale&quot;</span><span class="p">],</span>
+                        <span class="n">degrees</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;angles&quot;</span><span class="p">],</span>
+                        <span class="n">translation</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s2">&quot;translation&quot;</span><span class="p">],</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomAffineTransform.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomAffineTransform.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+
+        <span class="c1"># set parameters of the transform</span>
+        <span class="n">scales</span> <span class="o">=</span> <span class="n">sample_range_uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scaling_limit</span><span class="p">)</span>
+        <span class="n">angles</span> <span class="o">=</span> <span class="n">sample_range_uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">angle_limit</span><span class="p">)</span>
+        <span class="n">translation</span> <span class="o">=</span> <span class="n">sample_range_uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">translation_limit</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="n">scales</span><span class="p">,</span>
+            <span class="s2">&quot;angles&quot;</span><span class="p">:</span> <span class="n">angles</span><span class="p">,</span>
+            <span class="s2">&quot;translation&quot;</span><span class="p">:</span> <span class="n">translation</span>
+        <span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AffineTransform">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.AffineTransform">[docs]</a>
+<span class="k">class</span> <span class="nc">AffineTransform</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Affine transformation of the input image with given parameters.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            angles (Tuple[float], optional): angles of rotation for the spatial axes.</span>
+<span class="sd">                Must be: (A_Z, A_Y, A_X).</span>
+<span class="sd">                Defaults to (0, 0, 0).</span>
+<span class="sd">            translation (Tuple[float], optional): translation vector for the spatial axes.</span>
+<span class="sd">                Must be: (T_Z, T_Y, T_X).</span>
+<span class="sd">                Defaults to (0, 0, 0).</span>
+<span class="sd">            scale (Tuple[float], optional): scales for the spatial axes.</span>
+<span class="sd">                Must be: (S_Z, S_Y, S_X).</span>
+<span class="sd">                Defaults to (1, 1, 1).</span>
+<span class="sd">            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.</span>
+<span class="sd">                Must be: (S1, S2, S3).</span>
+<span class="sd">                Defaults to (1, 1, 1).</span>
+<span class="sd">            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.</span>
+<span class="sd">            interpolation (Int, optional): The order of spline interpolation. Defaults to 1.</span>
+<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
+<span class="sd">                boundaries. Defaults to &#39;constant&#39;.</span>
+<span class="sd">            ival (float, optional): Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
+<span class="sd">            mval (float, optional): Value to fill past edges of mask if mode is &#39;constant&#39;. Defaults to 0.</span>
+<span class="sd">            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with</span>
+<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                 <span class="n">translation</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                 <span class="n">scale</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                 <span class="n">spacing</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                 <span class="n">change_to_isotropic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                 <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">translation</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">scale</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">spacing</span><span class="p">,</span> <span class="n">identity_element</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">interpolation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>                 <span class="c1"># not used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span>                   <span class="c1"># not used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">mval</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_scale</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">change_to_isotropic</span>
+
+        <span class="k">if</span> <span class="n">ignore_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="AffineTransform.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.AffineTransform.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                        <span class="n">degrees</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">,</span>
+                        <span class="n">translation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">,</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="AffineTransform.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.AffineTransform.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+
+        <span class="n">interpolation</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># refers to &#39;sitkNearestNeighbor&#39;</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">affine</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span>
+                        <span class="n">scales</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">scale</span><span class="p">,</span>
+                        <span class="n">degrees</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">angles</span><span class="p">,</span>
+                        <span class="n">translation</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">translation</span><span class="p">,</span>
+                        <span class="n">interpolation</span><span class="o">=</span><span class="n">interpolation</span><span class="p">,</span>
+                        <span class="n">border_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">,</span>
+                        <span class="n">spacing</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spacing</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1"># TODO create checks (mean, std, got good shape, and etc.), what if given list but only one channel, and reverse.</span>
+<div class="viewcode-block" id="NormalizeMeanStd">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.NormalizeMeanStd">[docs]</a>
+<span class="k">class</span> <span class="nc">NormalizeMeanStd</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Normalize image values to have mean 0 and standard deviation 1, given channel-wise means and standard deviations.</span>
+
+<span class="sd">        For a single-channel image, the normalization is applied by the formula: :math:`img = (img - mean) / std`.</span>
+<span class="sd">        If the image contains more channels, then the previous formula is used for each channel separately.</span>
+
+<span class="sd">        It is recommended to input dataset-wide means and standard deviations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mean (float | List[float]): channel-wise image mean. Must be either of: M, (M_1, M_2, ..., M_C).</span>
+<span class="sd">            std (float | List[float]): channel-wise image standard deviation. Must be either of: S, (S_1, S_2, ..., S_C).</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span> <span class="n">std</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NormalizeMeanStd.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.NormalizeMeanStd.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">normalize_mean_std</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">denominator</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;NormalizeMeanStd(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="si">}</span><span class="s1">, &#39;</span> \
+               <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="GaussianBlur">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.GaussianBlur">[docs]</a>
+<span class="k">class</span> <span class="nc">GaussianBlur</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs Gaussian blur on the image. In case of a multi-channel image, individual channels are blured separately.</span>
+
+<span class="sd">        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,</span>
+<span class="sd">         arguments are forwarded to it. More details at:</span>
+<span class="sd">        https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Gaussian sigma.</span>
+<span class="sd">                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],</span>
+<span class="sd">                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or</span>
+<span class="sd">                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].</span>
+<span class="sd">                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).</span>
+<span class="sd">                If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.</span>
+<span class="sd">                If a list, sigmas for each channel must be specified either as a single number or as a tuple.</span>
+<span class="sd">                Defaults to 0.8.</span>
+<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
+<span class="sd">                boundaries. Defaults to &quot;reflect&quot;.</span>
+<span class="sd">            cval (float, optional):  Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span> <span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+                 <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">cval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cval</span> <span class="o">=</span> <span class="n">cval</span>
+
+<div class="viewcode-block" id="GaussianBlur.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.GaussianBlur.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">gaussian_blur</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cval</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RandomGaussianBlur">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomGaussianBlur">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomGaussianBlur</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs Gaussian blur on the image with a random strength blurring.</span>
+<span class="sd">        In case of a multi-channel image, individual channels are blured separately.</span>
+
+<span class="sd">        Behaves similarly to GaussianBlur. The Gaussian sigma is randomly drawn from</span>
+<span class="sd">        the interval [min_sigma, s] for the respective s from max_sigma for each channel and dimension.</span>
+
+<span class="sd">        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,</span>
+<span class="sd">         arguments are forwarded to it. More details at:</span>
+<span class="sd">        https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_sigma (float, Tuple(float), List[Tuple(float) | float] , optional): maximum Gaussian sigma.</span>
+<span class="sd">                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],</span>
+<span class="sd">                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or</span>
+<span class="sd">                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].</span>
+<span class="sd">                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).</span>
+<span class="sd">                If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.</span>
+<span class="sd">                If a list, sigmas for each channel must be specified either as a single number or as a tuple.</span>
+<span class="sd">                Defaults to 0.8.</span>
+<span class="sd">            min_sigma (float, optional): minimum Gaussian sigma. It is the same for all channels and dimensions.</span>
+<span class="sd">                Defaults to 0.</span>
+<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
+<span class="sd">                boundaries. Defaults to &quot;reflect&quot;.</span>
+<span class="sd">            cval (float, optional):  Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
+                 <span class="n">min_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">cval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span> <span class="o">=</span> <span class="n">parse_coefs</span><span class="p">(</span><span class="n">max_sigma</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min_sigma</span> <span class="o">=</span> <span class="n">min_sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cval</span> <span class="o">=</span> <span class="n">cval</span>
+
+<div class="viewcode-block" id="RandomGaussianBlur.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomGaussianBlur.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">gaussian_blur</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cval</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomGaussianBlur.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomGaussianBlur.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_sigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_sigma</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">))])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+                    <span class="n">sigma</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_sigma</span><span class="p">,</span> <span class="n">channel</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sigma</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">([</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">min_sigma</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channel</span><span class="p">))]))</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">sigma</span><span class="p">}</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RandomGamma">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomGamma">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomGamma</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs the gamma transform with a randomly chosen gamma. If image values (in any channel) are outside</span>
+<span class="sd">        the [0,1] interval, this transformation is skipped.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gamma_limit (Tuple(float), optional): interval from which gamma is selected. Defaults to (0.8, 1.2).</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gamma_limit</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">),</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gamma_limit</span> <span class="o">=</span> <span class="n">gamma_limit</span>
+
+<div class="viewcode-block" id="RandomGamma.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomGamma.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">gamma_transform</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">gamma</span><span class="o">=</span><span class="n">gamma</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RandomGamma.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomGamma.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_limit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">gamma_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">])}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RandomGamma(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">gamma_limit</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="RandomBrightnessContrast">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomBrightnessContrast">[docs]</a>
+<span class="k">class</span> <span class="nc">RandomBrightnessContrast</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Randomly change brightness and contrast of the input image.</span>
+
+<span class="sd">        Unlike RandomBrightnessContrast from Albumentations, this transform is using the</span>
+<span class="sd">        formula :math:`f(a) = (c+1) * a + b`, where :math:`c` is contrast and :math:`b` is brightness.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            brightness_limit ((float, float) | float, optional): interval from which the change in brightness is</span>
+<span class="sd">                randomly drawn. Must be either of: B, (B1, B2).</span>
+<span class="sd">                If a float, the interval will be (-B, B).</span>
+<span class="sd">                If the change in brightness is 0, the brightness will not change.</span>
+<span class="sd">                Defaults to 0.2.</span>
+<span class="sd">            contrast_limit ((float, float) | float, optional): interval from which the change in contrast is</span>
+<span class="sd">                randomly drawn. Must be either of: C, (C1, C2).</span>
+<span class="sd">                If a float, the interval will be (-C, C). If the change in contrast is 1,</span>
+<span class="sd">                the contrast will not change. Defaults to 0.2.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">brightness_limit</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">contrast_limit</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">brightness_limit</span> <span class="o">=</span> <span class="n">to_tuple</span><span class="p">(</span><span class="n">brightness_limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">contrast_limit</span> <span class="o">=</span> <span class="n">to_tuple</span><span class="p">(</span><span class="n">contrast_limit</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RandomBrightnessContrast.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomBrightnessContrast.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">brightness_contrast_adjust</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;alpha&#39;</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;beta&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="RandomBrightnessContrast.get_params">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomBrightnessContrast.get_params">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">data</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="mf">1.0</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">contrast_limit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">contrast_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="s2">&quot;beta&quot;</span><span class="p">:</span> <span class="mf">0.0</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brightness_limit</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">brightness_limit</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+        <span class="p">}</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;RandomBrightnessContrast(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">brightness_limit</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">contrast_limit</span><span class="si">}</span><span class="s1">,  &#39;</span> \
+               <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="HistogramEqualization">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.HistogramEqualization">[docs]</a>
+<span class="k">class</span> <span class="nc">HistogramEqualization</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs equalization of histogram. The equalization is done channel-wise, meaning that each channel is equalized</span>
+<span class="sd">        separately.</span>
+
+<span class="sd">        Warning! Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            bins (int, optional): Number of bins for image histogram. Defaults to 256.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bins</span> <span class="o">=</span> <span class="n">bins</span>
+
+<div class="viewcode-block" id="HistogramEqualization.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.HistogramEqualization.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">histogram_equalization</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bins</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="Pad">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Pad">[docs]</a>
+<span class="k">class</span> <span class="nc">Pad</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pads the input based on pad_size.</span>
+
+<span class="sd">        If pad_size is a single number, all spatial axes are padded on both sides</span>
+<span class="sd">        with this number. If it is tuple, then it has same behaviour as pad_size except sides are padded with different </span>
+<span class="sd">        number of pixels. If it is List, then it must have 3 items, which define padding for each spatial dimension</span>
+<span class="sd">        separately (in either of the ways described above). If the List is shorter, remaining axes are padded with 0. </span>
+
+<span class="sd">        For other parameters check https://numpy.org/doc/stable/reference/generated/numpy.pad.html    </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            pad_size (int | Tuple[int] | List[int | Tuple[int]]): number of pixels padded to the edges of each axis.</span>
+<span class="sd">                Must be either of: P, (P1, P2), [P_Z, P_Y, P_X], [P_Z, P_Y, P_X, P_T],</span>
+<span class="sd">                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)], or</span>
+<span class="sd">                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2), (P_T1, P_T2)].</span>
+<span class="sd">                If an integer, it is equivalent to [(P, P), (P, P), (P, P)].</span>
+<span class="sd">                If a tuple, it is equivalent to [(P1, P2), (P1, P2), (P1, P2)].</span>
+<span class="sd">                If a list, it must specify padding for all spatial dimensions and possibly also for the time dimension.</span>
+<span class="sd">                The unspecified dimensions (C and possibly T) are not affected.</span>
+<span class="sd">            border_mode (str, optional): `numpy.pad` parameter . Defaults to &#39;constant&#39;.</span>
+<span class="sd">            ival (float | Sequence, optional): value for image if needed by chosen border_mode. Defaults to 0.</span>
+<span class="sd">            mval (float | Sequence, optional): value for mask if needed by chosen border_mode. Defaults to 0.</span>
+<span class="sd">            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
+<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>  <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]],</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span>
+                 <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                 <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span> <span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pad_size</span> <span class="o">=</span> <span class="n">pad_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span> <span class="o">=</span> <span class="n">border_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="n">border_mode</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">ival</span> <span class="o">=</span> <span class="n">ival</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">mval</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">ignore_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mval</span> <span class="o">=</span> <span class="n">ignore_index</span>
+
+<div class="viewcode-block" id="Pad.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Pad.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">pad_pixels</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Pad.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Pad.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">pad_pixels</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask_mode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Pad(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">pad_size</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">border_mode</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">ival</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mval</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, &#39;</span> \
+               <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="Normalize">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Normalize">[docs]</a>
+<span class="k">class</span> <span class="nc">Normalize</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Change image mean and standard deviation to the given values (channel-wise).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mean (float | List[float], optional): the desired channel-wise means.</span>
+<span class="sd">                Must be either of: M, [M_1, M_2, ..., M_C]. Defaults to 0.</span>
+<span class="sd">            std (float | List[float], optional): the desired channel-wise standard deviations.</span>
+<span class="sd">                Must be either of: S, [S_1, S_2, ..., S_C]. Defaults to 1.</span>
+<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
+<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
+<span class="sd">        Image types:</span>
+<span class="sd">            float32</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                 <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">mean</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std</span> <span class="o">=</span> <span class="n">std</span>
+
+<div class="viewcode-block" id="Normalize.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Normalize.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">F</span><span class="o">.</span><span class="n">normalize</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Normalize(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">std</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">always_apply</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="Contiguous">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Contiguous">[docs]</a>
+<span class="k">class</span> <span class="nc">Contiguous</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform the image data to a contiguous array.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Contiguous.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Contiguous.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">image</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Contiguous.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Contiguous.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Contiguous()&#39;</span></div>
+
+
+
+<div class="viewcode-block" id="Float">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Float">[docs]</a>
+<span class="k">class</span> <span class="nc">Float</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Change datatype to np.float32 without changing the image values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Float.apply">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Float.apply">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Float.apply_to_mask">
+<a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Float.apply_to_mask">[docs]</a>
+    <span class="k">def</span> <span class="nf">apply_to_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">mask</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span></div>
+
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Float()&#39;</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Samuel Sulan, Lucia Hradecka, Filip Lux.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
