@@ -196,7 +196,7 @@ class Scale(DualTransform):
     """
     def __init__(self, scales: Union[float, TypeTripletFloat] = 1,
                  interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
-                 border_mode: str = 'reflect', ival: float = 0, mval: float = 0,
+                 border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 1):
         super().__init__(always_apply, p)
         self.scale = parse_coefs(scales, identity_element=1.)
@@ -218,6 +218,7 @@ class Scale(DualTransform):
                         value=self.ival,
                         spacing=self.spacing)
 
+    # TODO implement linear/cubic interpolation for float_mask
     def apply_to_mask(self, mask, **params):
         interpolation = 0   # refers to 'sitkNearestNeighbor'
         return F.affine(mask,
@@ -269,7 +270,7 @@ class RandomScale(DualTransform):
     """      
     def __init__(self, scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.9, 1.1),
                  interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
-                 border_mode: str = 'reflect', ival: float = 0, mval: float = 0,
+                 border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit)
@@ -702,7 +703,7 @@ class AffineTransform(DualTransform):
                  spacing: TypeTripletFloat = (1, 1, 1),
                  change_to_isotropic: bool = False,
                  interpolation: int = 1,
-                 border_mode: str = 'reflect', ival: float = 0, mval: float = 0,
+                 border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.angles: TypeTripletFloat = parse_coefs(angles, identity_element=0)
