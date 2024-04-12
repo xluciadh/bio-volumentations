@@ -32,18 +32,40 @@ except ImportError:
 setup(
     name='bio_volumentations',
     version='1.1.0',
-    author='Lucia Hradecká, Filip Lux, Samuel Šuľan',
+    author='Samuel Šuľan, Lucia Hradecká, Filip Lux',
     packages=find_packages(),
     url='https://gitlab.fi.muni.cz/cbia/bio-volumentations',
     description='Library for 3D augmentations of multi-dimensional biomedical images',
-    long_description='Library for preprocessing and augmentation of 3D biomedical images. The library can handle 3D-5D images: volumetric, multi-channel, and time-lapse.\n'
-                     'Inspired by:\n'
-                     '- Albumentations:           https://github.com/albumentations-team/albumentations\n'
-                     '- 3D Conversion:            https://github.com/ashawkey/volumentations\n'
-                     '- Continued Development:    https://github.com/ZFTurbo/volumentations\n'
-                     '- Enhancements:             https://github.com/qubvel/volumentations\n'
-                     '- Further Enhancements:     https://github.com/muellerdo/volumentations\n\n'
-                     'More details here: https://gitlab.fi.muni.cz/cbia/bio-volumentations.',
+    keywords='image,augmentation,volumetric,bioimage,biomedical,preprocessing,transformation',
+    long_description_content_type='text/markdown',
+    long_description='''Bio-Volumentations is an image augmentation and preprocessing package for 3D, 4D, and 5D 
+        (volumetric, multi-channel, and time-lapse) biomedical images.
+
+        This library offers a wide range of image transformations implemented efficiently for large-volume image data. 
+        This includes both preprocessing transformations (such as intensity normalisation, padding, and type casting) and 
+        augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
+
+        The Bio-Volumentations library is a suitable tool for data manipulation in machine learning applications. 
+        It can be used with any major Python deep learning library, including PyTorch, PyTorch Lightning, TensorFlow, and Keras.
+
+        This library builds upon wide-spread libraries such as Albumentations (see the Contributions section below) 
+        in terms of design and user interface. Therefore, it can easily be adopted by developers.
+    
+        More details can be found at the project's GitLab (https://gitlab.fi.muni.cz/cbia/bio-volumentations)
+        or at the documentation pages.
+        
+        The Bio-Volumentations library was inspired by:
+        
+        - Albumentations:           https://github.com/albumentations-team/albumentations
+        - 3D Conversion:            https://github.com/ashawkey/volumentations
+        - Continued Development:    https://github.com/ZFTurbo/volumentations
+        - Enhancements:             https://github.com/qubvel/volumentations
+        - Further Enhancements:     https://github.com/muellerdo/volumentations
+        
+        The Bio-Volumentations library is distributed under the MIT License.
+        
+        Copyright (c) 2024 Samuel Šuľan, Lucia Hradecká, Filip Lux
+        ''',
     install_requires=[
         'numpy',
         'scipy',
