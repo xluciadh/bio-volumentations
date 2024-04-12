@@ -1,8 +1,5 @@
-bio\_volumentations.conversion package
-======================================
-
-bio\_volumentations.conversion.transforms module
-------------------------------------------------
+Conversion Module
+=================
 
 .. automodule:: bio_volumentations.conversion.transforms
    :members:

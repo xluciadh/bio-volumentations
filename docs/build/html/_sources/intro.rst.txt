@@ -7,9 +7,11 @@ This includes both preprocessing transformations (such as intensity normalisatio
 and augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
 
 The `Bio-Volumentations` library is a suitable tool for data manipulation in machine learning applications.
-Importantly, it can be used with any major Python deep learning library.
+It can be used with any major Python deep learning library, including PyTorch, PyTorch Lightning, TensorFlow, and Keras.
 
-This library builds upon wide-spread libraries such as Albumentations (see the Contributions section below)
-in terms of design and user interface. Therefore, it can easily be adopted by users.
+This library builds upon wide-spread libraries such as `Albumentations` (see the Contributions section below)
+in terms of design and user interface. Therefore, it can easily be adopted by developers.
 
-The source codes and more details are also available `here <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-0?ref_type=heads>`_.
+The source codes and more details are also available
+`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-0?ref_type=heads>`_
+and `at the project's PyPi page <https://pypi.org/project/bio-volumentations/>`_.

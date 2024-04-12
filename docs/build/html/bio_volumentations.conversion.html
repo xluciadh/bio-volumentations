@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bio_volumentations.conversion package &mdash; bio-volumentations 1.1.0 documentation</title>
+  <title>Conversion Module &mdash; bio-volumentations 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -20,7 +20,9 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Core Module" href="bio_volumentations.core.html" />
+    <link rel="prev" title="Transforms Module" href="bio_volumentations.augmentations.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,9 +45,28 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules2.html">Bio-Volumentations Package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Bio-Volumentations Package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="bio_volumentations.augmentations.html">Transforms Module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Conversion Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.conversion.transforms.ConversionToFormat"><code class="docutils literal notranslate"><span class="pre">ConversionToFormat</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.conversion.transforms.ConversionToFormat.apply"><code class="docutils literal notranslate"><span class="pre">ConversionToFormat.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.conversion.transforms.ConversionToFormat.apply_to_float_mask"><code class="docutils literal notranslate"><span class="pre">ConversionToFormat.apply_to_float_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.conversion.transforms.ConversionToFormat.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">ConversionToFormat.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.conversion.transforms.NoConversion"><code class="docutils literal notranslate"><span class="pre">NoConversion</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.conversion.transforms.NoConversion.apply"><code class="docutils literal notranslate"><span class="pre">NoConversion.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.conversion.transforms.NoConversion.apply_to_float_mask"><code class="docutils literal notranslate"><span class="pre">NoConversion.apply_to_float_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.conversion.transforms.NoConversion.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">NoConversion.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bio_volumentations.core.html">Core Module</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributions.html">Copyright</a></li>
 </ul>
@@ -64,7 +85,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">bio_volumentations.conversion package</li>
+          <li class="breadcrumb-item"><a href="modules.html">Bio-Volumentations Package</a></li>
+      <li class="breadcrumb-item active">Conversion Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/bio_volumentations.conversion.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -74,10 +96,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bio-volumentations-conversion-package">
-<h1>bio_volumentations.conversion package<a class="headerlink" href="#bio-volumentations-conversion-package" title="Link to this heading"></a></h1>
-<section id="module-bio_volumentations.conversion.transforms">
-<span id="bio-volumentations-conversion-transforms-module"></span><h2>bio_volumentations.conversion.transforms module<a class="headerlink" href="#module-bio_volumentations.conversion.transforms" title="Link to this heading"></a></h2>
+  <section id="module-bio_volumentations.conversion.transforms">
+<span id="conversion-module"></span><h1>Conversion Module<a class="headerlink" href="#module-bio_volumentations.conversion.transforms" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="bio_volumentations.conversion.transforms.ConversionToFormat">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.conversion.transforms.</span></span><span class="sig-name descname"><span class="pre">ConversionToFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/conversion/transforms.html#ConversionToFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.conversion.transforms.ConversionToFormat" title="Link to this definition"></a></dt>
@@ -157,12 +177,14 @@ consistent (to some extent).</p>
 </dd></dl>
 
 </section>
-</section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="bio_volumentations.augmentations.html" class="btn btn-neutral float-left" title="Transforms Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bio_volumentations.core.html" class="btn btn-neutral float-right" title="Core Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

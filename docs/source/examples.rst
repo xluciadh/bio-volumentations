@@ -3,16 +3,32 @@ Getting Started
 
 Installation
 ************
-You can install the library from PyPi using ``pip install bio-volumentations``.
+You can install the `Bio-Volumentations` library from PyPi using:
+
+``pip install bio-volumentations``
+
+Required packages are:
+
+- `NumPy <https://numpy.org/>`_
+- `SciPy <https://scipy.org/>`_
+- `Scikit-image <https://scikit-image.org/>`_
+- `Matplotlib <https://matplotlib.org/>`_
+- `SimpleITK <https://simpleitk.org/>`_
+
+See `the project's PyPi page <https://pypi.org/project/bio-volumentations/>`_ for more details.
 
 Importing
 *********
-Import the library to your project using ``import bio_volumentations as biovol``.
+You can import the `Bio-Volumentations` library to your project using:
 
-How to Use the Library?
-***********************
+.. code-block:: python
 
-The Bio-Volumentations library processes 3D, 4D, and 5D images. Each image must be
+    import bio_volumentations as biovol
+
+How to Use Bio-Volumentations?
+******************************
+
+The `Bio-Volumentations` library processes 3D, 4D, and 5D images. Each image must be
 represented as :class:`numpy.ndarray` and must conform  to the following conventions:
 
 - The order of dimensions is [C, Z, Y, X, T], where C is the channel dimension, T is the time dimension, and Z, Y, and X are the spatial dimensions.
@@ -26,7 +42,7 @@ Thus, the input images can have these shapes:
 - [C, Z, Y, X] (a multi-channel volumetric image)
 - [C, Z, Y, X, T] (a single-channel as well as multi-channel volumetric image sequence)
 
-**It is strongly recommended to use** :class:`Compose` **to create and use transformations.**
+**It is strongly recommended to use** :class:`Compose` **to create and use transformation pipelines.**
 The :class:`Compose` class automatically checks and adjusts image format and datatype, stacks
 individual transforms to a pipeline, and outputs the image as a contiguous array.
 Optionally, it can also convert the transformed image to a desired format.
@@ -57,20 +73,20 @@ Example: Transforming a Single Image
     aug_data = aug(**data)
     transformed_img = aug_data['image']
 
-Example: Transforming Image Pairs
+Example: Transforming Image Tuples
 ***********************************
 Sometimes, it is necessary to consistently transform a tuple of corresponding images.
 To that end, `Bio-Volumentations` define several target types:
 
-- :class:`image` for the image data
-- :class:`mask` for integer-valued label images
-- :class:`float_mask` for real-valued label images
+- :class:`image` for the image data;
+- :class:`mask` for integer-valued label images; and
+- :class:`float_mask` for real-valued label images.
 
 The :class:`mask` and :class:`float_mask` target types are expected to have the same shape as the :class:`image`
 target except for the channel (C) dimension which must not be included.
-For example, for images of shape (150, 300, 300), (1, 150, 300, 300), or
-(4, 150, 300, 300), the corresponding :class:`mask` must be of shape (150, 300, 300).
-If one wants to use a multichannel :class:`mask` or :class:`float_mask`, one has to split it into
+For example, for images of shape ``(150, 300, 300)``, ``(1, 150, 300, 300)``, or
+``(4, 150, 300, 300)``, the corresponding :class:`mask` must be of shape ``(150, 300, 300)``.
+If one wants to use a multi-channel :class:`mask` or :class:`float_mask`, one has to split it into
 a set of single-channel :class:`mask` s or :class:`float_mask` s, respectively, and input them
 as stand-alone targets (see below).
 

@@ -47,6 +47,8 @@ from ..conversion import transforms as CT
 class Compose:
     """Compose a list of transformations into a callable transformation pipeline.
 
+    **It is strongly recommended to use** ``Compose`` **to define and use the transformation pipeline.**
+
     In addition, basic input image checks and conversions are performed. Optionally, datatype conversion
     (e.g. from ``numpy.ndarray`` to ``torch.Tensor``) is performed.
 

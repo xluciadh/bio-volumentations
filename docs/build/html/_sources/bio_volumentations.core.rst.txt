@@ -1,7 +1,7 @@
-bio\_volumentations.core package
-================================
+Core Module
+===========
 
-bio\_volumentations.core.composition module
+Composition Module
 -------------------------------------------
 
 .. automodule:: bio_volumentations.core.composition
@@ -9,7 +9,7 @@ bio\_volumentations.core.composition module
    :undoc-members:
    :show-inheritance:
 
-bio\_volumentations.core.transforms\_interface module
+Transforms Interface Module
 -----------------------------------------------------
 
 .. automodule:: bio_volumentations.core.transforms_interface

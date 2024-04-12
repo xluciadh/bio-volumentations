@@ -14,7 +14,7 @@ in terms of design and user interface. Therefore, it can easily be adopted by us
 
 # Installation
 
-Install the package from PyPi using
+Install the package from PyPi using:
 ```python
 pip install bio-volumentations
 ```
@@ -31,12 +31,12 @@ SimpleITK   https://simpleitk.org/ <br>
 
 ### Importing
 
-Import the library to your project using
+Import the library to your project using:
 ```python
 import bio_volumentations as biovol
 ```
 
-### How to Use the Library?
+### How to Use Bio-Volumentations?
 
 The Bio-Volumentations library processes 3D, 4D, and 5D images. Each image must be 
 represented as `numpy.ndarray`s and must conform  to the following conventions:
@@ -55,7 +55,7 @@ Thus, the input images can have these shapes:
 - [C, Z, Y, X] (a multi-channel volumetric image)
 - [C, Z, Y, X, T] (a single-channel as well as multi-channel volumetric image sequence)
 
-**It is strongly recommended to use `Compose` to create and use transformations.** 
+**It is strongly recommended to use `Compose` to create and use transformation pipelines.** 
 The `Compose` class automatically checks and adjusts image format, datatype, stacks
 individual transforms to a pipeline, and outputs the image as a contiguous array. 
 Optionally, it can also convert the transformed image to a desired format.
@@ -86,14 +86,14 @@ aug_data = aug(**data)
 transformed_img = aug_data['image']
 ```
 
-### Example: Transforming Image Pairs
+### Example: Transforming Image Tuples
 
 Sometimes, it is necessary to consistently transform a tuple of corresponding images.
 To that end, Bio-Volumentations define several target types:
 
-- `image` for the image data
-- `mask` for integer-valued label images
-- `float_mask` for real-valued label images
+- `image` for the image data;
+- `mask` for integer-valued label images; and
+- `float_mask` for real-valued label images.
 
 The `mask` and `float_mask` target types are expected to have the same shape as the `image`
 target except for the channel (C) dimension which must not be included. 

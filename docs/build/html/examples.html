@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Copyright" href="contributions.html" />
-    <link rel="prev" title="Bio-Volumentations Package" href="modules2.html" /> 
+    <link rel="prev" title="Core Module" href="bio_volumentations.core.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -47,13 +47,13 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules2.html">Bio-Volumentations Package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Bio-Volumentations Package</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#importing">Importing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-to-use-the-library">How to Use the Library?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-use-bio-volumentations">How to Use Bio-Volumentations?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-transforming-a-single-image">Example: Transforming a Single Image</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#example-transforming-image-pairs">Example: Transforming Image Pairs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-transforming-image-tuples">Example: Transforming Image Tuples</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-transforming-multiple-images-of-the-same-target-type">Example: Transforming Multiple Images of the Same Target Type</a></li>
 </ul>
 </li>
@@ -88,15 +88,28 @@
 <h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>You can install the library from PyPi using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">bio-volumentations</span></code>.</p>
+<p>You can install the <cite>Bio-Volumentations</cite> library from PyPi using:</p>
+<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">bio-volumentations</span></code></p>
+<p>Required packages are:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://numpy.org/">NumPy</a></p></li>
+<li><p><a class="reference external" href="https://scipy.org/">SciPy</a></p></li>
+<li><p><a class="reference external" href="https://scikit-image.org/">Scikit-image</a></p></li>
+<li><p><a class="reference external" href="https://matplotlib.org/">Matplotlib</a></p></li>
+<li><p><a class="reference external" href="https://simpleitk.org/">SimpleITK</a></p></li>
+</ul>
+<p>See <a class="reference external" href="https://pypi.org/project/bio-volumentations/">the project’s PyPi page</a> for more details.</p>
 </section>
 <section id="importing">
 <h2>Importing<a class="headerlink" href="#importing" title="Link to this heading"></a></h2>
-<p>Import the library to your project using <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">bio_volumentations</span> <span class="pre">as</span> <span class="pre">biovol</span></code>.</p>
+<p>You can import the <cite>Bio-Volumentations</cite> library to your project using:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">bio_volumentations</span> <span class="k">as</span> <span class="nn">biovol</span>
+</pre></div>
+</div>
 </section>
-<section id="how-to-use-the-library">
-<h2>How to Use the Library?<a class="headerlink" href="#how-to-use-the-library" title="Link to this heading"></a></h2>
-<p>The Bio-Volumentations library processes 3D, 4D, and 5D images. Each image must be
+<section id="how-to-use-bio-volumentations">
+<h2>How to Use Bio-Volumentations?<a class="headerlink" href="#how-to-use-bio-volumentations" title="Link to this heading"></a></h2>
+<p>The <cite>Bio-Volumentations</cite> library processes 3D, 4D, and 5D images. Each image must be
 represented as <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> and must conform  to the following conventions:</p>
 <ul class="simple">
 <li><p>The order of dimensions is [C, Z, Y, X, T], where C is the channel dimension, T is the time dimension, and Z, Y, and X are the spatial dimensions.</p></li>
@@ -110,7 +123,7 @@ represented as <code class="xref py py-class docutils literal notranslate"><span
 <li><p>[C, Z, Y, X] (a multi-channel volumetric image)</p></li>
 <li><p>[C, Z, Y, X, T] (a single-channel as well as multi-channel volumetric image sequence)</p></li>
 </ul>
-<p><strong>It is strongly recommended to use</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">Compose</span></code> <strong>to create and use transformations.</strong>
+<p><strong>It is strongly recommended to use</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">Compose</span></code> <strong>to create and use transformation pipelines.</strong>
 The <code class="xref py py-class docutils literal notranslate"><span class="pre">Compose</span></code> class automatically checks and adjusts image format and datatype, stacks
 individual transforms to a pipeline, and outputs the image as a contiguous array.
 Optionally, it can also convert the transformed image to a desired format.</p>
@@ -140,20 +153,20 @@ Optionally, it can also convert the transformed image to a desired format.</p>
 </pre></div>
 </div>
 </section>
-<section id="example-transforming-image-pairs">
-<h2>Example: Transforming Image Pairs<a class="headerlink" href="#example-transforming-image-pairs" title="Link to this heading"></a></h2>
+<section id="example-transforming-image-tuples">
+<h2>Example: Transforming Image Tuples<a class="headerlink" href="#example-transforming-image-tuples" title="Link to this heading"></a></h2>
 <p>Sometimes, it is necessary to consistently transform a tuple of corresponding images.
 To that end, <cite>Bio-Volumentations</cite> define several target types:</p>
 <ul class="simple">
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">image</span></code> for the image data</p></li>
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> for integer-valued label images</p></li>
-<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float_mask</span></code> for real-valued label images</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">image</span></code> for the image data;</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> for integer-valued label images; and</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float_mask</span></code> for real-valued label images.</p></li>
 </ul>
 <p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">float_mask</span></code> target types are expected to have the same shape as the <code class="xref py py-class docutils literal notranslate"><span class="pre">image</span></code>
 target except for the channel (C) dimension which must not be included.
-For example, for images of shape (150, 300, 300), (1, 150, 300, 300), or
-(4, 150, 300, 300), the corresponding <code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> must be of shape (150, 300, 300).
-If one wants to use a multichannel <code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">float_mask</span></code>, one has to split it into
+For example, for images of shape <code class="docutils literal notranslate"><span class="pre">(150,</span> <span class="pre">300,</span> <span class="pre">300)</span></code>, <code class="docutils literal notranslate"><span class="pre">(1,</span> <span class="pre">150,</span> <span class="pre">300,</span> <span class="pre">300)</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">(4,</span> <span class="pre">150,</span> <span class="pre">300,</span> <span class="pre">300)</span></code>, the corresponding <code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> must be of shape <code class="docutils literal notranslate"><span class="pre">(150,</span> <span class="pre">300,</span> <span class="pre">300)</span></code>.
+If one wants to use a multi-channel <code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">float_mask</span></code>, one has to split it into
 a set of single-channel <code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> s or <code class="xref py py-class docutils literal notranslate"><span class="pre">float_mask</span></code> s, respectively, and input them
 as stand-alone targets (see below).</p>
 <p>If a <code class="xref py py-class docutils literal notranslate"><span class="pre">Random...</span></code> transform receives multiple targets on its input in a single call,
@@ -230,7 +243,7 @@ for a practical example.</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules2.html" class="btn btn-neutral float-left" title="Bio-Volumentations Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bio_volumentations.core.html" class="btn btn-neutral float-left" title="Core Module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="contributions.html" class="btn btn-neutral float-right" title="Copyright" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

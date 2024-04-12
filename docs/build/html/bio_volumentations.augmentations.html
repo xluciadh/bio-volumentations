@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>bio_volumentations.augmentations package &mdash; bio-volumentations 1.1.0 documentation</title>
+  <title>Transforms Module &mdash; bio-volumentations 1.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
@@ -21,7 +21,9 @@
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Conversion Module" href="bio_volumentations.conversion.html" />
+    <link rel="prev" title="Bio-Volumentations Package" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -44,9 +46,133 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules2.html">Bio-Volumentations Package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Bio-Volumentations Package</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Transforms Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.AffineTransform"><code class="docutils literal notranslate"><span class="pre">AffineTransform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.AffineTransform.apply"><code class="docutils literal notranslate"><span class="pre">AffineTransform.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.AffineTransform.apply_to_float_mask"><code class="docutils literal notranslate"><span class="pre">AffineTransform.apply_to_float_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.AffineTransform.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">AffineTransform.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.CenterCrop"><code class="docutils literal notranslate"><span class="pre">CenterCrop</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.CenterCrop.apply"><code class="docutils literal notranslate"><span class="pre">CenterCrop.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.CenterCrop.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">CenterCrop.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Contiguous"><code class="docutils literal notranslate"><span class="pre">Contiguous</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Contiguous.apply"><code class="docutils literal notranslate"><span class="pre">Contiguous.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Contiguous.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">Contiguous.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Flip"><code class="docutils literal notranslate"><span class="pre">Flip</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Flip.apply"><code class="docutils literal notranslate"><span class="pre">Flip.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Flip.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">Flip.apply_to_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Flip.get_params"><code class="docutils literal notranslate"><span class="pre">Flip.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Float"><code class="docutils literal notranslate"><span class="pre">Float</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Float.apply"><code class="docutils literal notranslate"><span class="pre">Float.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Float.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">Float.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.GaussianBlur"><code class="docutils literal notranslate"><span class="pre">GaussianBlur</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.GaussianBlur.apply"><code class="docutils literal notranslate"><span class="pre">GaussianBlur.apply()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.GaussianNoise"><code class="docutils literal notranslate"><span class="pre">GaussianNoise</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.GaussianNoise.apply"><code class="docutils literal notranslate"><span class="pre">GaussianNoise.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.GaussianNoise.get_params"><code class="docutils literal notranslate"><span class="pre">GaussianNoise.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.HistogramEqualization"><code class="docutils literal notranslate"><span class="pre">HistogramEqualization</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.HistogramEqualization.apply"><code class="docutils literal notranslate"><span class="pre">HistogramEqualization.apply()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Normalize"><code class="docutils literal notranslate"><span class="pre">Normalize</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Normalize.apply"><code class="docutils literal notranslate"><span class="pre">Normalize.apply()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.NormalizeMeanStd"><code class="docutils literal notranslate"><span class="pre">NormalizeMeanStd</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.NormalizeMeanStd.apply"><code class="docutils literal notranslate"><span class="pre">NormalizeMeanStd.apply()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Pad"><code class="docutils literal notranslate"><span class="pre">Pad</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Pad.apply"><code class="docutils literal notranslate"><span class="pre">Pad.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Pad.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">Pad.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.PoissonNoise"><code class="docutils literal notranslate"><span class="pre">PoissonNoise</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.PoissonNoise.apply"><code class="docutils literal notranslate"><span class="pre">PoissonNoise.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.PoissonNoise.get_params"><code class="docutils literal notranslate"><span class="pre">PoissonNoise.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomAffineTransform"><code class="docutils literal notranslate"><span class="pre">RandomAffineTransform</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply"><code class="docutils literal notranslate"><span class="pre">RandomAffineTransform.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply_to_float_mask"><code class="docutils literal notranslate"><span class="pre">RandomAffineTransform.apply_to_float_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomAffineTransform.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">RandomAffineTransform.apply_to_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomAffineTransform.get_params"><code class="docutils literal notranslate"><span class="pre">RandomAffineTransform.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomBrightnessContrast"><code class="docutils literal notranslate"><span class="pre">RandomBrightnessContrast</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomBrightnessContrast.apply"><code class="docutils literal notranslate"><span class="pre">RandomBrightnessContrast.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomBrightnessContrast.get_params"><code class="docutils literal notranslate"><span class="pre">RandomBrightnessContrast.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomCrop"><code class="docutils literal notranslate"><span class="pre">RandomCrop</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomCrop.apply"><code class="docutils literal notranslate"><span class="pre">RandomCrop.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomCrop.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">RandomCrop.apply_to_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomCrop.get_params"><code class="docutils literal notranslate"><span class="pre">RandomCrop.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomFlip"><code class="docutils literal notranslate"><span class="pre">RandomFlip</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomFlip.apply"><code class="docutils literal notranslate"><span class="pre">RandomFlip.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomFlip.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">RandomFlip.apply_to_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomFlip.get_params"><code class="docutils literal notranslate"><span class="pre">RandomFlip.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomGamma"><code class="docutils literal notranslate"><span class="pre">RandomGamma</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomGamma.apply"><code class="docutils literal notranslate"><span class="pre">RandomGamma.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomGamma.get_params"><code class="docutils literal notranslate"><span class="pre">RandomGamma.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomGaussianBlur"><code class="docutils literal notranslate"><span class="pre">RandomGaussianBlur</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomGaussianBlur.apply"><code class="docutils literal notranslate"><span class="pre">RandomGaussianBlur.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomGaussianBlur.get_params"><code class="docutils literal notranslate"><span class="pre">RandomGaussianBlur.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomRotate90"><code class="docutils literal notranslate"><span class="pre">RandomRotate90</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomRotate90.apply"><code class="docutils literal notranslate"><span class="pre">RandomRotate90.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomRotate90.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">RandomRotate90.apply_to_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomRotate90.get_params"><code class="docutils literal notranslate"><span class="pre">RandomRotate90.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomScale"><code class="docutils literal notranslate"><span class="pre">RandomScale</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomScale.apply"><code class="docutils literal notranslate"><span class="pre">RandomScale.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomScale.apply_to_float_mask"><code class="docutils literal notranslate"><span class="pre">RandomScale.apply_to_float_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomScale.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">RandomScale.apply_to_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.RandomScale.get_params"><code class="docutils literal notranslate"><span class="pre">RandomScale.get_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Resize"><code class="docutils literal notranslate"><span class="pre">Resize</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Resize.apply"><code class="docutils literal notranslate"><span class="pre">Resize.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Resize.apply_to_float_mask"><code class="docutils literal notranslate"><span class="pre">Resize.apply_to_float_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Resize.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">Resize.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Scale"><code class="docutils literal notranslate"><span class="pre">Scale</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Scale.apply"><code class="docutils literal notranslate"><span class="pre">Scale.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Scale.apply_to_float_mask"><code class="docutils literal notranslate"><span class="pre">Scale.apply_to_float_mask()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#bio_volumentations.augmentations.transforms.Scale.apply_to_mask"><code class="docutils literal notranslate"><span class="pre">Scale.apply_to_mask()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bio_volumentations.conversion.html">Conversion Module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bio_volumentations.core.html">Core Module</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="examples.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributions.html">Copyright</a></li>
 </ul>
@@ -65,7 +191,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">bio_volumentations.augmentations package</li>
+          <li class="breadcrumb-item"><a href="modules.html">Bio-Volumentations Package</a></li>
+      <li class="breadcrumb-item active">Transforms Module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/bio_volumentations.augmentations.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -75,10 +202,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="bio-volumentations-augmentations-package">
-<h1>bio_volumentations.augmentations package<a class="headerlink" href="#bio-volumentations-augmentations-package" title="Link to this heading"></a></h1>
-<section id="module-bio_volumentations.augmentations.transforms">
-<span id="bio-volumentations-augmentations-transforms-module"></span><h2>bio_volumentations.augmentations.transforms module<a class="headerlink" href="#module-bio_volumentations.augmentations.transforms" title="Link to this heading"></a></h2>
+  <section id="module-bio_volumentations.augmentations.transforms">
+<span id="transforms-module"></span><h1>Transforms Module<a class="headerlink" href="#module-bio_volumentations.augmentations.transforms" title="Link to this heading"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="bio_volumentations.augmentations.transforms.AffineTransform">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">bio_volumentations.augmentations.transforms.</span></span><span class="sig-name descname"><span class="pre">AffineTransform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">angles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">translation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(0,</span> <span class="pre">0,</span> <span class="pre">0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spacing</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">(1,</span> <span class="pre">1,</span> <span class="pre">1)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">change_to_isotropic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">border_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'constant'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ival</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mval</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ignore_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">always_apply</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bio_volumentations/augmentations/transforms.html#AffineTransform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#bio_volumentations.augmentations.transforms.AffineTransform" title="Link to this definition"></a></dt>
@@ -1208,12 +1333,14 @@ downsampling. Recommended.</p>
 </dd></dl>
 
 </section>
-</section>
 
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Bio-Volumentations Package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bio_volumentations.conversion.html" class="btn btn-neutral float-right" title="Conversion Module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

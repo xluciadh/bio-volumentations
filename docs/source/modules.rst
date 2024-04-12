@@ -1,7 +1,19 @@
-bio_volumentations
-==================
+Bio-Volumentations Package
+==========================
+
+Here, you can find documentation pages for the individual transformations.
+
+| All preprocessing and augmentation transformations are implemented in the `Transforms Module`.
+| The conversion transformations are implemented in the `Conversion Module`.
+| The :class:`Compose` class and all base abstract transformations are implemented in the `Core Module`.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
-   bio_volumentations
+   bio_volumentations.augmentations
+   bio_volumentations.conversion
+
+.. toctree::
+   :maxdepth: 3
+
+   bio_volumentations.core
