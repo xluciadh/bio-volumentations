@@ -53,7 +53,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#importing">Importing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-to-use-the-library">How to Use the Library?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-transforming-a-single-image">Example: Transforming a Single Image</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#example-transforming-a-image-pairs">Example: Transforming a Image Pairs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-transforming-image-pairs">Example: Transforming Image Pairs</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#example-transforming-multiple-images-of-the-same-target-type">Example: Transforming Multiple Images of the Same Target Type</a></li>
 </ul>
 </li>
@@ -111,7 +111,7 @@ represented as <code class="xref py py-class docutils literal notranslate"><span
 <li><p>[C, Z, Y, X, T] (a single-channel as well as multi-channel volumetric image sequence)</p></li>
 </ul>
 <p><strong>It is strongly recommended to use</strong> <code class="xref py py-class docutils literal notranslate"><span class="pre">Compose</span></code> <strong>to create and use transformations.</strong>
-The <code class="xref py py-class docutils literal notranslate"><span class="pre">Compose</span></code> class automatically checks and adjusts image format, datatype, stacks
+The <code class="xref py py-class docutils literal notranslate"><span class="pre">Compose</span></code> class automatically checks and adjusts image format and datatype, stacks
 individual transforms to a pipeline, and outputs the image as a contiguous array.
 Optionally, it can also convert the transformed image to a desired format.</p>
 <p>Below, there are several examples of how to use the <cite>Bio-Volumentations</cite> library.</p>
@@ -140,10 +140,10 @@ Optionally, it can also convert the transformed image to a desired format.</p>
 </pre></div>
 </div>
 </section>
-<section id="example-transforming-a-image-pairs">
-<h2>Example: Transforming a Image Pairs<a class="headerlink" href="#example-transforming-a-image-pairs" title="Link to this heading"></a></h2>
+<section id="example-transforming-image-pairs">
+<h2>Example: Transforming Image Pairs<a class="headerlink" href="#example-transforming-image-pairs" title="Link to this heading"></a></h2>
 <p>Sometimes, it is necessary to consistently transform a tuple of corresponding images.
-To that end, Bio-Volumentations define several target types:</p>
+To that end, <cite>Bio-Volumentations</cite> define several target types:</p>
 <ul class="simple">
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">image</span></code> for the image data</p></li>
 <li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">mask</span></code> for integer-valued label images</p></li>

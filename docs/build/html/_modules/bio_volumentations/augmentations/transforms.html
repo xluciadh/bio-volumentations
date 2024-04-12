@@ -124,23 +124,28 @@
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">parse_limits</span><span class="p">,</span> <span class="n">parse_coefs</span><span class="p">,</span> <span class="n">to_tuple</span>
 
 
-<span class="c1"># Potential upgrade : different sigmas for different channels</span>
+<span class="c1"># TODO potential upgrade : different sigmas for different channels</span>
 <div class="viewcode-block" id="GaussianNoise">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.GaussianNoise">[docs]</a>
 <span class="k">class</span> <span class="nc">GaussianNoise</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            var_limit (tuple, optional): variance of normal distribution is randomly chosen from this interval.</span>
-<span class="sd">              Defaults to (0.001, 0.1).</span>
-<span class="sd">            mean (float, optional): mean of normal distribution. Defaults to 0.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">            var_limit (tuple, optional): Variance of normal distribution is randomly chosen from this interval.</span>
+
+<span class="sd">                Defaults to ``(0.001, 0.1)``.</span>
+<span class="sd">            mean (float, optional): Mean of normal distribution.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``0.5``.</span>
 
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_limit</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">),</span> <span class="n">mean</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
@@ -170,11 +175,21 @@
 <div class="viewcode-block" id="PoissonNoise">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.PoissonNoise">[docs]</a>
 <span class="k">class</span> <span class="nc">PoissonNoise</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds poisson noise to the image.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds Poisson noise to the image.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            intensity_limit (tuple): Range to sample expected intensity of added poisson noise.</span>
-<span class="sd">                Defaults to (1, 10).</span>
+<span class="sd">            intensity_limit (tuple): Range to sample the expected intensity of Poisson noise.</span>
+
+<span class="sd">                Defaults to ``(1, 10)``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition.</span>
+
+<span class="sd">                Defaults to ``0.5``.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">intensity_limit</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
@@ -206,32 +221,46 @@
 <span class="k">class</span> <span class="nc">Resize</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Resize input to the given shape.</span>
 
-<span class="sd">        Internally, the skimage `resize` function is used. The `interpolation`, `border_mode`, `ival`, `mval`,</span>
-<span class="sd">         and `anti_aliasing_downsample` arguments are forwarded to it. More details at:</span>
+<span class="sd">        Internally, the ``skimage.transform.resize`` function is used.</span>
+<span class="sd">        The ``interpolation``, ``border_mode``, ``ival``, ``mval``,</span>
+<span class="sd">        and ``anti_aliasing_downsample`` arguments are forwarded to it. More details at:</span>
 <span class="sd">        https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            shape (tuple of ints): the desired image shape. Must be of either of: (Z, Y, X) or (Z, Y, X, T).</span>
+<span class="sd">            shape (tuple of ints): The desired image shape.</span>
+
+<span class="sd">                Must be of either of: ``(Z, Y, X)`` or ``(Z, Y, X, T)``.</span>
+
 <span class="sd">                The unspecified dimensions (C and possibly T) are not affected.</span>
-<span class="sd">            interpolation (int, optional): order of spline interpolation for image. Defaults to 1.</span>
-<span class="sd">            border_mode (string, optional): points outside image are filled according to this mode.</span>
-<span class="sd">                Defaults to &#39;reflect&#39;.</span>
-<span class="sd">            ival (float, optional): value outside of image when the border_mode is chosen to be &quot;constant&quot;.</span>
-<span class="sd">                Defaults to 0.</span>
-<span class="sd">            mval (float, optional): value outside of mask when the border_mode is chosen to be &quot;constant&quot;.</span>
-<span class="sd">                Defaults to 0.</span>
-<span class="sd">            anti_aliasing_downsample (bool, optional): controls if the gaussian filter should be used on image before</span>
-<span class="sd">                downsampling, recommended. Defaults to True.</span>
-<span class="sd">            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
-<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">            interpolation (int, optional): Order of spline interpolation.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;reflect&#39;``.</span>
+<span class="sd">            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            anti_aliasing_downsample (bool, optional): Controls if the Gaussian filter should be applied before</span>
+<span class="sd">                downsampling. Recommended. </span>
+<span class="sd">                </span>
+<span class="sd">                Defaults to ``True``.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with </span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+<span class="sd">                </span>
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;reflect&#39;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                  <span class="n">mval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">anti_aliasing_downsample</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -278,26 +307,49 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            scales (float|List[float], optional): Value by which the input should be scaled.</span>
-<span class="sd">                Must be either of: S, [S_Z, S_Y, S_X], or [S_Z, S_Y, S_X, S_T].</span>
-<span class="sd">                If it is a float, then all spatial dimensions are scaled by it (S is equivalent to [S, S, S]).</span>
+
+<span class="sd">                Must be either of: ``S``, ``[S_Z, S_Y, S_X]``, or ``[S_Z, S_Y, S_X, S_T]``.</span>
+
+<span class="sd">                If a float, then all spatial dimensions are scaled by it (equivalent to ``[S, S, S]``).</span>
+
 <span class="sd">                The unspecified dimensions (C and possibly T) are not affected.</span>
-<span class="sd">                Defaults to 1.</span>
-<span class="sd">            interpolation (int, optional): order of spline interpolation for image. Defaults to 1.</span>
-<span class="sd">            border_mode (str, optional): points outside image are filled according to this mode.</span>
-<span class="sd">                Defaults to &#39;constant&#39;.</span>
-<span class="sd">            ival (float, optional): value outside of image when the border_mode is chosen to be &quot;constant&quot;.</span>
-<span class="sd">                Defaults to 0.</span>
-<span class="sd">            mval (float, optional): value outside of mask when the border_mode is chosen to be &quot;constant&quot;.</span>
-<span class="sd">                Defaults to 0.</span>
-<span class="sd">            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
-<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+<span class="sd">            interpolation (int, optional): Order of spline interpolation.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+<span class="sd">            spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.</span>
+
+<span class="sd">                If ``None``, equivalent to ``(1, 1, 1)``.</span>
+
+<span class="sd">                If a float ``S``, equivalent to ``(S, S, S)``.</span>
+
+<span class="sd">                Otherwise, a scale for each spatial dimension must be given.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;constant&#39;``.</span>
+<span class="sd">            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scales</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                  <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -356,28 +408,36 @@
 
 <span class="sd">                Must be either of: ``S``, ``(S1, S2)``, ``(S_Z, S_Y, S_X)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.</span>
 
-<span class="sd">                If it is a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from</span>
+<span class="sd">                If a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from</span>
 <span class="sd">                the interval [1-S, 1+S] (equivalent to inputting ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``).</span>
 
-<span class="sd">                If it is a tuple of 2 numbers, then all spatial dimensions are scaled by a random number drawn uniformly</span>
+<span class="sd">                If a tuple of 2 floats, then all spatial dimensions are scaled by a random number drawn uniformly</span>
 <span class="sd">                from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).</span>
 
-<span class="sd">                If it is a tuple of 3 numbers, then an interval [1-S_a, 1+S_a] is constructed for each spatial</span>
+<span class="sd">                If a tuple of 3 floats, then an interval [1-S_a, 1+S_a] is constructed for each spatial</span>
 <span class="sd">                dimension and the scale is randomly drawn from it</span>
 <span class="sd">                (equivalent to inputting ``(1-S_Z, 1+S_Z, 1-S_Y, 1+S_Y, 1-S_X, 1+S_X)``).</span>
 
-<span class="sd">                If it is a tuple of 6 numbers, the scales for individual spatial dimensions are randomly drawn from the</span>
+<span class="sd">                If a tuple of 6 floats, the scales for individual spatial dimensions are randomly drawn from the</span>
 <span class="sd">                respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].</span>
 
 <span class="sd">                The unspecified dimensions (C and T) are not affected.</span>
 
 <span class="sd">                Defaults to ``(0.9, 1.1)``.</span>
 
-<span class="sd">            interpolation (int, optional): Order of spline interpolation for the image.</span>
+<span class="sd">            interpolation (int, optional): Order of spline interpolation.</span>
 
 <span class="sd">                Defaults to ``1``.</span>
 
-<span class="sd">            spacing (TripleFloats | float | None): TBA</span>
+<span class="sd">            spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.</span>
+
+<span class="sd">                If ``None``, equivalent to ``(1, 1, 1)``.</span>
+
+<span class="sd">                If a float ``S``, equivalent to ``(S, S, S)``.</span>
+
+<span class="sd">                Otherwise, a scale for each spatial dimension must be given.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 
@@ -385,31 +445,29 @@
 
 <span class="sd">                Defaults to ``&#39;constant&#39;``.</span>
 
-<span class="sd">            ival (float, optional): Value outside of image when the border_mode is chosen to be ``&#39;constant&#39;``.</span>
+<span class="sd">            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
 
 <span class="sd">                Defaults to ``0``.</span>
 
-<span class="sd">            mval (float, optional): Value outside of mask when the border_mode is chosen to be &quot;constant&quot;.</span>
+<span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
 
 <span class="sd">                Defaults to ``0``.</span>
 
-<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is float, then transformation of mask is done with</span>
-<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, then it does nothing.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
 
 <span class="sd">                Defaults to ``None``.</span>
 
-<span class="sd">            always_apply (bool, optional): Always apply transformation in composition.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition.</span>
 
 <span class="sd">                Defaults to ``False``.</span>
 
-<span class="sd">            p (float, optional): Chance of applying transformation in composition.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition.</span>
 
 <span class="sd">                Defaults to ``0.5``.</span>
 
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>      
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scaling_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">1.1</span><span class="p">),</span>
                  <span class="n">interpolation</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">spacing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -473,17 +531,22 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Rotation of input by 0, 90, 180, or 270 degrees around the specified spatial axes.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            axes (List[int], optional): list of axes around which the input is rotated (recognised axis symbols are</span>
-<span class="sd">                1 for Z, 2 for Y, and 3 for X). A single axis can occur multiple times in the list.</span>
-<span class="sd">                If `shuffle_axis` is `False`, the order of axes determines the order of transformations.</span>
-<span class="sd">                Defaults to [1, 2, 3].</span>
-<span class="sd">            shuffle_axis (bool, optional): If set to `True`, order of rotations is random. Defaults to False.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">            axes (List[int], optional): List of axes around which the input is rotated. Recognised axis symbols are</span>
+<span class="sd">                ``1`` for Z, ``2`` for Y, and ``3`` for X. A single axis can occur multiple times in the list.</span>
+<span class="sd">                If ``shuffle_axis = False``, the order of axes determines the order of transformations.</span>
+
+<span class="sd">                Defaults to ``[1, 2, 3]``.</span>
+<span class="sd">            shuffle_axis (bool, optional): If set to ``True``, the order of rotations is random.</span>
+
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shuffle_axis</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                  <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
@@ -544,14 +607,18 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Flip input around the specified spatial axes.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            axes (List[int], optional): list of axes around which is flip done (recognised axis symbols are</span>
-<span class="sd">                1 for Z, 2 for Y, and 3 for X). Defaults to [1,2,3].</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">            axes (List[int], optional): List of axes around which is flip done. Recognised axis symbols are</span>
+<span class="sd">                ``1`` for Z, ``2`` for Y, and `3` for X.</span>
+
+<span class="sd">                Defaults to ``[1,2,3]``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
@@ -592,18 +659,22 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Flip input around a set of axes randomly chosen from the input list of axis combinations.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            axes_to_choose (List[Tuple[int]] or None, optional): a list of axis combinations from which one option</span>
-<span class="sd">                is randomly chosen (recognised axis symbols are 1 for Z, 2 for Y, and 3 for X).</span>
+<span class="sd">            axes_to_choose (List[Tuple[int]] or None, optional): List of axis combinations from which one option</span>
+<span class="sd">                is randomly chosen. Recognised axis symbols are ``1`` for Z, ``2`` for Y, and ``3`` for X.</span>
 <span class="sd">                The image will be flipped around all axes in the chosen combination.</span>
-<span class="sd">                If None, a random subset of spatial axes is chosen, corresponding to inputting</span>
-<span class="sd">                [(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)].</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+
+<span class="sd">                If ``None``, a random subset of spatial axes is chosen, corresponding to inputting</span>
+<span class="sd">                ``[(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]``.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes_to_choose</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
@@ -648,26 +719,38 @@
 <span class="k">class</span> <span class="nc">CenterCrop</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Crops the central region of the input of given size.</span>
 <span class="sd">          </span>
-<span class="sd">        Unlike CenterCrop from Albumentations, this transform pads the input in dimensions </span>
-<span class="sd">        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`</span>
-<span class="sd">        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:</span>
+<span class="sd">        Unlike ``CenterCrop`` from `Albumentations`, this transform pads the input in dimensions</span>
+<span class="sd">        where the input is smaller than the ``shape`` with ``numpy.pad``. The ``border_mode``, ``ival`` and ``mval``</span>
+<span class="sd">        arguments are forwarded to ``numpy.pad`` if padding is necessary. More details at:</span>
 <span class="sd">        https://numpy.org/doc/stable/reference/generated/numpy.pad.html.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            shape (Tuple[int]): the desired shape of input.</span>
-<span class="sd">                Must be either of: [Z, Y, X] or [Z, Y, X, T].</span>
-<span class="sd">            border_mode (str, optional): border mode used for numpy.pad. Defaults to &quot;reflect&quot;.</span>
-<span class="sd">            ival (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for image. Defaults to (0, 0).</span>
-<span class="sd">            mval (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for mask. Defaults to (0, 0).</span>
-<span class="sd">            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with</span>
-<span class="sd">                `border_mode = &quot;constant&quot;` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">            shape (Tuple[int]): The desired shape of input.</span>
+
+<span class="sd">                Must be either of: ``[Z, Y, X]`` or ``[Z, Y, X, T]``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;reflect&#39;``.</span>
+<span class="sd">            ival (float | Sequence, optional): Values of `image` voxels outside of the `image` domain.</span>
+<span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
+
+<span class="sd">                Defaults to ``(0, 0)``.</span>
+<span class="sd">            mval (float | Sequence, optional): Values of `mask` voxels outside of the `mask` domain.</span>
+<span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
+
+<span class="sd">                Defaults to ``(0, 0)``.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                  <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -705,25 +788,38 @@
 <span class="k">class</span> <span class="nc">RandomCrop</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Randomly crops a region of given size from the input.</span>
 
-<span class="sd">        Unlike RandomCrop from Albumentations, this transform pads the input in dimensions</span>
-<span class="sd">        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`</span>
-<span class="sd">        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:</span>
+<span class="sd">        Unlike ``RandomCrop`` from `Albumentations`, this transform pads the input in dimensions</span>
+<span class="sd">        where the input is smaller than the ``shape`` with ``numpy.pad``. The ``border_mode``, ``ival`` and ``mval``</span>
+<span class="sd">        arguments are forwarded to ``numpy.pad`` if padding is necessary. More details at:</span>
 <span class="sd">        https://numpy.org/doc/stable/reference/generated/numpy.pad.html.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            shape (Tuple[int]): the desired shape of input. Must be either of: [Z, Y, X] or [Z, Y, X, T].</span>
-<span class="sd">            border_mode (str, optional): border mode used for numpy.pad. Defaults to &quot;reflect&quot;.</span>
-<span class="sd">            ival (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for image. Defaults to (0, 0).</span>
-<span class="sd">            mval (Tuple[float], optional): values used for &#39;constant&#39; or &#39;linear_ramp&#39; for mask. Defaults to (0, 0).</span>
-<span class="sd">            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with</span>
-<span class="sd">                `border_mode = &quot;constant&quot;` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">            shape (Tuple[int]): The desired shape of input.</span>
+
+<span class="sd">                Must be either of: ``[Z, Y, X]`` or ``[Z, Y, X, T]``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;reflect&#39;``.</span>
+<span class="sd">            ival (float | Sequence, optional): Values of `image` voxels outside of the `image` domain.</span>
+<span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
+
+<span class="sd">                Defaults to ``(0, 0)``.</span>
+<span class="sd">            mval (float | Sequence, optional): Values of `mask` voxels outside of the `mask` domain.</span>
+<span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
+
+<span class="sd">                Defaults to ``(0, 0)``.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                  <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">ignore_index</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -771,50 +867,82 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Affine transformation of the input image with randomly chosen parameters.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            angle_limit (Tuple[float] | float, optional): intervals in degrees from which angles of</span>
+<span class="sd">            angle_limit (Tuple[float] | float, optional): Intervals in degrees from which angles of</span>
 <span class="sd">                rotation for the spatial axes are chosen.</span>
-<span class="sd">                Must be either of: A, (A1, A2), or (A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2).</span>
-<span class="sd">                If a float, equivalent to (-A, A, -A, A, -A, A).</span>
-<span class="sd">                If a tuple with 2 items, equivalent to (A1, A2, A1, A2, A1, A2).</span>
+
+<span class="sd">                Must be either of: ``A``, ``(A1, A2)``, or ``(A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2)``.</span>
+
+<span class="sd">                If a float, equivalent to ``(-A, A, -A, A, -A, A)``.</span>
+
+<span class="sd">                If a tuple with 2 items, equivalent to ``(A1, A2, A1, A2, A1, A2)``.</span>
+
 <span class="sd">                If a tuple with 6 items, angle of rotation is randomly chosen from an interval [A_a1, A_a2] for each</span>
 <span class="sd">                spatial axis.</span>
-<span class="sd">                Defaults to (15, 15, 15).</span>
-<span class="sd">            translation_limit (Tuple[int] | int | None, optional): intervals from which the translation parameters</span>
+
+<span class="sd">                Defaults to ``(15, 15, 15)``.</span>
+<span class="sd">            translation_limit (Tuple[int] | int | None, optional): Intervals from which the translation parameters</span>
 <span class="sd">                for the spatial axes are chosen.</span>
-<span class="sd">                Must be either of: T, (T1, T2), or (T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2).</span>
-<span class="sd">                If a float, equivalent to (-T, T, -T, T, -T, T).</span>
-<span class="sd">                If a tuple with 2 items, equivalent to (T1, T2, T1, T2, T1, T2).</span>
+
+<span class="sd">                Must be either of: ``T``, ``(T1, T2)``, or ``(T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2)``.</span>
+
+<span class="sd">                If a float, equivalent to ``(-T, T, -T, T, -T, T)``.</span>
+
+<span class="sd">                If a tuple with 2 items, equivalent to ``(T1, T2, T1, T2, T1, T2)``.</span>
+
 <span class="sd">                If a tuple with 6 items, the translation parameter is randomly chosen from an interval [T_a1, T_a2] for</span>
 <span class="sd">                each spatial axis.</span>
-<span class="sd">                Defaults to (0, 0, 0).</span>
-<span class="sd">            scaling_limit (Tuple[float] | float, optional): intervals from which the scales for the spatial axes are chosen.</span>
-<span class="sd">                Must be either of: S, (S1, S2), or (S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2).</span>
-<span class="sd">                If a float, equivalent to (1-S, 1+S, 1-S, 1+S, 1-S, 1+S).</span>
-<span class="sd">                If a tuple with 2 items, equivalent to (S1, S2, S1, S2, S1, S2).</span>
+
+<span class="sd">                Defaults to ``(0, 0, 0)``.</span>
+<span class="sd">            scaling_limit (Tuple[float] | float, optional): Intervals from which the scales for the spatial axes are chosen.</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S1, S2)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.</span>
+
+<span class="sd">                If a float, equivalent to ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``.</span>
+
+<span class="sd">                If a tuple with 2 items, equivalent to ``(S1, S2, S1, S2, S1, S2)``.</span>
+
 <span class="sd">                If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for</span>
 <span class="sd">                each spatial axis.</span>
-<span class="sd">                Defaults to (0.2, 0.2, 0.2).</span>
-<span class="sd">            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.</span>
-<span class="sd">                Must be either of: S, (S1, S2, S3), or None.</span>
-<span class="sd">                If `None`, equivalent to (1, 1, 1).</span>
-<span class="sd">                If a float S, equivalent to (S, S, S).</span>
-<span class="sd">                If a tuple with 3 items, the scale is (S1, S2, S3).</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.</span>
-<span class="sd">            interpolation (Int, optional): The order of spline interpolation. Defaults to 1.</span>
-<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
-<span class="sd">                boundaries. Defaults to &#39;constant&#39;.</span>
-<span class="sd">            ival (float, optional): Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
-<span class="sd">            mval (float, optional): Value to fill past edges of mask if mode is &#39;constant&#39;. Defaults to 0.</span>
-<span class="sd">            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
-<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+
+<span class="sd">                Defaults to ``(0.2, 0.2, 0.2)``.</span>
+<span class="sd">            spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.</span>
+
+<span class="sd">                If ``None``, equivalent to ``(1, 1, 1)``.</span>
+
+<span class="sd">                If a float ``S``, equivalent to ``(S, S, S)``.</span>
+
+<span class="sd">                Otherwise, a scale for each spatial dimension must be given.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.</span>
+
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            interpolation (int, optional): Order of spline interpolation.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;constant&#39;``.</span>
+<span class="sd">            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angle_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
                  <span class="n">translation_limit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypePairFloat</span><span class="p">,</span> <span class="n">TypeSextetFloat</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -893,33 +1021,54 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Affine transformation of the input image with given parameters.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            angles (Tuple[float], optional): angles of rotation for the spatial axes.</span>
-<span class="sd">                Must be: (A_Z, A_Y, A_X).</span>
-<span class="sd">                Defaults to (0, 0, 0).</span>
-<span class="sd">            translation (Tuple[float], optional): translation vector for the spatial axes.</span>
-<span class="sd">                Must be: (T_Z, T_Y, T_X).</span>
-<span class="sd">                Defaults to (0, 0, 0).</span>
-<span class="sd">            scale (Tuple[float], optional): scales for the spatial axes.</span>
-<span class="sd">                Must be: (S_Z, S_Y, S_X).</span>
-<span class="sd">                Defaults to (1, 1, 1).</span>
-<span class="sd">            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.</span>
-<span class="sd">                Must be: (S1, S2, S3).</span>
-<span class="sd">                Defaults to (1, 1, 1).</span>
-<span class="sd">            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.</span>
-<span class="sd">            interpolation (Int, optional): The order of spline interpolation. Defaults to 1.</span>
-<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
-<span class="sd">                boundaries. Defaults to &#39;constant&#39;.</span>
-<span class="sd">            ival (float, optional): Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
-<span class="sd">            mval (float, optional): Value to fill past edges of mask if mode is &#39;constant&#39;. Defaults to 0.</span>
-<span class="sd">            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with</span>
-<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">            angles (Tuple[float], optional): Angles of rotation for the spatial axes.</span>
+
+<span class="sd">                Must be: ``(A_Z, A_Y, A_X)``.</span>
+
+<span class="sd">                Defaults to ``(0, 0, 0)``.</span>
+<span class="sd">            translation (Tuple[float], optional): Translation vector for the spatial axes.</span>
+
+<span class="sd">                Must be: ``(T_Z, T_Y, T_X)``.</span>
+
+<span class="sd">                Defaults to ``(0, 0, 0)``.</span>
+<span class="sd">            scale (Tuple[float], optional): Scales for the spatial axes.</span>
+
+<span class="sd">                Must be: ``(S_Z, S_Y, S_X)``.</span>
+
+<span class="sd">                Defaults to ``(1, 1, 1)``.</span>
+<span class="sd">            spacing (Tuple[float, float, float], optional): Voxel spacing for individual spatial dimensions.</span>
+
+<span class="sd">                Must be: `(S1, S2, S3)`` (a scale for each spatial dimension must be given).</span>
+
+<span class="sd">                Defaults to ``(1, 1, 1)``.</span>
+<span class="sd">            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.</span>
+
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            interpolation (int, optional): Order of spline interpolation.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;constant&#39;``.</span>
+<span class="sd">            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
+
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">angles</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
                  <span class="n">translation</span><span class="p">:</span> <span class="n">TypeTripletFloat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
@@ -987,14 +1136,20 @@
 <span class="sd">        It is recommended to input dataset-wide means and standard deviations.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            mean (float | List[float]): channel-wise image mean. Must be either of: M, (M_1, M_2, ..., M_C).</span>
-<span class="sd">            std (float | List[float]): channel-wise image standard deviation. Must be either of: S, (S_1, S_2, ..., S_C).</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">            mean (float | List[float]): Channel-wise image mean.</span>
+
+<span class="sd">                Must be either of: ``M``, ``(M_1, M_2, ..., M_C)``.</span>
+<span class="sd">            std (float | List[float]): Channel-wise image standard deviation.</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S_1, S_2, ..., S_C)``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span> <span class="n">std</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">],</span>
                  <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
@@ -1020,28 +1175,38 @@
 <span class="k">class</span> <span class="nc">GaussianBlur</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs Gaussian blur on the image. In case of a multi-channel image, individual channels are blured separately.</span>
 
-<span class="sd">        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,</span>
-<span class="sd">         arguments are forwarded to it. More details at:</span>
+<span class="sd">        Internally, the ``scipy.ndimage.gaussian_filter`` function is used. The ``border_mode`` and ``cval``</span>
+<span class="sd">        arguments are forwarded to it. More details at:</span>
 <span class="sd">        https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Gaussian sigma.</span>
-<span class="sd">                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],</span>
-<span class="sd">                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or</span>
-<span class="sd">                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].</span>
-<span class="sd">                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S_Z, S_Y, S_X)``, ``(S_Z, S_Y, S_X, S_T)``, ``[S_1, S_2, ..., S_C]``,</span>
+<span class="sd">                ``[(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)]``, or</span>
+<span class="sd">                ``[(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)]``.</span>
+
+<span class="sd">                If a float, the spatial dimensions are blurred with the same strength (equivalent to ``(S, S, S)``).</span>
+
 <span class="sd">                If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.</span>
+
 <span class="sd">                If a list, sigmas for each channel must be specified either as a single number or as a tuple.</span>
-<span class="sd">                Defaults to 0.8.</span>
-<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
-<span class="sd">                boundaries. Defaults to &quot;reflect&quot;.</span>
-<span class="sd">            cval (float, optional):  Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+
+<span class="sd">                Defaults to ``0.8``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;reflect&#39;``.</span>
+<span class="sd">            cval (float, optional): Value to fill past edges of image. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span> <span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">float</span><span class="p">]]]</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
                  <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">cval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1067,32 +1232,43 @@
 <span class="sd">        In case of a multi-channel image, individual channels are blured separately.</span>
 
 <span class="sd">        Behaves similarly to GaussianBlur. The Gaussian sigma is randomly drawn from</span>
-<span class="sd">        the interval [min_sigma, s] for the respective s from max_sigma for each channel and dimension.</span>
+<span class="sd">        the interval [min_sigma, s] for the respective s from ``max_sigma`` for each channel and dimension.</span>
 
-<span class="sd">        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,</span>
-<span class="sd">         arguments are forwarded to it. More details at:</span>
+<span class="sd">        Internally, the ``scipy.ndimage.gaussian_filter`` function is used. The ``border_mode`` and ``cval``</span>
+<span class="sd">        arguments are forwarded to it. More details at:</span>
 <span class="sd">        https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            max_sigma (float, Tuple(float), List[Tuple(float) | float] , optional): maximum Gaussian sigma.</span>
-<span class="sd">                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],</span>
-<span class="sd">                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or</span>
-<span class="sd">                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].</span>
-<span class="sd">                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).</span>
+<span class="sd">            max_sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Maximum Gaussian sigma.</span>
+
+<span class="sd">                Must be either of: ``S``, ``(S_Z, S_Y, S_X)``, ``(S_Z, S_Y, S_X, S_T)``, ``[S_1, S_2, ..., S_C]``,</span>
+<span class="sd">                ``[(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)]``, or</span>
+<span class="sd">                ``[(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)]``.</span>
+
+<span class="sd">                If a float, the spatial dimensions are blurred equivalently (equivalent to ``(S, S, S)``).</span>
+
 <span class="sd">                If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.</span>
+
 <span class="sd">                If a list, sigmas for each channel must be specified either as a single number or as a tuple.</span>
-<span class="sd">                Defaults to 0.8.</span>
-<span class="sd">            min_sigma (float, optional): minimum Gaussian sigma. It is the same for all channels and dimensions.</span>
-<span class="sd">                Defaults to 0.</span>
-<span class="sd">            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its</span>
-<span class="sd">                boundaries. Defaults to &quot;reflect&quot;.</span>
-<span class="sd">            cval (float, optional):  Value to fill past edges of image if mode is &#39;constant&#39;. Defaults to 0.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+
+<span class="sd">                Defaults to ``0.8``.</span>
+<span class="sd">            min_sigma (float, optional): Minimum Gaussian sigma for all channels and dimensions.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;reflect&#39;``.</span>
+<span class="sd">            cval (float, optional): Value to fill past edges of image. Only applied when ``border_mode = &#39;constant&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_sigma</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">TypeTripletFloat</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
                  <span class="n">min_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;reflect&quot;</span><span class="p">,</span> <span class="n">cval</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1131,17 +1307,21 @@
 <div class="viewcode-block" id="RandomGamma">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.RandomGamma">[docs]</a>
 <span class="k">class</span> <span class="nc">RandomGamma</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs the gamma transform with a randomly chosen gamma. If image values (in any channel) are outside</span>
-<span class="sd">        the [0,1] interval, this transformation is skipped.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs the gamma transformation with a randomly chosen gamma. If image values (in any channel) are outside</span>
+<span class="sd">        the [0,1] interval, this transformation is not performed.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            gamma_limit (Tuple(float), optional): interval from which gamma is selected. Defaults to (0.8, 1.2).</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">            gamma_limit (Tuple(float), optional): Interval from which gamma is selected.</span>
+
+<span class="sd">                Defaults to ``(0.8, 1.2)``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gamma_limit</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">1.2</span><span class="p">),</span>
                  <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">):</span>
@@ -1170,25 +1350,34 @@
 <span class="k">class</span> <span class="nc">RandomBrightnessContrast</span><span class="p">(</span><span class="n">ImageOnlyTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Randomly change brightness and contrast of the input image.</span>
 
-<span class="sd">        Unlike RandomBrightnessContrast from Albumentations, this transform is using the</span>
+<span class="sd">        Unlike ``RandomBrightnessContrast`` from `Albumentations`, this transform is using the</span>
 <span class="sd">        formula :math:`f(a) = (c+1) * a + b`, where :math:`c` is contrast and :math:`b` is brightness.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            brightness_limit ((float, float) | float, optional): interval from which the change in brightness is</span>
-<span class="sd">                randomly drawn. Must be either of: B, (B1, B2).</span>
-<span class="sd">                If a float, the interval will be (-B, B).</span>
-<span class="sd">                If the change in brightness is 0, the brightness will not change.</span>
-<span class="sd">                Defaults to 0.2.</span>
-<span class="sd">            contrast_limit ((float, float) | float, optional): interval from which the change in contrast is</span>
-<span class="sd">                randomly drawn. Must be either of: C, (C1, C2).</span>
-<span class="sd">                If a float, the interval will be (-C, C). If the change in contrast is 1,</span>
-<span class="sd">                the contrast will not change. Defaults to 0.2.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">            brightness_limit ((float, float) | float, optional): Interval from which the change in brightness is</span>
+<span class="sd">                randomly drawn. If the change in brightness is 0, the brightness will not change.</span>
+
+<span class="sd">                Must be either of: ``B``, ``(B1, B2)``.</span>
+
+<span class="sd">                If a float, the interval will be ``(-B, B)``.</span>
+
+<span class="sd">                Defaults to ``0.2``.</span>
+<span class="sd">            contrast_limit ((float, float) | float, optional): Interval from which the change in contrast is</span>
+<span class="sd">                randomly drawn. If the change in contrast is 1, the contrast will not change.</span>
+
+<span class="sd">                Must be either of: ``C``, ``(C1, C2)``.</span>
+
+<span class="sd">                If a float, the interval will be ``(-C, C)``.</span>
+
+<span class="sd">                Defaults to ``0.2``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">brightness_limit</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">contrast_limit</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">always_apply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
@@ -1222,16 +1411,20 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Performs equalization of histogram. The equalization is done channel-wise, meaning that each channel is equalized</span>
 <span class="sd">        separately.</span>
 
-<span class="sd">        Warning! Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].</span>
+<span class="sd">        **Warning!** Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            bins (int, optional): Number of bins for image histogram. Defaults to 256.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">            bins (int, optional): Number of bins for image histogram.</span>
+
+<span class="sd">                Defaults to ``256``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">256</span><span class="p">,</span> <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">always_apply</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
@@ -1248,36 +1441,45 @@
 <div class="viewcode-block" id="Pad">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Pad">[docs]</a>
 <span class="k">class</span> <span class="nc">Pad</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pads the input based on pad_size.</span>
-
-<span class="sd">        If pad_size is a single number, all spatial axes are padded on both sides</span>
-<span class="sd">        with this number. If it is tuple, then it has same behaviour as pad_size except sides are padded with different </span>
-<span class="sd">        number of pixels. If it is List, then it must have 3 items, which define padding for each spatial dimension</span>
-<span class="sd">        separately (in either of the ways described above). If the List is shorter, remaining axes are padded with 0. </span>
-
-<span class="sd">        For other parameters check https://numpy.org/doc/stable/reference/generated/numpy.pad.html    </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Pads the input.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            pad_size (int | Tuple[int] | List[int | Tuple[int]]): number of pixels padded to the edges of each axis.</span>
-<span class="sd">                Must be either of: P, (P1, P2), [P_Z, P_Y, P_X], [P_Z, P_Y, P_X, P_T],</span>
-<span class="sd">                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)], or</span>
-<span class="sd">                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2), (P_T1, P_T2)].</span>
-<span class="sd">                If an integer, it is equivalent to [(P, P), (P, P), (P, P)].</span>
-<span class="sd">                If a tuple, it is equivalent to [(P1, P2), (P1, P2), (P1, P2)].</span>
+<span class="sd">            pad_size (int | Tuple[int] | List[int | Tuple[int]]): Number of pixels padded to the edges of each axis.</span>
+
+<span class="sd">                Must be either of: ``P``, ``(P1, P2)``, ``[P_Z, P_Y, P_X]``, ``[P_Z, P_Y, P_X, P_T]``,</span>
+<span class="sd">                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)]``, or</span>
+<span class="sd">                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2), (P_T1, P_T2)]``.</span>
+
+<span class="sd">                If an integer, it is equivalent to ``[(P, P), (P, P), (P, P)]``.</span>
+
+<span class="sd">                If a tuple, it is equivalent to ``[(P1, P2), (P1, P2), (P1, P2)]``.</span>
+
 <span class="sd">                If a list, it must specify padding for all spatial dimensions and possibly also for the time dimension.</span>
+
 <span class="sd">                The unspecified dimensions (C and possibly T) are not affected.</span>
-<span class="sd">            border_mode (str, optional): `numpy.pad` parameter . Defaults to &#39;constant&#39;.</span>
-<span class="sd">            ival (float | Sequence, optional): value for image if needed by chosen border_mode. Defaults to 0.</span>
-<span class="sd">            mval (float | Sequence, optional): value for mask if needed by chosen border_mode. Defaults to 0.</span>
-<span class="sd">            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with </span>
-<span class="sd">                border_mode = &quot;constant&quot; and mval = ignore_index. If ignore_index is None, then it does nothing.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.</span>
+<span class="sd">            border_mode (str, optional): Values outside image domain are filled according to this mode.</span>
+
+<span class="sd">                Defaults to ``&#39;constant&#39;``.</span>
+<span class="sd">            ival (float | Sequence, optional): Values of `image` voxels outside of the `image` domain.</span>
+<span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            mval (float | Sequence, optional): Values of `mask` voxels outside of the `mask` domain.</span>
+<span class="sd">                Only applied when ``border_mode = &#39;constant&#39;`` or ``border_mode = &#39;linear_ramp&#39;``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with</span>
+<span class="sd">                ``border_mode = &#39;constant&#39;`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.</span>
+
+<span class="sd">                Defaults to ``None``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``0.5``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image, mask</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pad_size</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>  <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]]]],</span> <span class="n">border_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span>
                  <span class="n">ival</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
@@ -1317,16 +1519,24 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Change image mean and standard deviation to the given values (channel-wise).</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            mean (float | List[float], optional): the desired channel-wise means.</span>
-<span class="sd">                Must be either of: M, [M_1, M_2, ..., M_C]. Defaults to 0.</span>
-<span class="sd">            std (float | List[float], optional): the desired channel-wise standard deviations.</span>
-<span class="sd">                Must be either of: S, [S_1, S_2, ..., S_C]. Defaults to 1.</span>
-<span class="sd">            always_apply (bool, optional): always apply transformation in composition. Defaults to False.</span>
-<span class="sd">            p (float, optional): chance of applying transformation in composition. Defaults to 1.</span>
+<span class="sd">            mean (float | List[float], optional): The desired channel-wise means.</span>
+
+<span class="sd">                Must be either of: ``M``, ``[M_1, M_2, ..., M_C]``.</span>
+
+<span class="sd">                Defaults to ``0``.</span>
+<span class="sd">            std (float | List[float], optional): The desired channel-wise standard deviations.</span>
+
+<span class="sd">                Must be either of: ``S``, ``[S_1, S_2, ..., S_C]``.</span>
+
+<span class="sd">                Defaults to ``1``.</span>
+<span class="sd">            always_apply (bool, optional): Always apply this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``False``.</span>
+<span class="sd">            p (float, optional): Chance of applying this transformation in composition. </span>
+<span class="sd">            </span>
+<span class="sd">                Defaults to ``1``.</span>
 <span class="sd">        Targets:</span>
 <span class="sd">            image</span>
-<span class="sd">        Image types:</span>
-<span class="sd">            float32</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">std</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
                  <span class="n">always_apply</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">):</span>
@@ -1349,6 +1559,9 @@
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Contiguous">[docs]</a>
 <span class="k">class</span> <span class="nc">Contiguous</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform the image data to a contiguous array.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Contiguous.apply">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Contiguous.apply">[docs]</a>
@@ -1370,7 +1583,10 @@
 <div class="viewcode-block" id="Float">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Float">[docs]</a>
 <span class="k">class</span> <span class="nc">Float</span><span class="p">(</span><span class="n">DualTransform</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Change datatype to np.float32 without changing the image values.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Change datatype to ``np.float32`` without changing intensities.</span>
+
+<span class="sd">        Targets:</span>
+<span class="sd">            image, mask</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 <div class="viewcode-block" id="Float.apply">
 <a class="viewcode-back" href="../../../modules2.html#bio_volumentations.augmentations.transforms.Float.apply">[docs]</a>

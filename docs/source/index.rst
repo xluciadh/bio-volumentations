@@ -5,7 +5,7 @@ Welcome to Bio-Volumentations's documentation!
 
 `Bio-Volumentations` is an image augmentation and preprocessing package for 3D, 4D, and 5D biomedical images.
 
-It offers a wide range of transforms for volumetric images, an easy-to-use API, a neat Getting Started guide,
+The library offers a wide range of efficiently implemented transforms for volumetric images, an easy-to-use API, a neat Getting Started guide,
 and can be used to manipulate your image data in any context.
 
 .. toctree::

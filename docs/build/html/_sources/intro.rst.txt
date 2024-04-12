@@ -2,7 +2,7 @@ Introduction
 ============
 `Bio-Volumentations` is an image augmentation and preprocessing package for 3D, 4D, and 5D biomedical images.
 
-It offers a range of image transformations implemented efficiently for time-lapse multi-channel volumetric image data.
+The library offers a range of image transformations implemented efficiently for time-lapse multi-channel volumetric image data.
 This includes both preprocessing transformations (such as intensity normalisation, padding, and type casting)
 and augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
 

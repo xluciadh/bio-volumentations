@@ -27,7 +27,7 @@ Thus, the input images can have these shapes:
 - [C, Z, Y, X, T] (a single-channel as well as multi-channel volumetric image sequence)
 
 **It is strongly recommended to use** :class:`Compose` **to create and use transformations.**
-The :class:`Compose` class automatically checks and adjusts image format, datatype, stacks
+The :class:`Compose` class automatically checks and adjusts image format and datatype, stacks
 individual transforms to a pipeline, and outputs the image as a contiguous array.
 Optionally, it can also convert the transformed image to a desired format.
 
@@ -57,10 +57,10 @@ Example: Transforming a Single Image
     aug_data = aug(**data)
     transformed_img = aug_data['image']
 
-Example: Transforming a Image Pairs
+Example: Transforming Image Pairs
 ***********************************
 Sometimes, it is necessary to consistently transform a tuple of corresponding images.
-To that end, Bio-Volumentations define several target types:
+To that end, `Bio-Volumentations` define several target types:
 
 - :class:`image` for the image data
 - :class:`mask` for integer-valued label images

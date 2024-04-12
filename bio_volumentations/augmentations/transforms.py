@@ -48,21 +48,26 @@ from ..typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
 from .utils import parse_limits, parse_coefs, to_tuple
 
 
-# Potential upgrade : different sigmas for different channels
+# TODO potential upgrade : different sigmas for different channels
 class GaussianNoise(ImageOnlyTransform):
     """Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.
 
         Args:
-            var_limit (tuple, optional): variance of normal distribution is randomly chosen from this interval.
-              Defaults to (0.001, 0.1).
-            mean (float, optional): mean of normal distribution. Defaults to 0.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+            var_limit (tuple, optional): Variance of normal distribution is randomly chosen from this interval.
+
+                Defaults to ``(0.001, 0.1)``.
+            mean (float, optional): Mean of normal distribution.
+
+                Defaults to ``0``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``0.5``.
 
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, var_limit: tuple = (0.001, 0.1), mean: float = 0,
                  always_apply: bool = False, p: float = 0.5):
@@ -83,11 +88,21 @@ class GaussianNoise(ImageOnlyTransform):
 
 
 class PoissonNoise(ImageOnlyTransform):
-    """Adds poisson noise to the image.
+    """Adds Poisson noise to the image.
 
         Args:
-            intensity_limit (tuple): Range to sample expected intensity of added poisson noise.
-                Defaults to (1, 10).
+            intensity_limit (tuple): Range to sample the expected intensity of Poisson noise.
+
+                Defaults to ``(1, 10)``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``0.5``.
+
+        Targets:
+            image
     """
     def __init__(self,
                  intensity_limit=(1, 10),
@@ -110,32 +125,46 @@ class PoissonNoise(ImageOnlyTransform):
 class Resize(DualTransform):
     """Resize input to the given shape.
 
-        Internally, the skimage `resize` function is used. The `interpolation`, `border_mode`, `ival`, `mval`,
-         and `anti_aliasing_downsample` arguments are forwarded to it. More details at:
+        Internally, the ``skimage.transform.resize`` function is used.
+        The ``interpolation``, ``border_mode``, ``ival``, ``mval``,
+        and ``anti_aliasing_downsample`` arguments are forwarded to it. More details at:
         https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize.
 
         Args:
-            shape (tuple of ints): the desired image shape. Must be of either of: (Z, Y, X) or (Z, Y, X, T).
+            shape (tuple of ints): The desired image shape.
+
+                Must be of either of: ``(Z, Y, X)`` or ``(Z, Y, X, T)``.
+
                 The unspecified dimensions (C and possibly T) are not affected.
-            interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
-            border_mode (string, optional): points outside image are filled according to this mode.
-                Defaults to 'reflect'.
-            ival (float, optional): value outside of image when the border_mode is chosen to be "constant".
-                Defaults to 0.
-            mval (float, optional): value outside of mask when the border_mode is chosen to be "constant".
-                Defaults to 0.
-            anti_aliasing_downsample (bool, optional): controls if the gaussian filter should be used on image before
-                downsampling, recommended. Defaults to True.
-            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with 
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+            interpolation (int, optional): Order of spline interpolation.
+
+                Defaults to ``1``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'reflect'``.
+            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+            
+                Defaults to ``0``.
+            anti_aliasing_downsample (bool, optional): Controls if the Gaussian filter should be applied before
+                downsampling. Recommended. 
+                
+                Defaults to ``True``.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with 
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+                
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
 
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, shape: tuple, interpolation: int = 1, border_mode: str = 'reflect', ival: float = 0,
                  mval: float = 0, anti_aliasing_downsample: bool = True, ignore_index: Union[float, None] = None,
@@ -173,26 +202,49 @@ class Scale(DualTransform):
 
         Args:
             scales (float|List[float], optional): Value by which the input should be scaled.
-                Must be either of: S, [S_Z, S_Y, S_X], or [S_Z, S_Y, S_X, S_T].
-                If it is a float, then all spatial dimensions are scaled by it (S is equivalent to [S, S, S]).
+
+                Must be either of: ``S``, ``[S_Z, S_Y, S_X]``, or ``[S_Z, S_Y, S_X, S_T]``.
+
+                If a float, then all spatial dimensions are scaled by it (equivalent to ``[S, S, S]``).
+
                 The unspecified dimensions (C and possibly T) are not affected.
-                Defaults to 1.
-            interpolation (int, optional): order of spline interpolation for image. Defaults to 1.
-            border_mode (str, optional): points outside image are filled according to this mode.
-                Defaults to 'constant'.
-            ival (float, optional): value outside of image when the border_mode is chosen to be "constant".
-                Defaults to 0.
-            mval (float, optional): value outside of mask when the border_mode is chosen to be "constant".
-                Defaults to 0.
-            ignore_index (float | None, optional): If ignore_index is float, then transformation of mask is done with 
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+
+                Defaults to ``1``.
+            interpolation (int, optional): Order of spline interpolation.
+
+                Defaults to ``1``.
+            spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
+
+                Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.
+
+                If ``None``, equivalent to ``(1, 1, 1)``.
+
+                If a float ``S``, equivalent to ``(S, S, S)``.
+
+                Otherwise, a scale for each spatial dimension must be given.
+
+                Defaults to ``None``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'constant'``.
+            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, scales: Union[float, TypeTripletFloat] = 1,
                  interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
@@ -242,28 +294,36 @@ class RandomScale(DualTransform):
 
                 Must be either of: ``S``, ``(S1, S2)``, ``(S_Z, S_Y, S_X)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
-                If it is a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from
+                If a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from
                 the interval [1-S, 1+S] (equivalent to inputting ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``).
 
-                If it is a tuple of 2 numbers, then all spatial dimensions are scaled by a random number drawn uniformly
+                If a tuple of 2 floats, then all spatial dimensions are scaled by a random number drawn uniformly
                 from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).
 
-                If it is a tuple of 3 numbers, then an interval [1-S_a, 1+S_a] is constructed for each spatial
+                If a tuple of 3 floats, then an interval [1-S_a, 1+S_a] is constructed for each spatial
                 dimension and the scale is randomly drawn from it
                 (equivalent to inputting ``(1-S_Z, 1+S_Z, 1-S_Y, 1+S_Y, 1-S_X, 1+S_X)``).
 
-                If it is a tuple of 6 numbers, the scales for individual spatial dimensions are randomly drawn from the
+                If a tuple of 6 floats, the scales for individual spatial dimensions are randomly drawn from the
                 respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
 
                 The unspecified dimensions (C and T) are not affected.
 
                 Defaults to ``(0.9, 1.1)``.
 
-            interpolation (int, optional): Order of spline interpolation for the image.
+            interpolation (int, optional): Order of spline interpolation.
 
                 Defaults to ``1``.
 
-            spacing (TripleFloats | float | None): TBA
+            spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
+
+                Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.
+
+                If ``None``, equivalent to ``(1, 1, 1)``.
+
+                If a float ``S``, equivalent to ``(S, S, S)``.
+
+                Otherwise, a scale for each spatial dimension must be given.
 
                 Defaults to ``None``.
 
@@ -271,31 +331,29 @@ class RandomScale(DualTransform):
 
                 Defaults to ``'constant'``.
 
-            ival (float, optional): Value outside of image when the border_mode is chosen to be ``'constant'``.
+            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
 
-            mval (float, optional): Value outside of mask when the border_mode is chosen to be "constant".
+            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
 
-            ignore_index (float | None, optional): If ``ignore_index`` is float, then transformation of mask is done with
-                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, then it does nothing.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
 
                 Defaults to ``None``.
 
-            always_apply (bool, optional): Always apply transformation in composition.
+            always_apply (bool, optional): Always apply this transformation in composition.
 
                 Defaults to ``False``.
 
-            p (float, optional): Chance of applying transformation in composition.
+            p (float, optional): Chance of applying this transformation in composition.
 
                 Defaults to ``0.5``.
 
         Targets:
             image, mask
-        Image types:
-            float32
     """      
     def __init__(self, scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.9, 1.1),
                  interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
@@ -347,17 +405,22 @@ class RandomRotate90(DualTransform):
     """Rotation of input by 0, 90, 180, or 270 degrees around the specified spatial axes.
 
         Args:
-            axes (List[int], optional): list of axes around which the input is rotated (recognised axis symbols are
-                1 for Z, 2 for Y, and 3 for X). A single axis can occur multiple times in the list.
-                If `shuffle_axis` is `False`, the order of axes determines the order of transformations.
-                Defaults to [1, 2, 3].
-            shuffle_axis (bool, optional): If set to `True`, order of rotations is random. Defaults to False.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+            axes (List[int], optional): List of axes around which the input is rotated. Recognised axis symbols are
+                ``1`` for Z, ``2`` for Y, and ``3`` for X. A single axis can occur multiple times in the list.
+                If ``shuffle_axis = False``, the order of axes determines the order of transformations.
+
+                Defaults to ``[1, 2, 3]``.
+            shuffle_axis (bool, optional): If set to ``True``, the order of rotations is random.
+
+                Defaults to ``False``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, axes: List[int] = None, shuffle_axis: bool = False,
                  always_apply: bool = False, p: float = 0.5):
@@ -406,14 +469,18 @@ class Flip(DualTransform):
     """Flip input around the specified spatial axes.
 
         Args:
-            axes (List[int], optional): list of axes around which is flip done (recognised axis symbols are
-                1 for Z, 2 for Y, and 3 for X). Defaults to [1,2,3].
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+            axes (List[int], optional): List of axes around which is flip done. Recognised axis symbols are
+                ``1`` for Z, ``2`` for Y, and `3` for X.
+
+                Defaults to ``[1,2,3]``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, axes: List[int] = None, always_apply=False, p=1):
         super().__init__(always_apply, p)
@@ -442,18 +509,22 @@ class RandomFlip(DualTransform):
     """Flip input around a set of axes randomly chosen from the input list of axis combinations.
 
         Args:
-            axes_to_choose (List[Tuple[int]] or None, optional): a list of axis combinations from which one option
-                is randomly chosen (recognised axis symbols are 1 for Z, 2 for Y, and 3 for X).
+            axes_to_choose (List[Tuple[int]] or None, optional): List of axis combinations from which one option
+                is randomly chosen. Recognised axis symbols are ``1`` for Z, ``2`` for Y, and ``3`` for X.
                 The image will be flipped around all axes in the chosen combination.
-                If None, a random subset of spatial axes is chosen, corresponding to inputting
-                [(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)].
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+
+                If ``None``, a random subset of spatial axes is chosen, corresponding to inputting
+                ``[(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]``.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, always_apply=False, p=0.5):
         super().__init__(always_apply, p)
@@ -486,26 +557,38 @@ class RandomFlip(DualTransform):
 class CenterCrop(DualTransform):
     """Crops the central region of the input of given size.
           
-        Unlike CenterCrop from Albumentations, this transform pads the input in dimensions 
-        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`
-        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:
+        Unlike ``CenterCrop`` from `Albumentations`, this transform pads the input in dimensions
+        where the input is smaller than the ``shape`` with ``numpy.pad``. The ``border_mode``, ``ival`` and ``mval``
+        arguments are forwarded to ``numpy.pad`` if padding is necessary. More details at:
         https://numpy.org/doc/stable/reference/generated/numpy.pad.html.
 
         Args:
-            shape (Tuple[int]): the desired shape of input.
-                Must be either of: [Z, Y, X] or [Z, Y, X, T].
-            border_mode (str, optional): border mode used for numpy.pad. Defaults to "reflect".
-            ival (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for image. Defaults to (0, 0).
-            mval (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for mask. Defaults to (0, 0).
-            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with
-                `border_mode = "constant"` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+            shape (Tuple[int]): The desired shape of input.
+
+                Must be either of: ``[Z, Y, X]`` or ``[Z, Y, X, T]``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'reflect'``.
+            ival (float | Sequence, optional): Values of `image` voxels outside of the `image` domain.
+                Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
+
+                Defaults to ``(0, 0)``.
+            mval (float | Sequence, optional): Values of `mask` voxels outside of the `mask` domain.
+                Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
+
+                Defaults to ``(0, 0)``.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, shape: Tuple[int], border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
@@ -534,25 +617,38 @@ class CenterCrop(DualTransform):
 class RandomCrop(DualTransform):
     """Randomly crops a region of given size from the input.
 
-        Unlike RandomCrop from Albumentations, this transform pads the input in dimensions
-        where the input is smaller than the `shape` with `numpy.pad`. The `border_mode`, `ival` and `mval`
-        arguments are forwarded to `numpy.pad` if padding is necessary. More details at:
+        Unlike ``RandomCrop`` from `Albumentations`, this transform pads the input in dimensions
+        where the input is smaller than the ``shape`` with ``numpy.pad``. The ``border_mode``, ``ival`` and ``mval``
+        arguments are forwarded to ``numpy.pad`` if padding is necessary. More details at:
         https://numpy.org/doc/stable/reference/generated/numpy.pad.html.
 
         Args:
-            shape (Tuple[int]): the desired shape of input. Must be either of: [Z, Y, X] or [Z, Y, X, T].
-            border_mode (str, optional): border mode used for numpy.pad. Defaults to "reflect".
-            ival (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for image. Defaults to (0, 0).
-            mval (Tuple[float], optional): values used for 'constant' or 'linear_ramp' for mask. Defaults to (0, 0).
-            ignore_index (float | None, optional): if `ignore_index` is a float, then transformation of mask is done with
-                `border_mode = "constant"` and `mval = ignore_index`. If ignore_index is `None`, then it does nothing.
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+            shape (Tuple[int]): The desired shape of input.
+
+                Must be either of: ``[Z, Y, X]`` or ``[Z, Y, X, T]``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'reflect'``.
+            ival (float | Sequence, optional): Values of `image` voxels outside of the `image` domain.
+                Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
+
+                Defaults to ``(0, 0)``.
+            mval (float | Sequence, optional): Values of `mask` voxels outside of the `mask` domain.
+                Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
+
+                Defaults to ``(0, 0)``.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, shape: tuple, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
@@ -588,50 +684,82 @@ class RandomAffineTransform(DualTransform):
     """Affine transformation of the input image with randomly chosen parameters.
 
         Args:
-            angle_limit (Tuple[float] | float, optional): intervals in degrees from which angles of
+            angle_limit (Tuple[float] | float, optional): Intervals in degrees from which angles of
                 rotation for the spatial axes are chosen.
-                Must be either of: A, (A1, A2), or (A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2).
-                If a float, equivalent to (-A, A, -A, A, -A, A).
-                If a tuple with 2 items, equivalent to (A1, A2, A1, A2, A1, A2).
+
+                Must be either of: ``A``, ``(A1, A2)``, or ``(A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2)``.
+
+                If a float, equivalent to ``(-A, A, -A, A, -A, A)``.
+
+                If a tuple with 2 items, equivalent to ``(A1, A2, A1, A2, A1, A2)``.
+
                 If a tuple with 6 items, angle of rotation is randomly chosen from an interval [A_a1, A_a2] for each
                 spatial axis.
-                Defaults to (15, 15, 15).
-            translation_limit (Tuple[int] | int | None, optional): intervals from which the translation parameters
+
+                Defaults to ``(15, 15, 15)``.
+            translation_limit (Tuple[int] | int | None, optional): Intervals from which the translation parameters
                 for the spatial axes are chosen.
-                Must be either of: T, (T1, T2), or (T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2).
-                If a float, equivalent to (-T, T, -T, T, -T, T).
-                If a tuple with 2 items, equivalent to (T1, T2, T1, T2, T1, T2).
+
+                Must be either of: ``T``, ``(T1, T2)``, or ``(T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2)``.
+
+                If a float, equivalent to ``(-T, T, -T, T, -T, T)``.
+
+                If a tuple with 2 items, equivalent to ``(T1, T2, T1, T2, T1, T2)``.
+
                 If a tuple with 6 items, the translation parameter is randomly chosen from an interval [T_a1, T_a2] for
                 each spatial axis.
-                Defaults to (0, 0, 0).
-            scaling_limit (Tuple[float] | float, optional): intervals from which the scales for the spatial axes are chosen.
-                Must be either of: S, (S1, S2), or (S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2).
-                If a float, equivalent to (1-S, 1+S, 1-S, 1+S, 1-S, 1+S).
-                If a tuple with 2 items, equivalent to (S1, S2, S1, S2, S1, S2).
+
+                Defaults to ``(0, 0, 0)``.
+            scaling_limit (Tuple[float] | float, optional): Intervals from which the scales for the spatial axes are chosen.
+
+                Must be either of: ``S``, ``(S1, S2)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
+
+                If a float, equivalent to ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``.
+
+                If a tuple with 2 items, equivalent to ``(S1, S2, S1, S2, S1, S2)``.
+
                 If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
                 each spatial axis.
-                Defaults to (0.2, 0.2, 0.2).
-            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.
-                Must be either of: S, (S1, S2, S3), or None.
-                If `None`, equivalent to (1, 1, 1).
-                If a float S, equivalent to (S, S, S).
-                If a tuple with 3 items, the scale is (S1, S2, S3).
-                Defaults to None.
-            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.
-            interpolation (Int, optional): The order of spline interpolation. Defaults to 1.
-            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
-                boundaries. Defaults to 'constant'.
-            ival (float, optional): Value to fill past edges of image if mode is 'constant'. Defaults to 0.
-            mval (float, optional): Value to fill past edges of mask if mode is 'constant'. Defaults to 0.
-            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with 
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+
+                Defaults to ``(0.2, 0.2, 0.2)``.
+            spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
+
+                Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.
+
+                If ``None``, equivalent to ``(1, 1, 1)``.
+
+                If a float ``S``, equivalent to ``(S, S, S)``.
+
+                Otherwise, a scale for each spatial dimension must be given.
+
+                Defaults to ``None``.
+            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
+
+                Defaults to ``False``.
+            interpolation (int, optional): Order of spline interpolation.
+
+                Defaults to ``1``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'constant'``.
+            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, angle_limit: Union[float, TypePairFloat, TypeSextetFloat] = (15, 15, 15),
                  translation_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0, 0, 0),
@@ -698,33 +826,54 @@ class AffineTransform(DualTransform):
     """Affine transformation of the input image with given parameters.
 
         Args:
-            angles (Tuple[float], optional): angles of rotation for the spatial axes.
-                Must be: (A_Z, A_Y, A_X).
-                Defaults to (0, 0, 0).
-            translation (Tuple[float], optional): translation vector for the spatial axes.
-                Must be: (T_Z, T_Y, T_X).
-                Defaults to (0, 0, 0).
-            scale (Tuple[float], optional): scales for the spatial axes.
-                Must be: (S_Z, S_Y, S_X).
-                Defaults to (1, 1, 1).
-            spacing (float | Tuple[float, float, float] | None, optional): voxel spacing for individual spatial dimensions.
-                Must be: (S1, S2, S3).
-                Defaults to (1, 1, 1).
-            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic. Defaults to False.
-            interpolation (Int, optional): The order of spline interpolation. Defaults to 1.
-            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
-                boundaries. Defaults to 'constant'.
-            ival (float, optional): Value to fill past edges of image if mode is 'constant'. Defaults to 0.
-            mval (float, optional): Value to fill past edges of mask if mode is 'constant'. Defaults to 0.
-            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+            angles (Tuple[float], optional): Angles of rotation for the spatial axes.
+
+                Must be: ``(A_Z, A_Y, A_X)``.
+
+                Defaults to ``(0, 0, 0)``.
+            translation (Tuple[float], optional): Translation vector for the spatial axes.
+
+                Must be: ``(T_Z, T_Y, T_X)``.
+
+                Defaults to ``(0, 0, 0)``.
+            scale (Tuple[float], optional): Scales for the spatial axes.
+
+                Must be: ``(S_Z, S_Y, S_X)``.
+
+                Defaults to ``(1, 1, 1)``.
+            spacing (Tuple[float, float, float], optional): Voxel spacing for individual spatial dimensions.
+
+                Must be: `(S1, S2, S3)`` (a scale for each spatial dimension must be given).
+
+                Defaults to ``(1, 1, 1)``.
+            change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
+
+                Defaults to ``False``.
+            interpolation (int, optional): Order of spline interpolation.
+
+                Defaults to ``1``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'constant'``.
+            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
+
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, angles: TypeTripletFloat = (0, 0, 0),
                  translation: TypeTripletFloat = (0, 0, 0),
@@ -783,14 +932,20 @@ class NormalizeMeanStd(ImageOnlyTransform):
         It is recommended to input dataset-wide means and standard deviations.
 
         Args:
-            mean (float | List[float]): channel-wise image mean. Must be either of: M, (M_1, M_2, ..., M_C).
-            std (float | List[float]): channel-wise image standard deviation. Must be either of: S, (S_1, S_2, ..., S_C).
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+            mean (float | List[float]): Channel-wise image mean.
+
+                Must be either of: ``M``, ``(M_1, M_2, ..., M_C)``.
+            std (float | List[float]): Channel-wise image standard deviation.
+
+                Must be either of: ``S``, ``(S_1, S_2, ..., S_C)``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, mean: Union[List[float], float], std: Union[List[float], float],
                  always_apply: bool = True, p: float = 1.0):
@@ -810,28 +965,38 @@ class NormalizeMeanStd(ImageOnlyTransform):
 class GaussianBlur(ImageOnlyTransform):
     """Performs Gaussian blur on the image. In case of a multi-channel image, individual channels are blured separately.
 
-        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,
-         arguments are forwarded to it. More details at:
+        Internally, the ``scipy.ndimage.gaussian_filter`` function is used. The ``border_mode`` and ``cval``
+        arguments are forwarded to it. More details at:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.
 
         Args:
             sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Gaussian sigma.
-                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],
-                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or
-                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].
-                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).
+
+                Must be either of: ``S``, ``(S_Z, S_Y, S_X)``, ``(S_Z, S_Y, S_X, S_T)``, ``[S_1, S_2, ..., S_C]``,
+                ``[(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)]``, or
+                ``[(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)]``.
+
+                If a float, the spatial dimensions are blurred with the same strength (equivalent to ``(S, S, S)``).
+
                 If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.
+
                 If a list, sigmas for each channel must be specified either as a single number or as a tuple.
-                Defaults to 0.8.
-            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
-                boundaries. Defaults to "reflect".
-            cval (float, optional):  Value to fill past edges of image if mode is 'constant'. Defaults to 0.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+
+                Defaults to ``0.8``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'reflect'``.
+            cval (float, optional): Value to fill past edges of image. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, sigma: Union[float , Tuple[float], List[ Union[Tuple[float], float]]] = 0.8,
                  border_mode: str = "reflect", cval: float = 0,
@@ -851,32 +1016,43 @@ class RandomGaussianBlur(ImageOnlyTransform):
         In case of a multi-channel image, individual channels are blured separately.
 
         Behaves similarly to GaussianBlur. The Gaussian sigma is randomly drawn from
-        the interval [min_sigma, s] for the respective s from max_sigma for each channel and dimension.
+        the interval [min_sigma, s] for the respective s from ``max_sigma`` for each channel and dimension.
 
-        Internally, the scipy `gaussian_filter` function is used. The `border_mode` and`cval`,
-         arguments are forwarded to it. More details at:
+        Internally, the ``scipy.ndimage.gaussian_filter`` function is used. The ``border_mode`` and ``cval``
+        arguments are forwarded to it. More details at:
         https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.
 
         Args:
-            max_sigma (float, Tuple(float), List[Tuple(float) | float] , optional): maximum Gaussian sigma.
-                Must be either of: S, (S_Z, S_Y, S_X), (S_Z, S_Y, S_X, S_T), [S_1, S_2, ..., S_C],
-                [(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)], or
-                [(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)].
-                If a float, the spatial dimensions are blurred equivalently (equivalent to (S, S, S)).
+            max_sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Maximum Gaussian sigma.
+
+                Must be either of: ``S``, ``(S_Z, S_Y, S_X)``, ``(S_Z, S_Y, S_X, S_T)``, ``[S_1, S_2, ..., S_C]``,
+                ``[(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)]``, or
+                ``[(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)]``.
+
+                If a float, the spatial dimensions are blurred equivalently (equivalent to ``(S, S, S)``).
+
                 If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.
+
                 If a list, sigmas for each channel must be specified either as a single number or as a tuple.
-                Defaults to 0.8.
-            min_sigma (float, optional): minimum Gaussian sigma. It is the same for all channels and dimensions.
-                Defaults to 0.
-            border_mode (str, optional): The mode parameter determines how the input array is extended beyond its
-                boundaries. Defaults to "reflect".
-            cval (float, optional):  Value to fill past edges of image if mode is 'constant'. Defaults to 0.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+
+                Defaults to ``0.8``.
+            min_sigma (float, optional): Minimum Gaussian sigma for all channels and dimensions.
+
+                Defaults to ``0``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'reflect'``.
+            cval (float, optional): Value to fill past edges of image. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, max_sigma: Union[float, TypeTripletFloat] = 0.8,
                  min_sigma: float = 0, border_mode: str = "reflect", cval: float = 0,
@@ -906,17 +1082,21 @@ class RandomGaussianBlur(ImageOnlyTransform):
 
 
 class RandomGamma(ImageOnlyTransform):
-    """Performs the gamma transform with a randomly chosen gamma. If image values (in any channel) are outside
-        the [0,1] interval, this transformation is skipped.
+    """Performs the gamma transformation with a randomly chosen gamma. If image values (in any channel) are outside
+        the [0,1] interval, this transformation is not performed.
 
         Args:
-            gamma_limit (Tuple(float), optional): interval from which gamma is selected. Defaults to (0.8, 1.2).
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+            gamma_limit (Tuple(float), optional): Interval from which gamma is selected.
+
+                Defaults to ``(0.8, 1.2)``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, gamma_limit: Tuple[float] = (0.8, 1.2),
                  always_apply: bool = False, p: float = 0.5):
@@ -936,25 +1116,34 @@ class RandomGamma(ImageOnlyTransform):
 class RandomBrightnessContrast(ImageOnlyTransform):
     """Randomly change brightness and contrast of the input image.
 
-        Unlike RandomBrightnessContrast from Albumentations, this transform is using the
+        Unlike ``RandomBrightnessContrast`` from `Albumentations`, this transform is using the
         formula :math:`f(a) = (c+1) * a + b`, where :math:`c` is contrast and :math:`b` is brightness.
 
         Args:
-            brightness_limit ((float, float) | float, optional): interval from which the change in brightness is
-                randomly drawn. Must be either of: B, (B1, B2).
-                If a float, the interval will be (-B, B).
-                If the change in brightness is 0, the brightness will not change.
-                Defaults to 0.2.
-            contrast_limit ((float, float) | float, optional): interval from which the change in contrast is
-                randomly drawn. Must be either of: C, (C1, C2).
-                If a float, the interval will be (-C, C). If the change in contrast is 1,
-                the contrast will not change. Defaults to 0.2.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+            brightness_limit ((float, float) | float, optional): Interval from which the change in brightness is
+                randomly drawn. If the change in brightness is 0, the brightness will not change.
+
+                Must be either of: ``B``, ``(B1, B2)``.
+
+                If a float, the interval will be ``(-B, B)``.
+
+                Defaults to ``0.2``.
+            contrast_limit ((float, float) | float, optional): Interval from which the change in contrast is
+                randomly drawn. If the change in contrast is 1, the contrast will not change.
+
+                Must be either of: ``C``, ``(C1, C2)``.
+
+                If a float, the interval will be ``(-C, C)``.
+
+                Defaults to ``0.2``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, brightness_limit=0.2, contrast_limit=0.2, always_apply=False, p=0.5,):
         super().__init__(always_apply, p)
@@ -979,16 +1168,20 @@ class HistogramEqualization(ImageOnlyTransform):
     """Performs equalization of histogram. The equalization is done channel-wise, meaning that each channel is equalized
         separately.
 
-        Warning! Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].
+        **Warning!** Images are normalized over both spatial and temporal domains together. The output is in the range [0, 1].
 
         Args:
-            bins (int, optional): Number of bins for image histogram. Defaults to 256.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+            bins (int, optional): Number of bins for image histogram.
+
+                Defaults to ``256``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, bins: int = 256, always_apply: bool = False, p: float = 1):
         super().__init__(always_apply, p)
@@ -999,36 +1192,45 @@ class HistogramEqualization(ImageOnlyTransform):
 
 
 class Pad(DualTransform):
-    """Pads the input based on pad_size.
-
-        If pad_size is a single number, all spatial axes are padded on both sides
-        with this number. If it is tuple, then it has same behaviour as pad_size except sides are padded with different 
-        number of pixels. If it is List, then it must have 3 items, which define padding for each spatial dimension
-        separately (in either of the ways described above). If the List is shorter, remaining axes are padded with 0. 
-
-        For other parameters check https://numpy.org/doc/stable/reference/generated/numpy.pad.html    
+    """Pads the input.
 
         Args:
-            pad_size (int | Tuple[int] | List[int | Tuple[int]]): number of pixels padded to the edges of each axis.
-                Must be either of: P, (P1, P2), [P_Z, P_Y, P_X], [P_Z, P_Y, P_X, P_T],
-                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)], or
-                [(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2), (P_T1, P_T2)].
-                If an integer, it is equivalent to [(P, P), (P, P), (P, P)].
-                If a tuple, it is equivalent to [(P1, P2), (P1, P2), (P1, P2)].
+            pad_size (int | Tuple[int] | List[int | Tuple[int]]): Number of pixels padded to the edges of each axis.
+
+                Must be either of: ``P``, ``(P1, P2)``, ``[P_Z, P_Y, P_X]``, ``[P_Z, P_Y, P_X, P_T]``,
+                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)]``, or
+                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2), (P_T1, P_T2)]``.
+
+                If an integer, it is equivalent to ``[(P, P), (P, P), (P, P)]``.
+
+                If a tuple, it is equivalent to ``[(P1, P2), (P1, P2), (P1, P2)]``.
+
                 If a list, it must specify padding for all spatial dimensions and possibly also for the time dimension.
+
                 The unspecified dimensions (C and possibly T) are not affected.
-            border_mode (str, optional): `numpy.pad` parameter . Defaults to 'constant'.
-            ival (float | Sequence, optional): value for image if needed by chosen border_mode. Defaults to 0.
-            mval (float | Sequence, optional): value for mask if needed by chosen border_mode. Defaults to 0.
-            ignore_index ( float | None, optional): If ignore_index is float, then transformation of mask is done with 
-                border_mode = "constant" and mval = ignore_index. If ignore_index is None, then it does nothing.
-                Defaults to None.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 0.5.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'constant'``.
+            ival (float | Sequence, optional): Values of `image` voxels outside of the `image` domain.
+                Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
+
+                Defaults to ``0``.
+            mval (float | Sequence, optional): Values of `mask` voxels outside of the `mask` domain.
+                Only applied when ``border_mode = 'constant'`` or ``border_mode = 'linear_ramp'``.
+
+                Defaults to ``0``.
+            ignore_index (float | None, optional): If ``ignore_index`` is a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``. If ``ignore_index`` is ``None``, its value is ignored.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``0.5``.
         Targets:
             image, mask
-        Image types:
-            float32
     """
     def __init__(self, pad_size: Union[int, Tuple[int],  List[Union[int, Tuple[int]]]], border_mode: str = 'constant',
                  ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
@@ -1059,16 +1261,24 @@ class Normalize(ImageOnlyTransform):
     """Change image mean and standard deviation to the given values (channel-wise).
 
         Args:
-            mean (float | List[float], optional): the desired channel-wise means.
-                Must be either of: M, [M_1, M_2, ..., M_C]. Defaults to 0.
-            std (float | List[float], optional): the desired channel-wise standard deviations.
-                Must be either of: S, [S_1, S_2, ..., S_C]. Defaults to 1.
-            always_apply (bool, optional): always apply transformation in composition. Defaults to False.
-            p (float, optional): chance of applying transformation in composition. Defaults to 1.
+            mean (float | List[float], optional): The desired channel-wise means.
+
+                Must be either of: ``M``, ``[M_1, M_2, ..., M_C]``.
+
+                Defaults to ``0``.
+            std (float | List[float], optional): The desired channel-wise standard deviations.
+
+                Must be either of: ``S``, ``[S_1, S_2, ..., S_C]``.
+
+                Defaults to ``1``.
+            always_apply (bool, optional): Always apply this transformation in composition. 
+            
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition. 
+            
+                Defaults to ``1``.
         Targets:
             image
-        Image types:
-            float32
     """
     def __init__(self, mean: Union[float, List[float]] = 0, std: Union[float, List[float]] = 1,
                  always_apply: bool = True, p: float = 1.0):
@@ -1085,6 +1295,9 @@ class Normalize(ImageOnlyTransform):
 
 class Contiguous(DualTransform):
     """Transform the image data to a contiguous array.
+
+        Targets:
+            image, mask
     """
     def apply(self, image, **params):
         return np.ascontiguousarray(image)
@@ -1097,7 +1310,10 @@ class Contiguous(DualTransform):
 
 
 class Float(DualTransform):
-    """Change datatype to np.float32 without changing the image values.
+    """Change datatype to ``np.float32`` without changing intensities.
+
+        Targets:
+            image, mask
     """
     def apply(self, image, **params):
         return image.astype(np.float32)
