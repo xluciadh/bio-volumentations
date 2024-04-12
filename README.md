@@ -1,11 +1,20 @@
 # Bio-Volumentations
 
-Image augmentation and preprocessing package for 3D, 4D, and 5D biomedical images.
+`Bio-Volumentations` is an image augmentation and preprocessing package for 3D, 4D, and 5D biomedical images.
 
+It offers a range of image transformations implemented efficiently for time-lapse multi-channel volumetric image data.
+This includes both preprocessing transformations (such as intensity normalisation, padding, and type casting) 
+and augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
+
+The `Bio-Volumentations` library is a suitable tool for data manipulation in machine learning applications. 
+Importantly, it can be used with any major Python deep learning library.
+
+This library builds upon wide-spread libraries such as Albumentations (see the Contributions section below) 
+in terms of design and user interface. Therefore, it can easily be adopted by users.
 
 # Installation
 
-Install the package from pip using
+Install the package from PyPi using
 ```python
 pip install bio-volumentations
 ```
@@ -56,10 +65,10 @@ Below, there are several examples of how to use this library.
 ### Example: Transforming a Single Image
 
 ```python
-# Create the transformation using Compose from a list of transformations
 import numpy as np
 from bio_volumentations import Compose, RandomGamma, RandomRotate90, GaussianBlur
 
+# Create the transformation using Compose from a list of transformations
 aug = Compose([
         RandomGamma(gamma_limit = (0.8, 1,2), p = 0.8),
         RandomRotate90(axes = [1, 2, 3], p = 1),
@@ -97,7 +106,7 @@ as stand-alone targets (see below).
 If a `Random...` transform receives multiple targets on its input in a single call,
 the same random numbers are used to transform all of these targets.
 
-however, some transformations might behave slightly differently for the individual
+However, some transformations might behave slightly differently for the individual
 target types. For example, `RandomCrop` works in the same way for all target types, while
 `RandomGaussianNoise` only affects the `image` target and leaves the `mask` and
 `float_mask` targets unchanged. Please consult the documentation of respective transforms
@@ -229,7 +238,7 @@ We would thus like to thank their authors, namely:
 
 # Citation
 
-TODO
+TBA
 
 
 
