@@ -1,6 +1,4 @@
 sphinx-rtd-theme
-sphinxcontrib-napoleon
-sphinx-code-include
 numpy
 scipy
 scikit-image
