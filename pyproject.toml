@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "bio-volumentations"
 
 # Put the version of your project. This field is required, although it is often marked as dynamic:
-version = "1.1.1"
+version = "1.1.2"
 #dynamic = ["version"]
 # https://stackoverflow.com/questions/21064581/how-to-overwrite-pypi-package-when-doing-upload-from-command-line
 
@@ -29,7 +29,9 @@ requires-python = ">=3.1"
 
 # Authors (identified by a name and/or an email address)
 authors = [
+  {name = "Lucia Hradecká"},
   {name = "Lucia Hradecká", email = "lucia.d.hradecka@gmail.com"},
+  {name = "Filip Lux"},
   {name = "Filip Lux", email = "lux.filip@gmail.com"},
   {name = "Samuel Šuľan"},
 ]
@@ -61,7 +63,7 @@ classifiers = [
 # A list of URLs associated with your project, displayed on the left sidebar of your PyPI project page.
 [project.urls]
 Homepage = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-0?ref_type=heads"
-Documentation = "https://biovolumentations.readthedocs.io/v1-1-1/"
+Documentation = "https://biovolumentations.readthedocs.io/v1-1-2/"
 Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-0?ref_type=heads"
 
 # MISSING FROM SETUP.PY
