@@ -11,6 +11,10 @@ Here, you can find documentation pages for the individual transformations.
    :maxdepth: 2
 
    bio_volumentations.augmentations
+
+.. toctree::
+   :maxdepth: 2
+
    bio_volumentations.conversion
 
 .. toctree::
