@@ -64,7 +64,7 @@ classifiers = [
 [project.urls]
 Homepage = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-0?ref_type=heads"
 Documentation = "https://biovolumentations.readthedocs.io/v1-1-2/"
-Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-0?ref_type=heads"
+Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-2?ref_type=tags"
 
 # MISSING FROM SETUP.PY
 # entry_points={
