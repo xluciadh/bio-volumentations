@@ -1,1 +1,6 @@
 sphinx-rtd-theme
+numpy
+scipy
+scikit-image
+matplotlib
+SimpleITK
