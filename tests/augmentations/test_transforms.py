@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from ...augmentations.transforms import *
-from ...core.composition import Compose
+from bio_volumentations.augmentations.transforms import *
+from bio_volumentations.core.composition import Compose
 
 
 class TestResize(unittest.TestCase):
