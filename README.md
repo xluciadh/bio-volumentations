@@ -14,7 +14,7 @@ in terms of design and user interface. Therefore, it can easily be adopted by de
 
 # Installation
 
-Install the package from PyPi using:
+Install the package from pip using:
 ```python
 pip install bio-volumentations
 ```
@@ -59,6 +59,8 @@ Thus, the input images can have these shapes:
 The `Compose` class automatically checks and adjusts image format, datatype, stacks
 individual transforms to a pipeline, and outputs the image as a contiguous array. 
 Optionally, it can also convert the transformed image to a desired format.
+
+More at the [documentation pages](https://www.google.com).
 
 Below, there are several examples of how to use this library.
 

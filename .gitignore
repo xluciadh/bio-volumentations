@@ -1,1 +1,4 @@
 .idea
+dist/
+dist-1/
+bio_volumentations.egg-info/
