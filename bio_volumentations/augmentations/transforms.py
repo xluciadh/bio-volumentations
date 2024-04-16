@@ -282,20 +282,20 @@ class Scale(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def __repr__(self):
         return f'Scale({self.scale}, {self.interpolation}, {self.border_mode}, {self.ival}, {self.mval},' \
@@ -408,20 +408,20 @@ class RandomScale(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def __repr__(self):
         return f'RandomScale({self.scaling_limit}, {self.interpolation}, {self.always_apply}, {self.p})'
@@ -835,24 +835,24 @@ class RandomAffineTransform(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         degrees=params["angles"],
                         translation=params["translation"],
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         degrees=params["angles"],
                         translation=params["translation"],
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def get_params(self, **data):
 
@@ -959,24 +959,24 @@ class AffineTransform(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         degrees=self.angles,
                         translation=self.translation,
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         degrees=self.angles,
                         translation=self.translation,
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
 
 # TODO create checks (mean, std, got good shape, and etc.), what if given list but only one channel, and reverse.

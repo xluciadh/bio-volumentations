@@ -132,10 +132,11 @@ def apply_sitk_transform(
         spacing: TypeTripletFloat = (1., 1., 1.)
 ) -> np.array:
 
-    assert len(image.shape) == 4, f'image.shape: {image.shape}'
+    assert len(image.shape) >= 4, f'image.shape: {image.shape}'
 
+    # resolve the image shape
     ch = image.shape[0]
-    image_expanded = np.expand_dims(image, 4)
+    image_expanded = np.expand_dims(image, 4) if len(image.shape) == 4 else image
 
     # convert numpy array to sitk image
     sitk_image = np_to_sitk(image_expanded)
