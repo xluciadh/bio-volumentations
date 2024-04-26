@@ -40,7 +40,7 @@
 
 import numpy as np
 from typing import Optional, Sequence, Union, Type, Any
-from .typing import TypeSextetFloat, TypeTripletFloat
+from .biovol_typing import TypeSextetFloat, TypeTripletFloat
 import random as random
 
 NumType = Union[int, float, np.ndarray]

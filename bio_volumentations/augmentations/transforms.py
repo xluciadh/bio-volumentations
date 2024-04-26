@@ -44,7 +44,7 @@ from ..core.transforms_interface import DualTransform, ImageOnlyTransform
 from ..augmentations import functional as F
 from ..random_utils import uniform, sample_range_uniform
 from typing import List, Sequence, Tuple, Union
-from ..typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
+from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
 from .utils import parse_limits, parse_coefs, to_tuple
 
 
@@ -557,6 +557,8 @@ class RandomFlip(DualTransform):
     """
     def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, always_apply=False, p=0.5):
         super().__init__(always_apply, p)
+
+        # TODO: check if axis are valid
         self.axes = axes_to_choose
 
     def apply(self, img, **params):
@@ -568,15 +570,8 @@ class RandomFlip(DualTransform):
 
     def get_params(self, **data):
         
-        if self.axes is None or len(self.axes) == 0:
-            # Pick random combination of axes to flip
-            # TODO include possibility to pick empty combination = no flipping
-            combinations = [(1,), (2,), (3,), (1, 2),
-                            (1, 3), (2, 3), (1, 2, 3)]
-            axes = random.choice(combinations)
-        else:
-            # Pick a random choice from input
-            axes = random.choice(self.axes)
+        to_choose = [1, 2, 3] if self.axes is None else self.axes
+        axes = random.sample(to_choose, random.randint(0, len(to_choose)))
         return {"axes": axes}
 
     def __repr__(self):
@@ -799,8 +794,8 @@ class RandomAffineTransform(DualTransform):
         Targets:
             image, mask, float_mask
     """
-    def __init__(self, angle_limit: Union[float, TypePairFloat, TypeSextetFloat] = (15, 15, 15),
-                 translation_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0, 0, 0),
+    def __init__(self, angle_limit: Union[float, TypePairFloat, TypeSextetFloat] = (15., 15., 15.),
+                 translation_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0., 0., 0.),
                  scaling_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
                  spacing: Union[float, TypeTripletFloat] = None,
                  change_to_isotropic: bool = False,

@@ -24,7 +24,7 @@
 # ============================================================================================= #
 
 from typing import Sequence, Union
-from ..typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
+from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
 import numpy as np
 import SimpleITK as sitk
 
@@ -41,7 +41,7 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
 
     # input_limit = x : float
     # returns (ie-x, ie+x, ie-x, ie+x, ie-x, ie+x)
-    elif len(input_limit) == 1:
+    elif (type(input_limit) is float) or (type(input_limit) is int):
         return tuple((identity_element - input_limit, identity_element + input_limit) * 3)
 
     # input_limit = (a, b) : TypePairFloat
@@ -95,10 +95,8 @@ def get_image_center(image: np.array,
     shape = np.array(image.shape)
     if len(shape) == 3:
         center = (shape - 1) / 2
-    elif len(shape) == 4:
-        center = (shape[1:4] - 1) / 2
     else:
-        center = np.array((0, 0, 0))
+        center = (shape[1:4] - 1) / 2
 
     if lps:
         center = ras_to_lps(center)

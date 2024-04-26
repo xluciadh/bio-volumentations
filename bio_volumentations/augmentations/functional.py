@@ -42,11 +42,10 @@ import numpy as np
 from functools import wraps
 import skimage.transform as skt
 from skimage.exposure import equalize_hist
-from scipy.ndimage import zoom
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import zoom, gaussian_filter
 from warnings import warn
 
-from ..typing import TypeTripletFloat
+from ..biovol_typing import TypeTripletFloat
 from .spatial_funcional import get_affine_transform, apply_sitk_transform
 
 

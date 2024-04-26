@@ -24,7 +24,7 @@
 # ============================================================================================= #
 
 import numpy as np
-from ..typing import TypeTripletFloat
+from ..biovol_typing import TypeTripletFloat
 from typing import Sequence, Optional
 import SimpleITK as sitk
 
@@ -136,7 +136,14 @@ def apply_sitk_transform(
 
     # resolve the image shape
     ch = image.shape[0]
-    image_expanded = np.expand_dims(image, 4) if len(image.shape) == 4 else image
+    fr = 1 if len(image.shape) == 4 else image.shape[4]
+
+    if len(image.shape) == 4:
+        image_expanded = np.expand_dims(image, 4)
+        expanded = True
+    else:
+        image_expanded = image
+        expanded = False
 
     # convert numpy array to sitk image
     sitk_image = np_to_sitk(image_expanded)
@@ -151,7 +158,9 @@ def apply_sitk_transform(
     interpolator.SetTransform(sitk_transform)
 
     resampled = interpolator.Execute(floating)
-    np_array = sitk_to_np(resampled, channels=ch, frames=1).squeeze(4)
+    np_array = sitk_to_np(resampled, channels=ch, frames=fr)
+    if expanded:
+        np_array = np_array.squeeze(4)
 
     assert image.shape == np_array.shape, f"image.shape: {image.shape} np_array.shape:, {np_array.shape}"
 
