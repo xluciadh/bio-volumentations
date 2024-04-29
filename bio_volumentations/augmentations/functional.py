@@ -288,13 +288,13 @@ def normalize(img, input_mean, input_std):
 
 def gaussian_noise(img, mean, sigma):
     img = img.astype("float32")
-    noise = np.random.normal(mean, sigma, img.shape)
+    noise = np.random.normal(mean, sigma, img.shape).astype(np.float32)
     return img + noise
 
 
 def poisson_noise(img, intensity):
     img = img.astype("float32")
-    noise = np.random.poisson(img) * intensity
+    noise = np.random.poisson(img).astype(np.float32) * intensity
     return img + noise
 
 
