@@ -1382,8 +1382,9 @@ class Contiguous(DualTransform):
         return f'Contiguous({self.always_apply}, {self.p})'
 
 
-class Float(DualTransform):
-    """Change datatype to ``np.float32`` without changing intensities.
+class StandardizeDatatype(DualTransform):
+    """Change image and float_mask datatype to ``np.float32`` without changing intensities.
+    Change mask datatype to ``np.int32``.
 
         Args:
             always_apply (bool, optional): Always apply this transformation in composition.
@@ -1403,6 +1404,9 @@ class Float(DualTransform):
         return image.astype(np.float32)
 
     def apply_to_mask(self, mask, **params):
+        return mask.astype(np.int32)
+
+    def apply_to_float_mask(self, mask, **params):
         return mask.astype(np.float32)
 
     def __repr__(self):

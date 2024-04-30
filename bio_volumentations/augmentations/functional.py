@@ -227,8 +227,10 @@ def random_crop(img, input_crop_shape, input_crop_start, border_mode, cval, mask
         crop_shape = np.append(crop_shape, img_shape[-1])
         crop_start = np.append(crop_start, 0)
     if np.any(img_shape < crop_shape):
-        warn(f'Random crop(): image size {img_shape} smaller than crop size {crop_shape}, pad by {border_mode}.',
-             UserWarning)
+        warn(
+            f'BioVolumentations transformation RandomCrop():' +
+            f' image size {img_shape} smaller than crop size {crop_shape}, pad by {border_mode}.',
+            UserWarning)
         img = pad(img, img_shape, crop_shape, border_mode,cval)
         img_shape = np.array(img.shape)
     

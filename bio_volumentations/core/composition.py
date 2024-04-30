@@ -67,7 +67,7 @@ class Compose:
     """
     def __init__(self, transforms, p=1.0, targets=(['image'], ['mask'], ['float_mask']), conversion=None):
         assert 0 <= p <= 1
-        self.transforms = ([T.Float(always_apply=True),
+        self.transforms = ([T.StandardizeDatatype(always_apply=True),
                             CT.ConversionToFormat(always_apply=True)] +
                            transforms +
                            [T.Contiguous(always_apply=True)] +
