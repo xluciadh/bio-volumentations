@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "bio-volumentations"
 
 # Put the version of your project. This field is required, although it is often marked as dynamic:
-version = "1.1.2"
+version = "1.2.0"
 #dynamic = ["version"]
 # https://stackoverflow.com/questions/21064581/how-to-overwrite-pypi-package-when-doing-upload-from-command-line
 
@@ -39,7 +39,7 @@ authors = [
 
 # A one-line description of your project, to show as the “headline” of your project page on PyPI
 # and other places such as lists of search results:
-description = "Library for 3D-5D augmentations of volumetric multi-dimensional biomedical images"
+description = "Library for 3D-5D augmentations of volumetric multi-dimensional biomedical images and their annotations"
 
 # A longer description - can use readme.md
 readme = "README.md"
@@ -62,14 +62,6 @@ classifiers = [
 
 # A list of URLs associated with your project, displayed on the left sidebar of your PyPI project page.
 [project.urls]
-Homepage = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-0?ref_type=heads"
-Documentation = "https://biovolumentations.readthedocs.io/v1-1-2/"
-Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/v1-1-2?ref_type=tags"
-
-# MISSING FROM SETUP.PY
-# entry_points={
-#        'console_scripts': [
-#            'bioVolumentation=bio_volumentations:__init__'
-#        ]
-#    }
-# packages=setuptools.find_packages()
+Homepage = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.2.0?ref_type=tags"
+Documentation = "https://biovolumentations.readthedocs.io/1.2.0/"
+Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.2.0?ref_type=tags"
