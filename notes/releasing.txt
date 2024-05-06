@@ -1,0 +1,53 @@
+Releasing a new version:
+
+1. Finalise the code.
+
+2. Update the docstrings, descriptions, readme, non-generated .rst docu files under docs/source (such as intro.rst, index.rst, examples.rst, contributions.rst), ...
+
+3. Update release version in docs/source/conf.py and pyproject.toml. Update version-specific links, e.g. in readme.md and docu files.
+
+4. Regenerate docs from docstrings and push them to gitlab repo: https://sphinx-rtd-tutorial.readthedocs.io/en/latest/build-the-docs.html#generating-documentation-from-docstrings
+
+5. (Before doing this step, consider doing step 7 - the URLs can be guessed in advance.) Create a gitlab tag for the last commit related to this version.
+
+6. Upload the docs - logged in at readthedocs.org (first for the new version, then forward latest to it). For this, it is not necessary to have the newest html at gitlab, because RTD will generate everything on its own.
+
+7. Update URLs in pyproject.toml
+
+8. Build pypi files and upload them to pypi - run the following commands:
+python -m build
+twine upload dist/*
+
+
+*********************************************************************************
+
+UPLOADING TO RTD
+
+[modify 'docs/source/conf.py' for the correct version]
+[push to gitlab]
+[create a tag for the last commit]
+[in RTD project management, activate "branch" with the name of the tag]
+[build that branch]
+[un-hide it]
+
+
+*********************************************************************************
+
+UPLOADING TO PYPI
+
+[modify any files]
+[modify 'pyproject.toml', especially the version field and documentation field]
+[in the same directory where pyproject.toml is located:]
+conda activate <pypi-packages-env>
+python -m build
+twine upload dist/*
+
+
+*********************************************************************************
+
+https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#name
+https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives
+https://stackoverflow.com/questions/21064581/how-to-overwrite-pypi-package-when-doing-upload-from-command-line
+https://peps.python.org/pep-0427/#file-name-convention
+https://packaging.python.org/en/latest/specifications/core-metadata/#author
+
