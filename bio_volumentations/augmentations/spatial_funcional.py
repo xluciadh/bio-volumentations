@@ -38,7 +38,7 @@ SITK_interpolation = {
 }
 
 
-def get_affine_transform(image,
+def get_affine_transform(domain_limit,
                          scales: TypeTripletFloat,
                          degrees: TypeTripletFloat,
                          translation: TypeTripletFloat,
@@ -49,7 +49,7 @@ def get_affine_transform(image,
     rotation = np.asarray(degrees)
     translation = np.asarray(translation)  # * np.asarray(spacing)
 
-    center_lps = get_image_center(image,
+    center_lps = get_image_center(domain_limit,
                                   spacing=spacing,
                                   lps=False)
 
@@ -59,7 +59,7 @@ def get_affine_transform(image,
     )
 
     if DEBUG:
-        print('image.shape', image.shape)
+        print('domain_limit', domain_limit)
         print('center_lps', center_lps)
         print('translation', translation)
         print('scaling', scaling)

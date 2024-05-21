@@ -28,3 +28,9 @@ from typing import Tuple
 TypePairFloat = Tuple[float, float]
 TypeTripletFloat = Tuple[float, float, float]
 TypeSextetFloat = Tuple[float, float, float, float, float, float]
+
+TypePairInt = Tuple[int, int]
+TypeSextetInt = Tuple[int, int, int, int, int, int]
+
+TypeSpatioTemporalCoordinate = Tuple[float, float, float, float]
+TypeSpatialCoordinate = Tuple[float, float, float]

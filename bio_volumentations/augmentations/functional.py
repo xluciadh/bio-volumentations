@@ -44,9 +44,11 @@ import skimage.transform as skt
 from skimage.exposure import equalize_hist
 from scipy.ndimage import zoom, gaussian_filter
 from warnings import warn
+from typing import Union
 
-from ..biovol_typing import TypeTripletFloat
+from ..biovol_typing import TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSextetInt
 from .spatial_funcional import get_affine_transform, apply_sitk_transform
+from .utils import is_included
 
 
 MAX_VALUES_BY_DTYPE = {
@@ -150,8 +152,21 @@ def pad(img, img_shape, crop_shape, border_mode, cval):
     return np.pad(img, pad_width, border_mode)
 
 
-def pad_pixels(img, input_pad_width, border_mode, cval, mask=False):
+def pad_keypoints(keypoints, pad_size):
+    a, b, c, d, e, f = pad_size
+
+    res = []
+    for coo in keypoints:
+        padding = np.array((a, c, e)) if len(coo) == 3 else np.array((a, c, e, 0))
+        res.append(coo + padding)
+    return res
+
+
+def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=False):
+
+    """
     img_shape = img.shape
+
     if not mask:
         img_shape = img_shape[1:]
 
@@ -178,10 +193,17 @@ def pad_pixels(img, input_pad_width, border_mode, cval, mask=False):
         # Padding with zeroes
         if len(pad_width) < len(img_shape):
             pad_width = pad_width + [(0, 0)] * (len(img_shape) - len(pad_width))
+    """
+    a, b, c, d, e, f = input_pad_width
+    pad_width = [(a, b), (c, d), (e, f)]
 
     # zeroes for channel dimension
     if not mask:
         pad_width = [(0, 0)] + pad_width
+
+    # zeroes for temporal dimension
+    if len(img.shape) == 5:
+        pad_width = pad_width + [(0, 0)]
     
     if border_mode == "constant":
         return np.pad(img, pad_width, border_mode, constant_values=cval)
@@ -214,6 +236,7 @@ def get_random_crop_coords(img_shape, crop_shape, crop_start):
 
 # Too similar to the center_crop. Could be made into one function
 def random_crop(img, input_crop_shape, input_crop_start, border_mode, cval, mask):
+
     if not mask:
         crop_shape = np.insert(input_crop_shape, 0, img.shape[0])
         crop_start = np.insert(input_crop_start, 0, 0)
@@ -235,6 +258,8 @@ def random_crop(img, input_crop_shape, input_crop_start, border_mode, cval, mask
         img_shape = np.array(img.shape)
     
     froms, tos = get_random_crop_coords(img_shape, crop_shape, crop_start)
+
+    print('RANDOM_CROP', froms, tos, input_crop_start)
     return crop_from_to(img, froms, tos)
 
 
@@ -294,10 +319,9 @@ def gaussian_noise(img, mean, sigma):
     return img + noise
 
 
-def poisson_noise(img, intensity):
+def poisson_noise(img, peak):
     img = img.astype("float32")
-    noise = np.random.poisson(img).astype(np.float32) * intensity
-    return img + noise
+    return (np.random.poisson(img * peak) / peak).astype(np.float32)
 
 
 # TODO parameter
@@ -306,7 +330,9 @@ def poisson_noise(img, intensity):
 # float mask - how, for now no gaussian filter.
 def resize(img, input_new_shape, interpolation=1, border_mode='reflect', cval=0, mask=False,
            anti_aliasing_downsample=True):
-    new_shape = input_new_shape
+
+    # TODO: random fix, check if it is correct
+    new_shape = list(input_new_shape)[:-1]
 
     # Zero or negative check
     for dimension in new_shape:
@@ -368,6 +394,19 @@ def resize(img, input_new_shape, interpolation=1, border_mode='reflect', cval=0,
     new_img = np.stack(data, axis=0)
     
     return new_img
+
+
+def resize_keypoints(keypoints,
+                     domain_limit: TypeSpatioTemporalCoordinate,
+                     new_shape: TypeSpatioTemporalCoordinate):
+
+    assert len(domain_limit) == len(new_shape) == 4
+
+    # for each dim compute ratio
+    ratio = np.array(new_shape[:3]) / np.array(domain_limit[:3])
+
+    # it supposes that length of keypoint is 3
+    return [keypoint * ratio for keypoint in keypoints]
 
 
 # TODO compare with skt.rescale, new version got channel_axis
@@ -475,8 +514,8 @@ def affine(img: np.array,
     """
     img (np.array) : format (channel, ax1, ax2, ax3, [time])
     """
-
-    transform = get_affine_transform(img,
+    shape = img.shape[1:]
+    transform = get_affine_transform(shape,
                                      scales=scales,
                                      degrees=degrees,
                                      translation=translation,
@@ -489,6 +528,47 @@ def affine(img: np.array,
                                 spacing=spacing)
 
 
+def affine_keypoints(keypoints: list,
+                     domain_limit: TypeSpatioTemporalCoordinate,
+                     degrees: TypeTripletFloat = (0, 0, 0),
+                     scales: TypeTripletFloat = (1, 1, 1),
+                     translation: TypeTripletFloat = (0, 0, 0),
+                     border_mode: str = 'constant',
+                     keep_all: bool = False,
+                     spacing: TypeTripletFloat = (1, 1, 1)):
+    """
+
+    Args:
+        keypoints: list of input keypoints
+        domain_limit: limit of the domain, there keyp-points can appear, it is used to define center of transforms
+                and to filter out output key-point from the outside of the domain
+        degrees:
+        scales:
+        translation:
+        border_mode: not used
+        keep_all: True to keep also key_point frou poutside the domain
+        spacing: relative voxel size
+
+    Returns: list of transformed key-points
+
+    """
+    transform = get_affine_transform(domain_limit,
+                                     scales=scales,
+                                     degrees=degrees,
+                                     translation=translation,
+                                     spacing=spacing)
+
+    transform = transform.GetInverse()
+
+    res = []
+    for point in keypoints:
+        transformed_point = transform.TransformPoint(point)
+        if keep_all or is_included(domain_limit, transformed_point):
+            res.append(transformed_point)
+    return res
+
+
+# TO REMOVE
 def rotation_matrix_calculation(dim, x_angle, y_angle, z_angle):
     rot_matrix = np.identity(dim).astype(np.float32)
     rot_matrix = rot_matrix @ rot_x(x_angle, dim)

@@ -42,83 +42,13 @@ import random
 import numpy as np
 from ..core.transforms_interface import DualTransform, ImageOnlyTransform
 from ..augmentations import functional as F
+from ..augmentations.spatial_funcional import get_affine_transform
 from ..random_utils import uniform, sample_range_uniform
 from typing import List, Sequence, Tuple, Union
-from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
-from .utils import parse_limits, parse_coefs, to_tuple
-
-
-# TODO potential upgrade : different sigmas for different channels
-class GaussianNoise(ImageOnlyTransform):
-    """Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.
-
-        Args:
-            var_limit (tuple, optional): Variance of normal distribution is randomly chosen from this interval.
-
-                Defaults to ``(0.001, 0.1)``.
-            mean (float, optional): Mean of normal distribution.
-
-                Defaults to ``0``.
-            always_apply (bool, optional): Always apply this transformation in composition.
-
-                Defaults to ``False``.
-            p (float, optional): Chance of applying this transformation in composition.
-
-                Defaults to ``0.5``.
-
-        Targets:
-            image
-    """
-    def __init__(self, var_limit: tuple = (0.001, 0.1), mean: float = 0,
-                 always_apply: bool = False, p: float = 0.5):
-        super().__init__(always_apply, p)
-        self.var_limit = var_limit
-        self.mean = mean
-
-    def apply(self, img, **params):
-        return F.gaussian_noise(img, sigma=params['sigma'], mean=self.mean)
-
-    def get_params(self, **params):
-        var = uniform(self.var_limit[0], self.var_limit[1])
-        sigma = var ** 0.5
-        return {"sigma": sigma}
-
-    def __repr__(self):
-        return f'GaussianNoise({self.var_limit}, {self.mean}, {self.always_apply}, {self.p})'
-
-
-class PoissonNoise(ImageOnlyTransform):
-    """Adds Poisson noise to the image.
-
-        Args:
-            intensity_limit (tuple): Range to sample the expected intensity of Poisson noise.
-
-                Defaults to ``(1, 10)``.
-            always_apply (bool, optional): Always apply this transformation in composition.
-
-                Defaults to ``False``.
-            p (float, optional): Chance of applying this transformation in composition.
-
-                Defaults to ``0.5``.
-
-        Targets:
-            image
-    """
-    def __init__(self,
-                 intensity_limit=(1, 10),
-                 always_apply: bool = False, p: float = 0.5):
-        super().__init__(always_apply, p)
-        self.intensity_limit = intensity_limit
-
-    def apply(self, img, **params):
-        return F.poisson_noise(img, intensity=params['intensity'])
-
-    def get_params(self, **params):
-        intensity = uniform(self.intensity_limit[0], self.intensity_limit[1])
-        return {"intensity": intensity}
-
-    def __repr__(self):
-        return f'PoissonNoise({self.always_apply}, {self.p})'
+from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat, TypeSpatioTemporalCoordinate,\
+    TypeSextetInt
+from .utils import parse_limits, parse_coefs, parse_pads, to_tuple, validate_bbox, get_spatio_temporal_domain_limit,\
+    to_spatio_temporal
 
 
 # TODO anti_aliasing_downsample keep parameter or remove?
@@ -173,7 +103,7 @@ class Resize(DualTransform):
                  always_apply: bool = False, p: float = 1):
         
         super().__init__(always_apply, p)
-        self.shape = shape
+        self.shape: TypeSpatioTemporalCoordinate = to_spatio_temporal(shape)
         self.interpolation = interpolation
         self.border_mode = border_mode
         self.mask_mode = border_mode
@@ -198,6 +128,34 @@ class Resize(DualTransform):
         return F.resize(mask, input_new_shape=self.shape, interpolation=self.interpolation,
                         border_mode=self.mask_mode, cval=self.mval, anti_aliasing_downsample=False,
                         mask=True)
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.resize_keypoints(keypoints,
+                                  domain_limit=params['domain_limit'],
+                                  new_shape=self.shape)
+
+    """
+    def apply_to_bboxes(self, bboxes, **params):
+        for bbox in bboxes:
+            new_bbox = F.resize_keypoints(bbox,
+                                          input_new_shape=self.shape,
+                                          original_shape=params['original_shape'],
+                                          keep_all=True)
+
+            if validate_bbox(bbox, new_bbox, min_overlay_ratio):
+                res.append(new_bbox)
+
+        return res
+    """
+
+    def get_params(self, **data):
+
+        # read shape of the original image
+        domain_limit: TypeSpatioTemporalCoordinate = get_spatio_temporal_domain_limit(data)
+
+        return {
+            "domain_limit": domain_limit,
+        }
         
     def __repr__(self):
         return f'Resize({self.shape}, {self.interpolation}, {self.border_mode} , {self.ival}, {self.mval},' \
@@ -297,6 +255,31 @@ class Scale(DualTransform):
                         value=self.mval,
                         spacing=self.spacing)[0]
 
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=self.scale,
+                                  spacing = self.spacing,
+                                  domain_limit=params['domain_limit'])
+
+    """
+    def apply_to_bboxes(self, bboxes, **params):
+        for bbox in bboxes:
+            new_bbox = F.affine_keypoints(bbox,
+                                          scales=self.scale,
+                                          domain_limit=params['domain_limit'],
+                                          spacing = self.spacing,
+                                          keep_all=True)
+
+            if validate_bbox(bbox, new_bbox):
+                res.append(new_bbox)
+
+        return res
+    """
+
+    def get_params(self, **data):
+        domain_limit: TypeSpatioTemporalCoordinate = get_spatio_temporal_domain_limit(data)
+        return {'domain_limit': domain_limit}
+
     def __repr__(self):
         return f'Scale({self.scale}, {self.interpolation}, {self.border_mode}, {self.ival}, {self.mval},' \
                f'{self.always_apply}, {self.p})'
@@ -392,9 +375,11 @@ class RandomScale(DualTransform):
 
     def get_params(self, **data):
         # set parameters of the transform
+        domain_limit: TypeSpatioTemporalCoordinate = get_spatio_temporal_domain_limit(data)
         scale = sample_range_uniform(self.scaling_limit)
 
         return {
+            "domain_limit": domain_limit,
             "scale": scale,
         }
 
@@ -422,6 +407,12 @@ class RandomScale(DualTransform):
                         border_mode=self.mask_mode,
                         value=self.mval,
                         spacing=self.spacing)[0]
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=params["scale"],
+                                  spacing=self.spacing,
+                                  domain_limit=params['domain_limit'])
 
     def __repr__(self):
         return f'RandomScale({self.scaling_limit}, {self.interpolation}, {self.always_apply}, {self.p})'
@@ -700,6 +691,9 @@ class RandomCrop(DualTransform):
     def apply_to_mask(self, mask, crop_start=np.array((0, 0, 0))):
         return F.random_crop(mask, self.shape, crop_start, self.mask_mode, self.mval, mask=True)
 
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return None
+
     def get_params(self, **data):
 
         return {
@@ -849,17 +843,27 @@ class RandomAffineTransform(DualTransform):
                         value=self.mval,
                         spacing=self.spacing)[0]
 
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=params["scale"],
+                                  degrees=params["angles"],
+                                  translation=params["translation"],
+                                  spacing=self.spacing,
+                                  domain_limit=params['domain_limit'])
+
     def get_params(self, **data):
 
         # set parameters of the transform
         scales = sample_range_uniform(self.scaling_limit)
         angles = sample_range_uniform(self.angle_limit)
         translation = sample_range_uniform(self.translation_limit)
+        domain_limit = get_spatio_temporal_domain_limit(data)
 
         return {
             "scale": scales,
             "angles": angles,
-            "translation": translation
+            "translation": translation,
+            "domain_limit": domain_limit
         }
 
 
@@ -972,6 +976,99 @@ class AffineTransform(DualTransform):
                         border_mode=self.mask_mode,
                         value=self.mval,
                         spacing=self.spacing)[0]
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=self.scale,
+                                  degrees=self.angles,
+                                  translation=self.translation,
+                                  spacing=self.spacing,
+                                  domain_limit=params['domain_limit'])
+
+    def get_params(self, **data):
+
+        # set parameters of the transform
+        domain_limit = get_spatio_temporal_domain_limit(data)
+
+        return {
+            "domain_limit": domain_limit
+        }
+
+
+# IMAGE ONLY TRANSFORMS
+# TODO potential upgrade : different sigmas for different channels
+class GaussianNoise(ImageOnlyTransform):
+    """Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.
+
+        Args:
+            var_limit (tuple, optional): Variance of normal distribution is randomly chosen from this interval.
+
+                Defaults to ``(0.001, 0.1)``.
+            mean (float, optional): Mean of normal distribution.
+
+                Defaults to ``0``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``0.5``.
+
+        Targets:
+            image
+    """
+
+    def __init__(self, var_limit: tuple = (0.001, 0.1), mean: float = 0,
+                 always_apply: bool = False, p: float = 0.5):
+        super().__init__(always_apply, p)
+        self.var_limit = var_limit
+        self.mean = mean
+
+    def apply(self, img, **params):
+        return F.gaussian_noise(img, sigma=params['sigma'], mean=self.mean)
+
+    def get_params(self, **params):
+        var = uniform(self.var_limit[0], self.var_limit[1])
+        sigma = var ** 0.5
+        return {"sigma": sigma}
+
+    def __repr__(self):
+        return f'GaussianNoise({self.var_limit}, {self.mean}, {self.always_apply}, {self.p})'
+
+
+class PoissonNoise(ImageOnlyTransform):
+    """Adds Poisson noise to the image.
+
+        Args:
+            intensity_limit (tuple): Range to sample the expected intensity of Poisson noise.
+
+                Defaults to ``(1, 10)``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``0.5``.
+
+        Targets:
+            image
+    """
+
+    def __init__(self,
+                 peak_limit=(0.1, 0.5),
+                 always_apply: bool = False, p: float = 0.5):
+        super().__init__(always_apply, p)
+        self.peak_limit = peak_limit
+
+    def apply(self, img, **params):
+        return F.poisson_noise(img, peak=params['peak'])
+
+    def get_params(self, **params):
+        peak = uniform(self.peak_limit[0], self.peak_limit[1])
+        return {"peak": peak}
+
+    def __repr__(self):
+        return f'PoissonNoise({self.always_apply}, {self.p})'
 
 
 # TODO create checks (mean, std, got good shape, and etc.), what if given list but only one channel, and reverse.
@@ -1297,7 +1394,7 @@ class Pad(DualTransform):
                  ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = True, p : float = 1):
         super().__init__(always_apply, p)
-        self.pad_size = pad_size
+        self.pad_size: TypeSextetInt = parse_pads(pad_size)
         self.border_mode = border_mode
         self.mask_mode = border_mode 
         self.ival = ival
@@ -1312,6 +1409,9 @@ class Pad(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         return F.pad_pixels(mask, self.pad_size, self.mask_mode, self.mval, True)
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.pad_keypoints(keypoints, self.pad_size)
 
     def __repr__(self):
         return f'Pad({self.pad_size}, {self.border_mode}, {self.ival}, {self.mval}, {self.always_apply}, ' \
@@ -1411,4 +1511,6 @@ class StandardizeDatatype(DualTransform):
 
     def __repr__(self):
         return f'Float({self.always_apply}, {self.p})'
+
+
 

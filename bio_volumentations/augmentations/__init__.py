@@ -38,6 +38,5 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
-# TODO: can be removed?
-#from .functional import *
-#from .transforms import *
+from .functional import *
+from .transforms import *

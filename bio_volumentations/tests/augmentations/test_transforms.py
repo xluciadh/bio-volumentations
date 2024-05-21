@@ -32,21 +32,7 @@ from bio_volumentations.augmentations.transforms import (
 from bio_volumentations.core.composition import Compose
 import numpy as np
 
-
-class TestGaussianNoise(unittest.TestCase):
-    def test_shape(self):
-        tests = get_shape_tests(GaussianNoise, (31, 32, 33))
-        for tr_img, expected_shape, data_type in tests:
-            self.assertTupleEqual(tr_img.shape, expected_shape)
-            self.assertEqual(tr_img.dtype, data_type)
-
-
-class TestPoissonNoise(unittest.TestCase):
-    def test_shape(self):
-        tests = get_shape_tests(PoissonNoise, (31, 32, 33))
-        for tr_img, expected_shape, data_type in tests:
-            self.assertTupleEqual(tr_img.shape, expected_shape)
-            self.assertEqual(tr_img.dtype, data_type)
+DEBUG = False
 
 
 class TestScale(unittest.TestCase):
@@ -61,6 +47,112 @@ class TestScale(unittest.TestCase):
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
 
+    def test_keypoints(self):
+
+        tests = get_keypoints_tests(Scale, params={'scales': 1.5})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.1, msg)
+
+        tests = get_keypoints_tests(Scale, params={'scales': 0.8})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.1, msg)
+
+
+def get_keypoints_tests(transform,
+                        in_shape: tuple = (32, 33, 34),
+                        params: dict = {}):
+
+    w, h, d = in_shape
+
+    img = np.zeros((4, w, h, d), np.float32)
+    mask = np.zeros((w, h, d), np.int32)
+    keypoints = []
+
+    lbd = 3
+
+    for _ in range(15):
+        w1, h1, d1 = np.random.randint(lbd, w - lbd), \
+                     np.random.randint(lbd, h - lbd), \
+                     np.random.randint(lbd, d - lbd)
+        img[:, w1 - lbd:w1 + lbd, h1 - lbd:h1 + lbd, d1 - lbd:d1 + lbd] = 10.
+        mask[w1 - lbd:w1 + lbd, h1 - lbd:h1 + lbd, d1 - lbd:d1 + lbd] = 10.
+        keypoints.append((w1-0., h1-0., d1-0.))
+
+    sample = {'image': img,
+              'mask': mask,
+              'keypoints': keypoints}
+
+    tr = Compose([transform(**params, p=1)])
+    sample_transformed = tr(**sample)
+
+    keypoints_transformed = sample_transformed['keypoints']
+    if DEBUG:
+        print('KEYPOINTS', transform, keypoints)
+        print('KEYPOINTS TRANSFORMED', transform, keypoints_transformed)
+
+    tests = []
+    for k in keypoints_transformed:
+        coos = (np.array(k) + .5).astype(int)
+        tests.append((sample_transformed['image'][0, coos[0], coos[1], coos[2]], 10.,
+                      f'mask, {k} {coos} {transform} {params}'))
+        tests.append((sample_transformed['mask'][coos[0], coos[1], coos[2]], 10.,
+                      f'img {k} {coos} {transform}, {params}'))
+
+    return tests
+
+
+def get_shape_tests(transform,
+                    in_shape: tuple,
+                    params={}):
+    """
+    Iterates over all the possibilities, hot the array can passed throught the transform
+    Args:
+        transform: biovol transform,
+        in_shape: spatial dimension of the input image
+        params: optional, params of the biovol transform
+
+    Returns:
+        list of outputs and expected shapes
+
+    """
+
+    w, h, d = in_shape
+    w_, h_, d_ = params['shape'] if 'shape' in params.keys() else (w, h, d)
+
+    res = []
+    tr = Compose([transform(**params, p=1)])
+
+    # img (W, H, D), mask (W, H, D)
+    img = np.ones((w, h, d), dtype=np.float32)
+    mask = np.ones((w, h, d), dtype=np.int32)
+    fmask = np.ones((w, h, d), dtype=np.float32)
+    #print(img.dtype, mask.dtype, fmask.dtype)
+    tr_img = tr(image=img, mask=mask, float_mask=fmask)
+    #print(tr_img['image'].dtype, tr_img['mask'].dtype, tr_img['float_mask'].dtype)
+    res.append((tr_img['image'], (1, w_, h_, d_), np.float32))
+    res.append((tr_img['mask'], (w_, h_, d_), np.int32))
+    res.append((tr_img['float_mask'], (w_, h_, d_), np.float32))
+
+    # img (C, W, H, D), mask (W, H, D)
+    img = np.ones((4, w, h, d), dtype=np.single)
+    mask = np.ones((w, h, d), dtype=int)
+    fmask = np.ones((w, h, d), dtype=np.single)
+    tr_img = tr(image=img, mask=mask, float_mask=fmask)
+    res.append((tr_img['image'], (4, w_, h_, d_), np.float32))
+    res.append((tr_img['mask'], (w_, h_, d_), np.int32))
+    res.append((tr_img['float_mask'], (w_, h_, d_), np.float32))
+
+    # img (C, W, H, D, T), mask (W, H, D, T)
+    img = np.ones((4, w, h, d, 5), dtype=np.single)
+    mask = np.ones((w, h, d, 5), dtype=int)
+    fmask = np.ones((w, h, d, 5), dtype=np.single)
+    tr_img = tr(image=img, mask=mask, float_mask=fmask)
+    res.append((tr_img['image'], (4, w_, h_, d_, 5), np.float32))
+    res.append((tr_img['mask'], (w_, h_, d_, 5), np.int32))
+    res.append((tr_img['float_mask'], (w_, h_, d_, 5), np.float32))
+
+    return res
+
 
 class TestRandomScale(unittest.TestCase):
     def test_shape(self):
@@ -71,11 +163,26 @@ class TestRandomScale(unittest.TestCase):
                   (0.8, 1.2, 0.9, 1.1, 0.7, 1.)]
 
         for scaling_limit in limits:
-            tests = get_shape_tests(RandomScale, (31, 32, 33),
+            tests = get_shape_tests(RandomScale,
+                                    in_shape=(31, 32, 33),
                                     params={'scaling_limit': scaling_limit})
             for tr_img, expected_shape, data_type in tests:
                 self.assertTupleEqual(tr_img.shape, expected_shape)
                 self.assertEqual(tr_img.dtype, data_type)
+
+    def test_keypoints(self):
+
+        limits = [0.2,
+                  (0.8, 1.2),
+                  (0.2, 0.3, 0.1),
+                  (0.8, 1.2, 0.9, 1.1, 0.7, 1.)]
+
+        for scaling_limit in limits:
+            tests = get_keypoints_tests(RandomScale,
+                                        in_shape=(61, 62, 63),
+                                        params={'scaling_limit': scaling_limit})
+            for value, expected_value, msg in tests:
+                self.assertGreater(value, expected_value * 0.5, msg)
 
 
 class TestRandomRotate90(unittest.TestCase):
@@ -137,6 +244,8 @@ class TestCenterCrop(unittest.TestCase):
             self.assertEqual(tr_img.dtype, data_type)
 
 
+
+
 class TestRandomCrop(unittest.TestCase):
     def test_inflate(self):
         in_shape = (32, 31, 30)
@@ -155,57 +264,6 @@ class TestRandomCrop(unittest.TestCase):
             self.assertEqual(tr_img.dtype, data_type)
 
 
-def get_shape_tests(transform, in_shape: tuple, params={}):
-    """
-    Iterates over all the possibilities, hot the array can passed throught the transform
-    Args:
-        transform: biovol transform,
-        in_shape: spatial dimension of the input image
-        params: optional, params of the biovol transform
-
-    Returns:
-        list of outputs and expected shapes
-
-    """
-
-    w, h, d = in_shape
-    w_, h_, d_ = params['shape'] if 'shape' in params.keys() else (w, h, d)
-
-    res = []
-    tr = Compose([transform(**params, p=1)])
-
-    # img (W, H, D), mask (W, H, D)
-    img = np.ones((w, h, d), dtype=np.float32)
-    mask = np.ones((w, h, d), dtype=np.int32)
-    fmask = np.ones((w, h, d), dtype=np.float32)
-    #print(img.dtype, mask.dtype, fmask.dtype)
-    tr_img = tr(image=img, mask=mask, float_mask=fmask)
-    #print(tr_img['image'].dtype, tr_img['mask'].dtype, tr_img['float_mask'].dtype)
-    res.append((tr_img['image'], (1, w_, h_, d_), np.float32))
-    res.append((tr_img['mask'], (w_, h_, d_), np.int32))
-    res.append((tr_img['float_mask'], (w_, h_, d_), np.float32))
-
-    # img (C, W, H, D), mask (W, H, D)
-    img = np.ones((4, w, h, d), dtype=np.single)
-    mask = np.ones((w, h, d), dtype=int)
-    fmask = np.ones((w, h, d), dtype=np.single)
-    tr_img = tr(image=img, mask=mask, float_mask=fmask)
-    res.append((tr_img['image'], (4, w_, h_, d_), np.float32))
-    res.append((tr_img['mask'], (w_, h_, d_), np.int32))
-    res.append((tr_img['float_mask'], (w_, h_, d_), np.float32))
-
-    # img (C, W, H, D, T), mask (W, H, D, T)
-    img = np.ones((4, w, h, d, 5), dtype=np.single)
-    mask = np.ones((w, h, d, 5), dtype=int)
-    fmask = np.ones((w, h, d, 5), dtype=np.single)
-    tr_img = tr(image=img, mask=mask, float_mask=fmask)
-    res.append((tr_img['image'], (4, w_, h_, d_, 5), np.float32))
-    res.append((tr_img['mask'], (w_, h_, d_, 5), np.int32))
-    res.append((tr_img['float_mask'], (w_, h_, d_, 5), np.float32))
-
-    return res
-
-
 class TestResize(unittest.TestCase):
     def test_inflate(self):
         in_shape = (32, 31, 30)
@@ -222,6 +280,16 @@ class TestResize(unittest.TestCase):
         for tr_img, expected_shape, data_type in shape_tests:
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
+
+    def test_keypoints(self):
+        in_shape = (32, 31, 30)
+        tests = get_keypoints_tests(Resize, in_shape, params={'shape': (40, 41, 42)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+        tests = get_keypoints_tests(Resize, in_shape, params={'shape': (20, 21, 22)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
 
 
 class TestPad(unittest.TestCase):
@@ -243,6 +311,20 @@ class TestPad(unittest.TestCase):
         img = np.empty((4, 30, 30, 30, 5))
         tr_img = tr(image=img)['image']
         self.assertTupleEqual(tr_img.shape, (4, 34, 34, 34, 5))
+
+    def test_keypoints(self):
+        in_shape = (32, 31, 30)
+        tests = get_keypoints_tests(Pad, in_shape, params={'pad_size': (5, 8)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+        tests = get_keypoints_tests(Pad, in_shape, params={'pad_size': 4})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+        tests = get_keypoints_tests(Pad, in_shape, params={'pad_size': (3, 4, 5, 6, 7, 8)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
 
 
 class TestRandomAffineTransform(unittest.TestCase):
@@ -284,6 +366,50 @@ class TestRandomAffineTransform(unittest.TestCase):
                 self.assertTupleEqual(tr_img.shape, expected_shape)
                 self.assertEqual(tr_img.dtype, data_type)
 
+    def test_keypoints(self):
+
+        in_shape = (61, 62, 63)
+
+        angle_limits = [10,
+                        (-20, 20),
+                        (12, 30, 0),
+                        (-20, 20, -180, 180, 0, 0)]
+
+        for angle_limit in angle_limits:
+            tests = get_keypoints_tests(RandomAffineTransform,
+                                        in_shape=in_shape,
+                                        params={'angle_limit': angle_limit})
+
+            for value, expected_value, msg in tests:
+                self.assertGreater(value, expected_value * 0.1, msg)
+
+        scale_limits = [0.2,
+                        (0.8, 1.2),
+                        (0.2, 0.3, 0.1),
+                        (0.8, 1.2, 0.9, 1.1, 0.7, 1.)]
+
+        for scale_limit in scale_limits:
+            tests = get_keypoints_tests(RandomAffineTransform,
+                                        in_shape=in_shape,
+                                        params={'scaling_limit': scale_limit})
+
+            for value, expected_value, msg in tests:
+                self.assertGreater(value, expected_value * 0.5, msg)
+
+        translation_limits = [10,
+                              (0, 12),
+                              (3, 5, 10),
+                              (-3, 3, -5, 5, 0, 0)]
+
+        for translation in translation_limits:
+            tests = get_keypoints_tests(RandomAffineTransform,
+                                        in_shape=in_shape,
+                                        params={'translation_limit': translation})
+
+            for value, expected_value, msg in tests:
+                self.assertGreater(value, expected_value * 0.2, msg)
+
+
 
 class TestAffineTransform(unittest.TestCase):
     def test_shape(self):
@@ -310,7 +436,30 @@ class TestAffineTransform(unittest.TestCase):
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
 
+    def test_keypoints(self):
 
+        scale = (1.2, 0.8, 1)
+        translation = (0, 1, -40)
+        angles = (-20, 0, -0.5)
+
+        tests = get_keypoints_tests(AffineTransform,
+                                    in_shape=(61, 62, 63),
+                                    params={'scale': scale})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+        tests = get_keypoints_tests(AffineTransform,
+                                    in_shape=(61, 62, 63),
+                                    params={'translation': translation})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+        tests = get_keypoints_tests(AffineTransform,
+                                    in_shape=(61, 62, 63),
+                                    params={'angles': angles})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+# ImageTransforms
 class TestNormalizeMeanStd(unittest.TestCase):
     def test_shape(self):
 
@@ -319,6 +468,22 @@ class TestNormalizeMeanStd(unittest.TestCase):
         tests = get_shape_tests(NormalizeMeanStd, (31, 32, 33),
                                 params={'mean': mean,
                                         'std': std})
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+
+class TestGaussianNoise(unittest.TestCase):
+    def test_shape(self):
+        tests = get_shape_tests(GaussianNoise, (31, 32, 33))
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+
+class TestPoissonNoise(unittest.TestCase):
+    def test_shape(self):
+        tests = get_shape_tests(PoissonNoise, (31, 32, 33))
         for tr_img, expected_shape, data_type in tests:
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
