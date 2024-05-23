@@ -46,7 +46,7 @@ from ..augmentations.spatial_funcional import get_affine_transform
 from ..random_utils import uniform, sample_range_uniform
 from typing import List, Sequence, Tuple, Union
 from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat, TypeSpatioTemporalCoordinate,\
-    TypeSextetInt
+    TypeSextetInt, TypeSpatialCoordinate, TypeSpatialShape
 from .utils import parse_limits, parse_coefs, parse_pads, to_tuple, validate_bbox, get_spatio_temporal_domain_limit,\
     to_spatio_temporal
 
@@ -612,7 +612,7 @@ class CenterCrop(DualTransform):
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
-        self.shape = np.asarray(shape, dtype=np.intc)
+        self.output_shape = np.asarray(shape, dtype=np.intc)  # TODO: make it len 3
         self.border_mode = border_mode
         self.mask_mode = border_mode
         self.ival = ival
@@ -623,13 +623,31 @@ class CenterCrop(DualTransform):
             self.mval = ignore_index
 
     def apply(self, img, **params):
-        return F.center_crop(img, self.shape, self.border_mode, self.ival, False)
+        return F.crop(img,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=False)
 
     def apply_to_mask(self, mask, **params):
-        return F.center_crop(mask, self.shape, self.mask_mode, self.mval, True)
+        return F.crop(mask,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=True)
+
+    def get_params(self, **data):
+        # get crop coordinates, position of the corner closest to the image origin
+        img_spatial_shape = np.array(data['image'].shape[1:4])
+        position: TypeSpatialCoordinate = (img_spatial_shape - self.output_shape) // 2
+        position = np.maximum(position, 0).astype(int)
+        pad_dims = F.get_pad_dims(img_spatial_shape, self.output_shape)
+
+        return {'crop_position': position,
+                'pad_dims': pad_dims}
 
     def __repr__(self):
-        return f'CenterCrop({self.shape}, {self.always_apply}, {self.p})'
+        return f'CenterCrop({self.output_shape}, {self.always_apply}, {self.p})'
 
 
 class RandomCrop(DualTransform):
@@ -675,7 +693,7 @@ class RandomCrop(DualTransform):
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
-        self.shape = np.asarray(shape, dtype=np.intc)
+        self.output_shape = np.asarray(shape, dtype=np.intc)
         self.border_mode = border_mode
         self.mask_mode = border_mode
         self.ival = ival
@@ -685,23 +703,34 @@ class RandomCrop(DualTransform):
             self.mask_mode = "constant"
             self.mval = ignore_index
 
-    def apply(self, img, crop_start=np.array((0, 0, 0))):
-        return F.random_crop(img, self.shape, crop_start, self.border_mode, self.ival, mask=False)
+    def apply(self, img, **params):
+        return F.crop(img,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=False)
 
-    def apply_to_mask(self, mask, crop_start=np.array((0, 0, 0))):
-        return F.random_crop(mask, self.shape, crop_start, self.mask_mode, self.mval, mask=True)
-
-    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
-        return None
+    def apply_to_mask(self, mask, **params):
+        return F.crop(mask,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=True)
 
     def get_params(self, **data):
+        # get crop coordinates, position of the corner closest to the image origin
+        img_spatial_shape = np.array(data['image'].shape[1:4])
+        ranges: TypeSpatialShape = np.maximum(img_spatial_shape - self.output_shape, 0)
+        position = np.array([random.randint(0, r) for r in ranges])
+        pad_dims = F.get_pad_dims(img_spatial_shape, self.output_shape)
+        return {'crop_position': position,
+                'pad_dims': pad_dims}
 
-        return {
-            "crop_start": [random.random() for _ in range(len(self.shape))]
-        }
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return keypoints
 
     def __repr__(self):
-        return f'RandomCrop({self.shape}, {self.always_apply}, {self.p})'
+        return f'RandomCrop({self.output_shape}, {self.always_apply}, {self.p})'
 
 
 class RandomAffineTransform(DualTransform):

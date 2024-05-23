@@ -34,3 +34,6 @@ TypeSextetInt = Tuple[int, int, int, int, int, int]
 
 TypeSpatioTemporalCoordinate = Tuple[float, float, float, float]
 TypeSpatialCoordinate = Tuple[float, float, float]
+
+TypeSpatioTemporalShape = Tuple[int, int, int, int]
+TypeSpatialShape = Tuple[int, int, int]
