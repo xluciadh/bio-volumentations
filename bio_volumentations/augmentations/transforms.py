@@ -512,12 +512,16 @@ class Flip(DualTransform):
         # Mask has no dimension channel
         return np.flip(mask, axis=[item - 1 for item in params["axes"]])
 
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return F.flip_keypoints(keypoints,
+                                axes=params['axes'],
+                                img_shape=params['img_shape'])
+
     def get_params(self, **data):
-        if self.axes is None:
-            axes = [1, 2, 3]
-        else:
-            axes = self.axes
-        return {"axes": axes}
+        axes = [1, 2, 3] if self.axes is None else self.axes
+        img_shape = np.array(data['image'].shape[1:4])
+        return {"axes": axes,
+                "img_shape": img_shape}
 
     def __repr__(self):
         return f'Flip({self.axes}, {self.always_apply}, {self.p})'
@@ -528,12 +532,12 @@ class RandomFlip(DualTransform):
     """Flip input around a set of axes randomly chosen from the input list of axis combinations.
 
         Args:
-            axes_to_choose (List[Tuple[int]] or None, optional): List of axis combinations from which one option
+            axes_to_choose (List[Tuple[int]] or None, optional): List of axis indices from which one option
                 is randomly chosen. Recognised axis symbols are ``1`` for Z, ``2`` for Y, and ``3`` for X.
                 The image will be flipped around all axes in the chosen combination.
 
                 If ``None``, a random subset of spatial axes is chosen, corresponding to inputting
-                ``[(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]``.
+                ``[(,), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]``.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -549,7 +553,7 @@ class RandomFlip(DualTransform):
     def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, always_apply=False, p=0.5):
         super().__init__(always_apply, p)
 
-        # TODO: check if axis are valid
+        # TODO: check if input value `axes_to_choice` valid
         self.axes = axes_to_choose
 
     def apply(self, img, **params):
@@ -559,11 +563,18 @@ class RandomFlip(DualTransform):
         # Mask has no dimension channel
         return np.flip(mask, axis=[item - 1 for item in params["axes"]])
 
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return F.flip_keypoints(keypoints,
+                                axes=params['axes'],
+                                img_shape=params['img_shape'])
+
     def get_params(self, **data):
         
         to_choose = [1, 2, 3] if self.axes is None else self.axes
         axes = random.sample(to_choose, random.randint(0, len(to_choose)))
-        return {"axes": axes}
+        img_shape = np.array(data['image'].shape[1:4])
+        return {"axes": axes,
+                "img_shape": img_shape}
 
     def __repr__(self):
         return f'Flip({self.axes}, {self.always_apply}, {self.p})'

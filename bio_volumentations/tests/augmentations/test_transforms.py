@@ -35,29 +35,6 @@ import numpy as np
 DEBUG = False
 
 
-class TestScale(unittest.TestCase):
-    def test_shape(self):
-        tests = get_shape_tests(Scale, (31, 32, 33), params={'scales': 1.5})
-        for tr_img, expected_shape, data_type in tests:
-            self.assertTupleEqual(tr_img.shape, expected_shape)
-            self.assertEqual(tr_img.dtype, data_type)
-
-        tests = get_shape_tests(Scale, (31, 32, 33), params={'scales': 0.8})
-        for tr_img, expected_shape, data_type in tests:
-            self.assertTupleEqual(tr_img.shape, expected_shape)
-            self.assertEqual(tr_img.dtype, data_type)
-
-    def test_keypoints(self):
-
-        tests = get_keypoints_tests(Scale, params={'scales': 1.5})
-        for value, expected_value, msg in tests:
-            self.assertGreater(value, expected_value * 0.1, msg)
-
-        tests = get_keypoints_tests(Scale, params={'scales': 0.8})
-        for value, expected_value, msg in tests:
-            self.assertGreater(value, expected_value * 0.1, msg)
-
-
 def get_keypoints_tests(transform,
                         in_shape: tuple = (32, 33, 34),
                         params: dict = {}):
@@ -154,6 +131,29 @@ def get_shape_tests(transform,
     return res
 
 
+class TestScale(unittest.TestCase):
+    def test_shape(self):
+        tests = get_shape_tests(Scale, (31, 32, 33), params={'scales': 1.5})
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+        tests = get_shape_tests(Scale, (31, 32, 33), params={'scales': 0.8})
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+    def test_keypoints(self):
+
+        tests = get_keypoints_tests(Scale, params={'scales': 1.5})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.1, msg)
+
+        tests = get_keypoints_tests(Scale, params={'scales': 0.8})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.1, msg)
+
+
 class TestRandomScale(unittest.TestCase):
     def test_shape(self):
 
@@ -208,6 +208,12 @@ class TestFlip(unittest.TestCase):
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
 
+    def test_keypoints(self):
+        tests = get_keypoints_tests(Flip, params={})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.1, msg)
+
+
 
 class TestRandomFlip(unittest.TestCase):
     def test_shape(self):
@@ -224,6 +230,19 @@ class TestRandomFlip(unittest.TestCase):
             for tr_img, expected_shape, data_type in tests:
                 self.assertTupleEqual(tr_img.shape, expected_shape)
                 self.assertEqual(tr_img.dtype, data_type)
+
+    def test_keypoints(self):
+
+        axes_list = [None,
+                     [],
+                     [1],
+                     [1, 2],
+                     [1, 2, 3]]
+
+        for axes in axes_list:
+            tests = get_keypoints_tests(RandomFlip, params={'axes_to_choose': axes})
+            for value, expected_value, msg in tests:
+                self.assertGreater(value, expected_value * 0.1, msg)
 
 
 class TestCenterCrop(unittest.TestCase):

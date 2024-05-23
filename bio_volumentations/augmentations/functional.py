@@ -207,6 +207,22 @@ def pad_keypoints(keypoints, pad_size):
     return res
 
 
+def flip_keypoints(keypoints, axes, img_shape):
+
+    mult, add = np.ones(3, int), np.zeros(3, int)
+    for ax in axes:
+        mult[ax-1] = -1
+        add[ax-1] = img_shape[ax-1]
+
+    res = []
+    for k in keypoints:
+        flipped = list(np.array(k[:3]) * mult + add)
+        if len(k) == 4:
+            flipped.append(k[-1])
+        res.append(tuple(flipped))
+    return res
+
+
 def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=False):
 
     a, b, c, d, e, f = input_pad_width
