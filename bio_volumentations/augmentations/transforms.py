@@ -636,6 +636,13 @@ class CenterCrop(DualTransform):
                       pad_dims=params['pad_dims'],
                       border_mode=self.mask_mode, cval=self.mval, mask=True)
 
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return F.crop_keypoints(keypoints,
+                                crop_shape=self.output_shape,
+                                crop_position=params['crop_position'],
+                                pad_dims=params['pad_dims'],
+                                keep_all=keep_all)
+
     def get_params(self, **data):
         # get crop coordinates, position of the corner closest to the image origin
         img_spatial_shape = np.array(data['image'].shape[1:4])
@@ -717,6 +724,13 @@ class RandomCrop(DualTransform):
                       pad_dims=params['pad_dims'],
                       border_mode=self.mask_mode, cval=self.mval, mask=True)
 
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return F.crop_keypoints(keypoints,
+                                crop_shape=self.output_shape,
+                                crop_position=params['crop_position'],
+                                pad_dims=params['pad_dims'],
+                                keep_all=keep_all)
+
     def get_params(self, **data):
         # get crop coordinates, position of the corner closest to the image origin
         img_spatial_shape = np.array(data['image'].shape[1:4])
@@ -725,9 +739,6 @@ class RandomCrop(DualTransform):
         pad_dims = F.get_pad_dims(img_spatial_shape, self.output_shape)
         return {'crop_position': position,
                 'pad_dims': pad_dims}
-
-    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
-        return keypoints
 
     def __repr__(self):
         return f'RandomCrop({self.output_shape}, {self.always_apply}, {self.p})'

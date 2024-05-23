@@ -109,44 +109,11 @@ def get_center_crop_coords(img_shape, crop_shape):
 
 
 # Too similar to the random_crop. Could be made into one function
-def center_crop(img, input_crop_shape, border_mode, cval, mask):
-    for i in input_crop_shape:
-        if i < 0:
-            warn(f'CenterCrop(): shape {input_crop_shape} contains zero or negative number, continuing'
-                 f'without CenterCrop.', UserWarning)
-            return img
-    if not mask:
-        crop_shape = np.insert(input_crop_shape, 0, img.shape[0])
-    else:
-        crop_shape = input_crop_shape
-    img_shape = np.array(img.shape)
-
-    # Adding last dimension, if there is one less in the crop_shape
-    if len(img_shape) == len(crop_shape) + 1:
-        crop_shape = np.append(crop_shape, img_shape[-1])
-    if np.any(img_shape < crop_shape):
-        warn(f'CenterCrop(): image size {img_shape} smaller than crop size {crop_shape}, pad by {border_mode}.', UserWarning)
-        img = pad(img, img_shape, crop_shape, border_mode , cval)
-        img_shape = np.array(img.shape)
-   
-    from_indices, to_indices = get_center_crop_coords(img_shape, crop_shape)
-    return crop_from_to(img, from_indices, to_indices)
-
-
-# Too similar to the random_crop. Could be made into one function
 def crop(input_array: np.array,
          crop_shape: TypeSpatialShape,
          crop_position: TypeSpatialShape,
          pad_dims,
          border_mode, cval, mask):
-
-    ''' TO REMOVE validate that position do not contain negative values
-    for i in input_crop_shape:
-        if i < 0:
-            warn(f'CenterCrop(): shape {input_crop_shape} contains zero or negative number, continuing'
-                 f'without CenterCrop.', UserWarning)
-            return img
-    '''
 
     input_spatial_shape = get_spatial_shape(input_array, mask)
 
@@ -174,6 +141,24 @@ def crop(input_array: np.array,
     return result
 
 
+def crop_keypoints(keypoints,
+                   crop_shape: TypeSpatialShape,
+                   crop_position: TypeSpatialShape,
+                   pad_dims,
+                   keep_all: bool):
+
+    (px, _), (py, _), (pz, _) = pad_dims
+    pad = np.array((px, py, pz))
+
+    res = []
+    for keypoint in keypoints:
+        k = keypoint[:3] - crop_position + pad
+        if keep_all or (np.all(k >= 0) and np.all((k + .5) < crop_shape)):
+            res.append(k)
+
+    return res
+
+
 def get_spatial_shape(array: np.array, mask: bool) -> TypeSpatialShape:
     return np.array(array.shape)[:3] if mask else np.array(array.shape)[1:4]
 
@@ -191,34 +176,6 @@ def get_pad_dims(spatial_shape: TypeSpatialShape, crop_shape: TypeSpatialShape):
         else:
             pad_dims.append((0, 0))
     return pad_dims
-
-
-def crop_coordinates(input_array: np.array,
-                     crop_position: TypeSpatialShape,
-                     crop_shape: TypeSpatialShape,
-                     mask: bool = False):
-    """
-
-    Args:
-        input_array: np.array, 3 - 5 dimensional array
-        crop_position: position of the crop corner, which is closest to the origin of coordinates
-        crop_shape: spatial shape of the result array
-        mask: bool - true if the input do not have a channel dimension
-
-    Returns:
-
-    """
-
-    x1, y1, z1 = crop_position
-    x2, y2, z2 = np.array(crop_position) + np.array(crop_shape)
-
-    if mask:
-        result = input_array[x1:x2, y1:y2, z1:z2]
-        assert np.all(result.shape[:3] == crop_shape), f'{result.shape} {crop_shape} {mask} {crop_position}'
-    else:
-        result = input_array[:, x1:x2, y1:y2, z1:z2]
-        assert np.all(result.shape[1:4] == crop_shape)
-    return result
 
 
 def pad(img, pad_width, border_mode, cval, mask=True):
@@ -252,36 +209,6 @@ def pad_keypoints(keypoints, pad_size):
 
 def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=False):
 
-    """
-    img_shape = img.shape
-
-    if not mask:
-        img_shape = img_shape[1:]
-
-    if isinstance(input_pad_width, (int, tuple)):
-        pad_width = input_pad_width
-    else:
-        pad_width = input_pad_width.copy()
-
-    if isinstance(pad_width, int):
-        # padding only spatial dimensions
-        pad_width = [(pad_width, pad_width) if i < 3 else (0, 0) for i in range(len(img_shape))]
-    elif isinstance(pad_width, tuple):
-        if len(pad_width) > 2:
-            warn(f'Pad(): tuple for pad_size {pad_width} have more than 2 elements, ignoring elements after the ' +
-                 f'second one.', UserWarning)
-
-        pad_width = [(pad_width[0], pad_width[1]) if i < 3 else (0, 0) for i in range(len(img_shape))]
-
-    else:
-        # Making tuples out of single numbers
-        for i in range(len(pad_width)):
-            if isinstance(pad_width[i], int):
-                pad_width[i] = (pad_width[i], pad_width[i])
-        # Padding with zeroes
-        if len(pad_width) < len(img_shape):
-            pad_width = pad_width + [(0, 0)] * (len(img_shape) - len(pad_width))
-    """
     a, b, c, d, e, f = input_pad_width
     pad_width = [(a, b), (c, d), (e, f)]
 
@@ -298,56 +225,6 @@ def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=Fals
     if border_mode == "linear_ramp":
         return np.pad(img, pad_width, border_mode, end_values=cval)
     return np.pad(img, pad_width, border_mode)
-
-
-def crop_from_to(img, froms, tos):
-    if len(froms) == 3:
-        c1, x1, y1 = froms
-        c2, x2, y2 = tos
-        return img[c1:c2, x1:x2, y1:y2]
-    if len(froms) == 4:
-        c1, x1, y1, z1 = froms
-        c2, x2, y2, z2 = tos
-        return img[c1:c2, x1:x2, y1:y2, z1:z2]
-    
-    if len(froms) == 5:
-        c1, x1, y1, z1, t1 = froms
-        c2, x2, y2, z2, t2 = tos
-        return img[c1:c2, x1:x2, y1:y2, z1:z2, t1:t2]
-
-
-def get_random_crop_coords(img_shape, crop_shape, crop_start):
-    froms = ((img_shape - crop_shape) * crop_start).astype(int)
-    tos = froms + crop_shape
-    return froms, tos
-
-
-# Too similar to the center_crop. Could be made into one function
-def random_crop(img, input_crop_shape, input_crop_start, border_mode, cval, mask):
-
-    if not mask:
-        crop_shape = np.insert(input_crop_shape, 0, img.shape[0])
-        crop_start = np.insert(input_crop_start, 0, 0)
-    else:
-        crop_shape = input_crop_shape
-        crop_start = input_crop_start
-    img_shape = np.array(img.shape)
-
-    # Adding last dimension, if there is one less in the crop_shape
-    if len(img_shape) == len(crop_shape) + 1:
-        crop_shape = np.append(crop_shape, img_shape[-1])
-        crop_start = np.append(crop_start, 0)
-    if np.any(img_shape < crop_shape):
-        warn(
-            f'BioVolumentations transformation RandomCrop():' +
-            f' image size {img_shape} smaller than crop size {crop_shape}, pad by {border_mode}.',
-            UserWarning)
-        img = pad(img, img_shape, crop_shape, border_mode,cval)
-        img_shape = np.array(img.shape)
-    
-    froms, tos = get_random_crop_coords(img_shape, crop_shape, crop_start)
-
-    return crop_from_to(img, froms, tos)
 
 
 def normalize_mean_std(img, mean, denominator):

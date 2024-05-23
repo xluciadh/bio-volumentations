@@ -229,7 +229,7 @@ class TestRandomFlip(unittest.TestCase):
 class TestCenterCrop(unittest.TestCase):
     def test_inflate(self):
         in_shape = (32, 31, 30)
-        shape_tests = get_shape_tests(CenterCrop, in_shape, {'shape': (40, 41, 42)})
+        shape_tests = get_shape_tests(CenterCrop, in_shape, {'shape': (40, 41, 43)})
 
         for tr_img, expected_shape, data_type in shape_tests:
             self.assertTupleEqual(tr_img.shape, expected_shape)
@@ -237,13 +237,21 @@ class TestCenterCrop(unittest.TestCase):
 
     def test_deflate(self):
         in_shape = (32, 31, 30)
-        shape_tests = get_shape_tests(CenterCrop, in_shape, {'shape': (20, 21, 22)})
+        shape_tests = get_shape_tests(CenterCrop, in_shape, {'shape': (20, 21, 23)})
 
         for tr_img, expected_shape, data_type in shape_tests:
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
 
+    def test_keypoints(self):
+        in_shape = (32, 31, 30)
+        tests = get_keypoints_tests(CenterCrop, in_shape, params={'shape': (40, 41, 42)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
 
+        tests = get_keypoints_tests(CenterCrop, in_shape, params={'shape': (20, 21, 22)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
 
 
 class TestRandomCrop(unittest.TestCase):
@@ -262,6 +270,16 @@ class TestRandomCrop(unittest.TestCase):
         for tr_img, expected_shape, data_type in shape_tests:
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
+
+    def test_keypoints(self):
+        in_shape = (32, 31, 30)
+        tests = get_keypoints_tests(RandomCrop, in_shape, params={'shape': (40, 41, 42)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+        tests = get_keypoints_tests(RandomCrop, in_shape, params={'shape': (20, 21, 22)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
 
 
 class TestResize(unittest.TestCase):
