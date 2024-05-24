@@ -452,10 +452,17 @@ class RandomRotate90(DualTransform):
         return img
 
     def apply_to_mask(self, mask, **params):
-        for i in range(len(params["rotation_around"])):
-            mask = np.rot90(mask, params["factor"][i], axes=(
-                params["rotation_around"][i][0] - 1, params["rotation_around"][i][1] - 1))
+        for rot, factor in zip(params["rotation_around"], params["factor"]):
+            mask = np.rot90(mask, factor, axes=(rot[0] - 1, rot[1] - 1))
         return mask
+
+    def apply_to_keypoints(self, keypoints, keep_all=True, **params):
+        for rot, factor in zip(params["rotation_around"], params["factor"]):
+            keypoints = F.rot90_keypoints(keypoints,
+                                          factor=factor,
+                                          axes=(rot[0] - 1, rot[1] - 1),
+                                          img_shape=params['img_shape'])
+        return keypoints
 
     def get_params(self, **data):
 
@@ -476,8 +483,11 @@ class RandomRotate90(DualTransform):
 
         # choose angle to rotate
         factor = [random.randint(0, 3) for _ in range(len(rotation_around))]
+        img_shape = np.array(data['image'].shape[1:4])
+
         return {"factor": factor,
-                "rotation_around": rotation_around}
+                "rotation_around": rotation_around,
+                "img_shape": img_shape}
 
     def __repr__(self):
         return f'RandomRotate90({self.axes}, {self.always_apply}, {self.p})'

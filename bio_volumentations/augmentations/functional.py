@@ -223,6 +223,28 @@ def flip_keypoints(keypoints, axes, img_shape):
     return res
 
 
+def rot90_keypoints(keypoints, factor, axes, img_shape):
+    if factor == 1:
+        keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
+        keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
+    elif factor == 2:
+        keypoints = flip_keypoints(keypoints, axes, img_shape)
+    elif factor == 3:
+        keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
+        keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
+
+    return keypoints
+
+
+def transpose_keypoints(keypoints, ax1, ax2):
+    res = []
+    for k in keypoints:
+        k = list(k)
+        k[ax1], k[ax2] = k[ax2], k[ax1]
+        res.append(tuple(k))
+    return res
+
+
 def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=False):
 
     a, b, c, d, e, f = input_pad_width

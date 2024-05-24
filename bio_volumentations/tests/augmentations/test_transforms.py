@@ -200,6 +200,18 @@ class TestRandomRotate90(unittest.TestCase):
                 self.assertTupleEqual(tr_img.shape, expected_shape)
                 self.assertEqual(tr_img.dtype, data_type)
 
+    def test_keypoints(self):
+
+        axes_list = [None,
+                     [1],
+                     [1, 2],
+                     [1, 2, 3]]
+
+        for axes in axes_list:
+            tests = get_keypoints_tests(RandomRotate90, params={'axes': axes})
+            for value, expected_value, msg in tests:
+                self.assertGreater(value, expected_value * 0.1, msg)
+
 
 class TestFlip(unittest.TestCase):
     def test_shape(self):
@@ -212,7 +224,6 @@ class TestFlip(unittest.TestCase):
         tests = get_keypoints_tests(Flip, params={})
         for value, expected_value, msg in tests:
             self.assertGreater(value, expected_value * 0.1, msg)
-
 
 
 class TestRandomFlip(unittest.TestCase):
