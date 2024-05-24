@@ -207,10 +207,11 @@ class TestRandomRotate90(unittest.TestCase):
                      [1, 2],
                      [1, 2, 3]]
 
-        for axes in axes_list:
-            tests = get_keypoints_tests(RandomRotate90, params={'axes': axes})
-            for value, expected_value, msg in tests:
-                self.assertGreater(value, expected_value * 0.1, msg)
+        for _ in range(32):
+            for axes in axes_list:
+                tests = get_keypoints_tests(RandomRotate90, params={'axes': axes})
+                for value, expected_value, msg in tests:
+                    self.assertGreater(value, expected_value * 0.1, msg)
 
 
 class TestFlip(unittest.TestCase):
@@ -235,12 +236,13 @@ class TestRandomFlip(unittest.TestCase):
                      [1, 2],
                      [1, 2, 3]]
 
-        for axes in axes_list:
-            tests = get_shape_tests(RandomFlip, (30, 30, 30),
-                                    params={'axes_to_choose': axes})
-            for tr_img, expected_shape, data_type in tests:
-                self.assertTupleEqual(tr_img.shape, expected_shape)
-                self.assertEqual(tr_img.dtype, data_type)
+        for _ in range(16):
+            for axes in axes_list:
+                tests = get_shape_tests(RandomFlip, (30, 30, 30),
+                                        params={'axes_to_choose': axes})
+                for tr_img, expected_shape, data_type in tests:
+                    self.assertTupleEqual(tr_img.shape, expected_shape)
+                    self.assertEqual(tr_img.dtype, data_type)
 
     def test_keypoints(self):
 
@@ -250,10 +252,11 @@ class TestRandomFlip(unittest.TestCase):
                      [1, 2],
                      [1, 2, 3]]
 
-        for axes in axes_list:
-            tests = get_keypoints_tests(RandomFlip, params={'axes_to_choose': axes})
-            for value, expected_value, msg in tests:
-                self.assertGreater(value, expected_value * 0.1, msg)
+        for _ in range(16):
+            for axes in axes_list:
+                tests = get_keypoints_tests(RandomFlip, params={'axes_to_choose': axes})
+                for value, expected_value, msg in tests:
+                    self.assertGreater(value, expected_value * 0.1, msg)
 
 
 class TestCenterCrop(unittest.TestCase):

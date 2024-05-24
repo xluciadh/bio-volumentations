@@ -209,10 +209,13 @@ def pad_keypoints(keypoints, pad_size):
 
 def flip_keypoints(keypoints, axes, img_shape):
 
+    # all values in axes are in [1, 2, 3]
+    assert np.all(np.array([ax in [1, 2, 3] for ax in axes])), f'{axes} does not contain values from [1, 2, 3]'
+
     mult, add = np.ones(3, int), np.zeros(3, int)
     for ax in axes:
         mult[ax-1] = -1
-        add[ax-1] = img_shape[ax-1]
+        add[ax-1] = img_shape[ax-1] - 1
 
     res = []
     for k in keypoints:
@@ -224,12 +227,15 @@ def flip_keypoints(keypoints, axes, img_shape):
 
 
 def rot90_keypoints(keypoints, factor, axes, img_shape):
+
     if factor == 1:
         keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
         keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
+
     elif factor == 2:
         keypoints = flip_keypoints(keypoints, axes, img_shape)
     elif factor == 3:
+
         keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
         keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
 
@@ -237,10 +243,14 @@ def rot90_keypoints(keypoints, factor, axes, img_shape):
 
 
 def transpose_keypoints(keypoints, ax1, ax2):
+
+    # all values in axes are in [1, 2, 3]
+    assert (ax1 in [1, 2, 3]) and (ax2 in [1, 2, 3]), f'[{ax1} {ax2}] does not contain values from [1, 2, 3]'
+
     res = []
     for k in keypoints:
         k = list(k)
-        k[ax1], k[ax2] = k[ax2], k[ax1]
+        k[ax1-1], k[ax2-1] = k[ax2-1], k[ax1-1]
         res.append(tuple(k))
     return res
 

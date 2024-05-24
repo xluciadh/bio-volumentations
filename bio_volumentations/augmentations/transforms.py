@@ -440,11 +440,12 @@ class RandomRotate90(DualTransform):
         Targets:
             image, mask, float_mask
     """
-    def __init__(self, axes: List[int] = None, shuffle_axis: bool = False,
+    def __init__(self, axes: List[int] = None, shuffle_axis: bool = False, factor = None,
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.axes = axes
         self.shuffle_axis = shuffle_axis
+        self.factor = factor
 
     def apply(self, img, **params):
         for factor, axes in zip(params["factor"], params["rotation_around"]):
@@ -460,7 +461,7 @@ class RandomRotate90(DualTransform):
         for rot, factor in zip(params["rotation_around"], params["factor"]):
             keypoints = F.rot90_keypoints(keypoints,
                                           factor=factor,
-                                          axes=(rot[0] - 1, rot[1] - 1),
+                                          axes=(rot[0], rot[1]),
                                           img_shape=params['img_shape'])
         return keypoints
 
@@ -482,7 +483,13 @@ class RandomRotate90(DualTransform):
             random.shuffle(rotation_around)
 
         # choose angle to rotate
-        factor = [random.randint(0, 3) for _ in range(len(rotation_around))]
+        if self.factor is None:
+            factor = [random.randint(0, 3) for _ in range(len(rotation_around))]
+        else:
+            factor = [self.factor]
+            rotation_around = [(1, 2)]
+            print('ROT90', factor, rotation_around)
+
         img_shape = np.array(data['image'].shape[1:4])
 
         return {"factor": factor,
