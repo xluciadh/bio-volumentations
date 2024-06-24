@@ -33,9 +33,18 @@ from .utils import get_image_center, ras_to_lps, np_to_sitk, sitk_to_np
 DEBUG = False
 
 SITK_interpolation = {
-    0: 'sitkNearestNeighbor',
-    1: 'sitkLinear'
+    'nearest': 'sitkNearestNeighbor',
+    'linear': 'sitkLinear',
+    'bspline': 'sitkBSpline',
+    'gaussian': 'sitkGaussian'
 }
+
+
+def parse_itk_interpolation(interpolation: str) -> str:
+
+    assert interpolation in SITK_interpolation.keys(), f'parameter {interpolation} ' \
+                    f'is not in the list of supported interpolation techniques: {SITK_interpolation.keys()}'
+    return SITK_interpolation[interpolation]
 
 
 def get_affine_transform(domain_limit,

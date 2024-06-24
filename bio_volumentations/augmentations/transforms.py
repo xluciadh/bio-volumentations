@@ -42,7 +42,7 @@ import random
 import numpy as np
 from ..core.transforms_interface import DualTransform, ImageOnlyTransform
 from ..augmentations import functional as F
-from ..augmentations.spatial_funcional import get_affine_transform
+from ..augmentations.spatial_funcional import get_affine_transform, parse_itk_interpolation
 from ..random_utils import uniform, sample_range_uniform
 from typing import List, Sequence, Tuple, Union
 from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat, TypeSpatioTemporalCoordinate,\
@@ -175,9 +175,12 @@ class Scale(DualTransform):
                 The unspecified dimensions (C and possibly T) are not affected.
 
                 Defaults to ``1``.
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
             spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
 
                 Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.
@@ -215,12 +218,12 @@ class Scale(DualTransform):
             image, mask, float_mask
     """
     def __init__(self, scales: Union[float, TypeTripletFloat] = 1,
-                 interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
+                 interpolation: str = 'linear', spacing: Union[float, TypeTripletFloat] = None,
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 1):
         super().__init__(always_apply, p)
         self.scale = parse_coefs(scales, identity_element=1.)
-        self.interpolation: int = interpolation
+        self.interpolation: str = parse_itk_interpolation(interpolation)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
         self.border_mode = border_mode              # not implemented
         self.mask_mode = border_mode                # not implemented
@@ -239,7 +242,7 @@ class Scale(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
         return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         interpolation=interpolation,
@@ -311,9 +314,12 @@ class RandomScale(DualTransform):
 
                 Defaults to ``(0.9, 1.1)``.
 
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
 
             spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
 
@@ -358,12 +364,12 @@ class RandomScale(DualTransform):
             image, mask, float_mask
     """      
     def __init__(self, scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.9, 1.1),
-                 interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
+                 interpolation: str = 'linear', spacing: Union[float, TypeTripletFloat] = None,
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit)
-        self.interpolation: int = interpolation
+        self.interpolation: str = parse_itk_interpolation(interpolation)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
         self.border_mode = border_mode
         self.mask_mode = border_mode
@@ -392,7 +398,7 @@ class RandomScale(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
         return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         interpolation=interpolation,
@@ -834,9 +840,12 @@ class RandomAffineTransform(DualTransform):
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
 
                 Defaults to ``False``.
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'constant'``.
@@ -867,7 +876,7 @@ class RandomAffineTransform(DualTransform):
                  scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
                  spacing: Union[float, TypeTripletFloat] = None,
                  change_to_isotropic: bool = False,
-                 interpolation: int = 1,
+                 interpolation: str = 'linear',
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
@@ -875,7 +884,7 @@ class RandomAffineTransform(DualTransform):
         self.translation_limit: TypeSextetFloat = parse_limits(translation_limit, identity_element=0)
         self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, identity_element=1)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1)
-        self.interpolation: int = interpolation
+        self.interpolation: int = parse_itk_interpolation(interpolation)
         self.border_mode = border_mode                 # not used
         self.mask_mode = border_mode                   # not used
         self.ival = ival
@@ -897,7 +906,7 @@ class RandomAffineTransform(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
         return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         degrees=params["angles"],
@@ -968,9 +977,12 @@ class AffineTransform(DualTransform):
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
 
                 Defaults to ``False``.
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'constant'``.
@@ -1001,7 +1013,7 @@ class AffineTransform(DualTransform):
                  scale: TypeTripletFloat = (1, 1, 1),
                  spacing: TypeTripletFloat = (1, 1, 1),
                  change_to_isotropic: bool = False,
-                 interpolation: int = 1,
+                 interpolation: str = 'linear',
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
@@ -1009,7 +1021,7 @@ class AffineTransform(DualTransform):
         self.translation: TypeTripletFloat = parse_coefs(translation, identity_element=0)
         self.scale: TypeTripletFloat = parse_coefs(scale, identity_element=1)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1)
-        self.interpolation: int = interpolation
+        self.interpolation: str = parse_itk_interpolation(interpolation)
         self.border_mode = border_mode                 # not used
         self.mask_mode = border_mode                   # not used
         self.ival = ival
@@ -1031,7 +1043,7 @@ class AffineTransform(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
         return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         degrees=self.angles,
@@ -1171,7 +1183,7 @@ class NormalizeMeanStd(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, mean: Union[List[float], float], std: Union[List[float], float],
+    def __init__(self, mean: Union[Tuple[float], float], std: Union[Tuple[float], float],
                  always_apply: bool = True, p: float = 1.0):
         super().__init__(always_apply, p)
         self.mean = np.array(mean, dtype=np.float32) 

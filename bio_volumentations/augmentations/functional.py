@@ -519,7 +519,7 @@ def affine(img: np.array,
            degrees: TypeTripletFloat = (0, 0, 0),
            scales: TypeTripletFloat = (1, 1, 1),
            translation: TypeTripletFloat = (0, 0, 0),
-           interpolation: int = 1,
+           interpolation: str = 'linear',
            border_mode: str = 'constant',
            value: float = 0,
            spacing: TypeTripletFloat = (1, 1, 1)):
@@ -535,7 +535,7 @@ def affine(img: np.array,
 
     return apply_sitk_transform(img,
                                 sitk_transform=transform,
-                                interpolation=SITK_interpolation[interpolation],
+                                interpolation=interpolation,
                                 default_value=value,
                                 spacing=spacing)
 
