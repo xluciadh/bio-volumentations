@@ -457,7 +457,7 @@ class RandomRotate90(DualTransform):
             mask = np.rot90(mask, factor, axes=(rot[0] - 1, rot[1] - 1))
         return mask
 
-    def apply_to_keypoints(self, keypoints, keep_all=True, **params):
+    def apply_to_keypoints(self, keypoints, **params):
         for rot, factor in zip(params["rotation_around"], params["factor"]):
             keypoints = F.rot90_keypoints(keypoints,
                                           factor=factor,
@@ -529,7 +529,7 @@ class Flip(DualTransform):
         # Mask has no dimension channel
         return np.flip(mask, axis=[item - 1 for item in params["axes"]])
 
-    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+    def apply_to_keypoints(self, keypoints, **params):
         return F.flip_keypoints(keypoints,
                                 axes=params['axes'],
                                 img_shape=params['img_shape'])
@@ -779,24 +779,28 @@ class RandomAffineTransform(DualTransform):
             angle_limit (Tuple[float] | float, optional): Intervals in degrees from which angles of
                 rotation for the spatial axes are chosen.
 
-                Must be either of: ``A``, ``(A1, A2)``, or ``(A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2)``.
+                Must be either of: ``A``, ``(A1, A2)``, ``(A1, A2, A3)``, or ``(A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2)``.
 
                 If a float, equivalent to ``(-A, A, -A, A, -A, A)``.
 
                 If a tuple with 2 items, equivalent to ``(A1, A2, A1, A2, A1, A2)``.
 
+                If a tuple with 3 items, equivalent to ``(-A1, A1, -A2, A2, -A3, A3)``.
+
                 If a tuple with 6 items, angle of rotation is randomly chosen from an interval [A_a1, A_a2] for each
                 spatial axis.
 
                 Defaults to ``(15, 15, 15)``.
-            translation_limit (Tuple[int] | int | None, optional): Intervals from which the translation parameters
+            translation_limit (Tuple[float] | float | None, optional): Intervals from which the translation parameters
                 for the spatial axes are chosen.
 
-                Must be either of: ``T``, ``(T1, T2)``, or ``(T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2)``.
+                Must be either of: ``T``, ``(T1, T2)``, ``(T1, T2, T3)``, or ``(T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2)``.
 
                 If a float, equivalent to ``(-T, T, -T, T, -T, T)``.
 
                 If a tuple with 2 items, equivalent to ``(T1, T2, T1, T2, T1, T2)``.
+
+                If a tuple with 3 items, equivalent to ``(-T1, T1, -T2, T2, -T3, T3)``.
 
                 If a tuple with 6 items, the translation parameter is randomly chosen from an interval [T_a1, T_a2] for
                 each spatial axis.
@@ -804,11 +808,13 @@ class RandomAffineTransform(DualTransform):
                 Defaults to ``(0, 0, 0)``.
             scaling_limit (Tuple[float] | float, optional): Intervals from which the scales for the spatial axes are chosen.
 
-                Must be either of: ``S``, ``(S1, S2)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
+                Must be either of: ``S``, ``(S1, S2)``, ``(S1, S2, S3)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
-                If a float, equivalent to ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``.
+                If a float, equivalent to ``(1 - S, 1 + S, 1 - S, 1 + S, 1 - S, 1 + S)``.
 
                 If a tuple with 2 items, equivalent to ``(S1, S2, S1, S2, S1, S2)``.
+
+                If a tuple with 3 items, equivalent to ``(1 - S1, 1 + S1, 1 - S2, 1 + S2, 1 - S3, 1 + S3)``.
 
                 If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
                 each spatial axis.
@@ -856,9 +862,9 @@ class RandomAffineTransform(DualTransform):
         Targets:
             image, mask, float_mask
     """
-    def __init__(self, angle_limit: Union[float, TypePairFloat, TypeSextetFloat] = (15., 15., 15.),
-                 translation_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0., 0., 0.),
-                 scaling_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
+    def __init__(self, angle_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (15., 15., 15.),
+                 translation_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0., 0., 0.),
+                 scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
                  spacing: Union[float, TypeTripletFloat] = None,
                  change_to_isotropic: bool = False,
                  interpolation: int = 1,
@@ -1108,9 +1114,9 @@ class PoissonNoise(ImageOnlyTransform):
     """Adds Poisson noise to the image.
 
         Args:
-            intensity_limit (tuple): Range to sample the expected intensity of Poisson noise.
+            peak_limit (tuple): Range to sample the expected intensity of Poisson noise.
 
-                Defaults to ``(1, 10)``.
+                Defaults to ``(0.1, 0.5)``.
             always_apply (bool, optional): Always apply this transformation in composition.
 
                 Defaults to ``False``.

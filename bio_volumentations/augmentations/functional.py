@@ -333,7 +333,7 @@ def gaussian_noise(img, mean, sigma):
 
 def poisson_noise(img, peak):
     img = img.astype("float32")
-    return (np.random.poisson(img * peak) / peak).astype(np.float32)
+    return img + np.random.poisson(img).astype(np.float32)
 
 
 # TODO parameter
