@@ -25,6 +25,7 @@ The `Bio-Volumentations` library is based on the following image augmentation li
 - `Continued Development <https://github.com/ZFTurbo/volumentations>`_
 - `Enhancements <https://github.com/qubvel/volumentations>`_
 - `Further Enhancements <https://github.com/muellerdo/volumentations>`_
+- `TorchIO <https://github.com/fepegar/torchio>`_
 
 We would thus like to thank their authors, namely:
 
@@ -33,6 +34,7 @@ We would thus like to thank their authors, namely:
 - `ZFTurbo <https://github.com/ZFTurbo>`_
 - `ashawkey <https://github.com/ashawkey>`_
 - `Dominik Müller <https://github.com/muellerdo>`_
+- `TorchIO contributors <https://github.com/fepegar/torchio/graphs/contributors>`_
 
 
 Citation

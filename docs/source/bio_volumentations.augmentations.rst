@@ -1,5 +1,5 @@
-Transforms Module
-=================
+Augmentation Module
+===================
 
 .. automodule:: bio_volumentations.augmentations.transforms
    :members:

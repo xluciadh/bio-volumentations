@@ -1,6 +1,6 @@
 .. bio-volumentations documentation master file, created by sphinx-quickstart 2024.
 
-Welcome to Bio-Volumentations's documentation!
+Welcome to Bio-Volumentations' documentation!
 ==============================================
 
 `Bio-Volumentations` is an image augmentation and preprocessing package for 3D, 4D, and 5D biomedical images.
