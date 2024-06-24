@@ -8,6 +8,7 @@
 #                Dominik Müller     : https://github.com/muellerdo                              #
 #                Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #
 #                Filip Lux          : lux.filip@gmail.com                                       #
+#                Samuel Šuľan                                                                   #
 #                                                                                               #
 #  Volumentations History:                                                                      #
 #       - Original:                 https://github.com/albumentations-team/albumentations       #
@@ -75,7 +76,7 @@ class Resize(DualTransform):
             ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
-            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+            mval (float, optional): Value of `mask` and `float_mask` voxels outside of the domain. Only applied when ``border_mode = 'constant'``.
             
                 Defaults to ``0``.
             anti_aliasing_downsample (bool, optional): Controls if the Gaussian filter should be applied before
@@ -96,7 +97,7 @@ class Resize(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, shape: tuple, interpolation: int = 1, border_mode: str = 'reflect', ival: float = 0,
                  mval: float = 0, anti_aliasing_downsample: bool = True, ignore_index: Union[float, None] = None,
@@ -159,7 +160,7 @@ class Resize(DualTransform):
         
     def __repr__(self):
         return f'Resize({self.shape}, {self.interpolation}, {self.border_mode} , {self.ival}, {self.mval},' \
-               f'{self.anti_aliasing_downsample},   {self.always_apply}, {self.p})'
+               f'{self.anti_aliasing_downsample}, {self.always_apply}, {self.p})'
 
 
 class Scale(DualTransform):
@@ -168,17 +169,18 @@ class Scale(DualTransform):
         Args:
             scales (float|List[float], optional): Value by which the input should be scaled.
 
-                Must be either of: ``S``, ``[S_Z, S_Y, S_X]``, or ``[S_Z, S_Y, S_X, S_T]``.
+                Must be either of: ``S``, ``[S_Z, S_Y, S_X]``.
 
                 If a float, then all spatial dimensions are scaled by it (equivalent to ``[S, S, S]``).
 
-                The unspecified dimensions (C and possibly T) are not affected.
+                The unspecified dimensions (C and T) are not affected.
 
                 Defaults to ``1``.
-            interpolation (str, optional): ITK interpolation type for image data.
+            interpolation (str, optional): SimpleITK interpolation type for `image` and `float_mask`.
 
-                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
-                There is always 'nearest' interpolation for labeled masks.
+                Must be one of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+
+                For `mask`, the ``nearest`` interpolation is always used.
 
                 Defaults to ``linear``.
             spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
@@ -198,7 +200,7 @@ class Scale(DualTransform):
             ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
-            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+            mval (float, optional): Value of `mask` and `float_mask` voxels outside of the domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
             ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
@@ -215,7 +217,7 @@ class Scale(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, scales: Union[float, TypeTripletFloat] = 1,
                  interpolation: str = 'linear', spacing: Union[float, TypeTripletFloat] = None,
@@ -288,24 +290,23 @@ class Scale(DualTransform):
                f'{self.always_apply}, {self.p})'
 
 
-# TODO cannot rescale T dimension
 class RandomScale(DualTransform):
     """Randomly rescale input.
 
         Args:
-            scaling_limit (float | Tuple[float] | List[Tuple[float]], optional): Limits of scaling factors.
+            scaling_limit (float | Tuple[float], optional): Limits of scaling factors.
 
                 Must be either of: ``S``, ``(S1, S2)``, ``(S_Z, S_Y, S_X)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
                 If a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from
-                the interval [1-S, 1+S] (equivalent to inputting ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``).
+                the interval [-S, S] (equivalent to inputting ``(-S, S, -S, S, -S, S)``).
 
                 If a tuple of 2 floats, then all spatial dimensions are scaled by a random number drawn uniformly
                 from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).
 
-                If a tuple of 3 floats, then an interval [1-S_a, 1+S_a] is constructed for each spatial
+                If a tuple of 3 floats, then an interval [-S_a, S_a] is constructed for each spatial
                 dimension and the scale is randomly drawn from it
-                (equivalent to inputting ``(1-S_Z, 1+S_Z, 1-S_Y, 1+S_Y, 1-S_X, 1+S_X)``).
+                (equivalent to inputting ``(-S_Z, S_Z, -S_Y, S_Y, -S_X, S_X)``).
 
                 If a tuple of 6 floats, the scales for individual spatial dimensions are randomly drawn from the
                 respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
@@ -314,10 +315,11 @@ class RandomScale(DualTransform):
 
                 Defaults to ``(0.9, 1.1)``.
 
-            interpolation (str, optional): ITK interpolation type for image data.
+            interpolation (str, optional): SimpleITK interpolation type for `image` and `float_mask`.
 
-                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
-                There is always 'nearest' interpolation for labeled masks.
+                Must be one of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+
+                For `mask`, the ``nearest`` interpolation is always used.
 
                 Defaults to ``linear``.
 
@@ -341,7 +343,7 @@ class RandomScale(DualTransform):
 
                 Defaults to ``0``.
 
-            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+            mval (float, optional): Value of `mask` and `float_mask` voxels outside of the domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
 
@@ -361,14 +363,14 @@ class RandomScale(DualTransform):
                 Defaults to ``0.5``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """      
     def __init__(self, scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.9, 1.1),
                  interpolation: str = 'linear', spacing: Union[float, TypeTripletFloat] = None,
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
-        self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit)
+        self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, identity_element=1)
         self.interpolation: str = parse_itk_interpolation(interpolation)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
         self.border_mode = border_mode
@@ -431,11 +433,15 @@ class RandomRotate90(DualTransform):
             axes (List[int], optional): List of axes around which the input is rotated. Recognised axis symbols are
                 ``1`` for Z, ``2`` for Y, and ``3`` for X. A single axis can occur multiple times in the list.
                 If ``shuffle_axis = False``, the order of axes determines the order of transformations.
+                If ``None``, will be rotated around all spatial axes.
 
-                Defaults to ``[1, 2, 3]``.
+                Defaults to ``None``.
             shuffle_axis (bool, optional): If set to ``True``, the order of rotations is random.
 
                 Defaults to ``False``.
+            factor (int, optional): Number of times the array is rotated by 90 degrees. If ``None``, will be chosen randomly.
+
+                Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
             
                 Defaults to ``False``.
@@ -444,9 +450,9 @@ class RandomRotate90(DualTransform):
                 Defaults to ``0.5``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, axes: List[int] = None, shuffle_axis: bool = False, factor = None,
+    def __init__(self, axes: List[int] = None, shuffle_axis: bool = False, factor=None,
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.axes = axes
@@ -511,9 +517,9 @@ class Flip(DualTransform):
 
         Args:
             axes (List[int], optional): List of axes around which is flip done. Recognised axis symbols are
-                ``1`` for Z, ``2`` for Y, and ``3`` for X.
+                ``1`` for Z, ``2`` for Y, and ``3`` for X. If ``None``, will be flipped around all spatial axes.
 
-                Defaults to ``[1,2,3]``.
+                Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
             
                 Defaults to ``False``.
@@ -522,7 +528,7 @@ class Flip(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, axes: List[int] = None, always_apply=False, p=1):
         super().__init__(always_apply, p)
@@ -550,7 +556,6 @@ class Flip(DualTransform):
         return f'Flip({self.axes}, {self.always_apply}, {self.p})'
 
 
-# TODO include possibility to pick empty combination = no flipping
 class RandomFlip(DualTransform):
     """Flip input around a set of axes randomly chosen from the input list of axis combinations.
 
@@ -571,12 +576,12 @@ class RandomFlip(DualTransform):
                 Defaults to ``0.5``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, always_apply=False, p=0.5):
         super().__init__(always_apply, p)
 
-        # TODO: check if input value `axes_to_choice` valid
+        # TODO: check if input value `axes_to_choose` valid
         self.axes = axes_to_choose
 
     def apply(self, img, **params):
@@ -600,7 +605,7 @@ class RandomFlip(DualTransform):
                 "img_shape": img_shape}
 
     def __repr__(self):
-        return f'Flip({self.axes}, {self.always_apply}, {self.p})'
+        return f'RandomFlip({self.axes}, {self.always_apply}, {self.p})'
 
 
 class CenterCrop(DualTransform):
@@ -614,7 +619,7 @@ class CenterCrop(DualTransform):
         Args:
             shape (Tuple[int]): The desired shape of input.
 
-                Must be either of: ``[Z, Y, X]`` or ``[Z, Y, X, T]``.
+                Must be ``[Z, Y, X]``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'reflect'``.
@@ -640,7 +645,7 @@ class CenterCrop(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, shape: Tuple[int], border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
@@ -702,7 +707,7 @@ class RandomCrop(DualTransform):
         Args:
             shape (Tuple[int]): The desired shape of input.
 
-                Must be either of: ``[Z, Y, X]`` or ``[Z, Y, X, T]``.
+                Must be ``[Z, Y, X]``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'reflect'``.
@@ -728,7 +733,7 @@ class RandomCrop(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, shape: tuple, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
@@ -816,16 +821,16 @@ class RandomAffineTransform(DualTransform):
 
                 Must be either of: ``S``, ``(S1, S2)``, ``(S1, S2, S3)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
-                If a float, equivalent to ``(1 - S, 1 + S, 1 - S, 1 + S, 1 - S, 1 + S)``.
+                If a float, equivalent to ``(-S, S, -S, S, -S, S)``.
 
                 If a tuple with 2 items, equivalent to ``(S1, S2, S1, S2, S1, S2)``.
 
-                If a tuple with 3 items, equivalent to ``(1 - S1, 1 + S1, 1 - S2, 1 + S2, 1 - S3, 1 + S3)``.
+                If a tuple with 3 items, equivalent to ``(-S1, S1, -S2, S2, -S3, S3)``.
 
                 If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
                 each spatial axis.
 
-                Defaults to ``(0.2, 0.2, 0.2)``.
+                Defaults to ``(1., 1., 1.)``.
             spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
 
                 Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.
@@ -840,10 +845,11 @@ class RandomAffineTransform(DualTransform):
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
 
                 Defaults to ``False``.
-            interpolation (str, optional): ITK interpolation type for image data.
+            interpolation (str, optional): SimpleITK interpolation type for `image` and `float_mask`.
 
-                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
-                There is always 'nearest' interpolation for labeled masks.
+                Must be one of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+
+                For `mask`, the ``nearest`` interpolation is always used.
 
                 Defaults to ``linear``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
@@ -852,7 +858,7 @@ class RandomAffineTransform(DualTransform):
             ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
-            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+            mval (float, optional): Value of `mask` and `float_mask` voxels outside of the domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
             ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
@@ -869,11 +875,11 @@ class RandomAffineTransform(DualTransform):
                 Defaults to ``0.5``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, angle_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (15., 15., 15.),
                  translation_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0., 0., 0.),
-                 scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
+                 scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (1., 1., 1.),
                  spacing: Union[float, TypeTripletFloat] = None,
                  change_to_isotropic: bool = False,
                  interpolation: str = 'linear',
@@ -977,10 +983,11 @@ class AffineTransform(DualTransform):
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
 
                 Defaults to ``False``.
-            interpolation (str, optional): ITK interpolation type for image data.
+            interpolation (str, optional): SimpleITK interpolation type for `image` and `float_mask`.
 
-                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
-                There is always 'nearest' interpolation for labeled masks.
+                Must be one of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+
+                For `mask`, the ``nearest`` interpolation is always used.
 
                 Defaults to ``linear``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
@@ -989,7 +996,7 @@ class AffineTransform(DualTransform):
             ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
-            mval (float, optional): Value of `mask` voxels outside of the `mask` domain. Only applied when ``border_mode = 'constant'``.
+            mval (float, optional): Value of `mask` and `float_mask` voxels outside of the domain. Only applied when ``border_mode = 'constant'``.
 
                 Defaults to ``0``.
             ignore_index (float | None, optional): If a float, then transformation of `mask` is done with 
@@ -1006,7 +1013,7 @@ class AffineTransform(DualTransform):
                 Defaults to ``0.5``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, angles: TypeTripletFloat = (0, 0, 0),
                  translation: TypeTripletFloat = (0, 0, 0),
@@ -1235,7 +1242,7 @@ class GaussianBlur(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, sigma: Union[float , Tuple[float], List[ Union[Tuple[float], float]]] = 0.8,
+    def __init__(self, sigma: Union[float , Tuple[float], List[Union[Tuple[float], float]]] = 0.8,
                  border_mode: str = "reflect", cval: float = 0,
                  always_apply: bool = False, p: float = 0.5):
         
@@ -1438,17 +1445,16 @@ class Pad(DualTransform):
         Args:
             pad_size (int | Tuple[int] | List[int | Tuple[int]]): Number of pixels padded to the edges of each axis.
 
-                Must be either of: ``P``, ``(P1, P2)``, ``[P_Z, P_Y, P_X]``, ``[P_Z, P_Y, P_X, P_T]``,
-                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)]``, or
-                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2), (P_T1, P_T2)]``.
+                Must be either of: ``P``, ``(P1, P2)``, ``[P_Z, P_Y, P_X]``, or
+                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)]``.
 
                 If an integer, it is equivalent to ``[(P, P), (P, P), (P, P)]``.
 
                 If a tuple, it is equivalent to ``[(P1, P2), (P1, P2), (P1, P2)]``.
 
-                If a list, it must specify padding for all spatial dimensions and possibly also for the time dimension.
+                If a list, it must specify padding for all spatial dimensions.
 
-                The unspecified dimensions (C and possibly T) are not affected.
+                The unspecified dimensions (C and T) are not affected.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'constant'``.
@@ -1474,7 +1480,7 @@ class Pad(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, pad_size: Union[int, Tuple[int],  List[Union[int, Tuple[int]]]], border_mode: str = 'constant',
                  ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
@@ -1553,7 +1559,7 @@ class Contiguous(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask
     """
     def __init__(self, always_apply: bool = True, p: float = 1.0):
         super().__init__(always_apply, p)
@@ -1581,7 +1587,7 @@ class StandardizeDatatype(DualTransform):
                 Defaults to ``1``.
 
         Targets:
-            image, mask, float_mask
+            image, mask, float mask
     """
     def __init__(self, always_apply: bool = True, p: float = 1.0):
         super().__init__(always_apply, p)

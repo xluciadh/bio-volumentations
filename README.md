@@ -256,13 +256,17 @@ Point transformations:
 ```python
 GaussianNoise 
 PoissonNoise
-GaussianBlur 
-RandomGaussianBlur
 RandomGamma 
 RandomBrightnessContrast 
 HistogramEqualization 
 Normalize
 NormalizeMeanStd
+```
+
+Local transformations:
+```python
+GaussianBlur 
+RandomGaussianBlur
 ```
 
 Geometrical transformations:

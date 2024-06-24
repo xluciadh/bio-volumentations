@@ -53,15 +53,36 @@ class Compose:
     (e.g. from ``numpy.ndarray`` to ``torch.Tensor``) is performed.
 
     Args:
-        transforms (List[Transform]): List of transforms (objects of type ``Transform``).
+        transforms (List[Transform]): A list of transforms (objects of type ``Transform``).
 
-        p (float, optional): Chance of applying the whole pipeline.
+        p (float, optional): The chance of applying the whole pipeline.
 
             Defaults to ``1``.
-        TODO: decompose targets to keywords
-        targets (Tuple[List[str]] | List[List[str]], optional): List of targets.
 
-            Defaults to ``(['image'], ['mask'], ['float_mask'])``.
+        img_keywords (Tuple[str], optional): List of `image` target names.
+
+            Defaults to ``('image',)``.
+
+        mask_keywords (Tuple[str], optional): List of `mask` target names.
+
+            Defaults to ``('mask',)``.
+
+        fmask_keywords (Tuple[str], optional): List of `float mask` target names.
+
+            Defaults to ``('float_mask',)``.
+
+        keypoints_keywords (Tuple[str], optional): List of `key points` target names.
+
+            Defaults to ``('keypoints',)``.
+
+        bboxes_keywords (Tuple[str], optional): List of `bounding boxes` target names.
+
+            Defaults to ``('bboxes',)``.
+
+        value_keywords (Tuple[str], optional): List of `value` target names.
+
+            Defaults to ``('class_value',)``.
+
         conversion (Transform | None, optional): Image datatype conversion transform, applied after the transformations.
 
             Defaults to ``None``.
@@ -73,6 +94,7 @@ class Compose:
                  fmask_keywords=('float_mask',),
                  keypoints_keywords=('keypoints',),
                  bboxes_keywords=('bboxes',),
+                 value_keywords=('class_value',),
                  conversion=None):
 
         assert 0 <= p <= 1
@@ -87,7 +109,8 @@ class Compose:
                         'mask_keywords': mask_keywords,
                         'fmask_keywords': fmask_keywords,
                         'keypoint_keywords': keypoints_keywords,
-                        'bbox_keywords': bboxes_keywords}
+                        'bbox_keywords': bboxes_keywords,
+                        'value_keywords': value_keywords}
 
     def get_always_apply_transforms(self):
         res = []
@@ -107,5 +130,5 @@ class Compose:
         return data
 
     def __repr__(self):
-        return f'Compose({self.transforms[1:-2]}, {self.p}, {self.targets}, {self.transforms[-1]})'
+        return f'Compose({self.transforms[2:-2]}, {self.p}, {self.targets}, {self.transforms[-1]})'
 

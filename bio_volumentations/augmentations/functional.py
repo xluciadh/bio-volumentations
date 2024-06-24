@@ -8,6 +8,7 @@
 #                Dominik Müller     : https://github.com/muellerdo                              #
 #                Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #
 #                Filip Lux          : lux.filip@gmail.com                                       #
+#                Samuel Šuľan                                                                   #
 #                                                                                               #
 #  Volumentations History:                                                                      #
 #       - Original:                 https://github.com/albumentations-team/albumentations       #

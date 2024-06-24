@@ -16,5 +16,5 @@ Therefore, it can easily be adopted by developers.
 
 The source codes and more details are also available
 `at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.2.0?ref_type=tags>`_
-and `at the project's PyPi page <https://pypi.org/project/bio-volumentations/>`_.
+and `at the project's PyPI page <https://pypi.org/project/bio-volumentations/>`_.
 

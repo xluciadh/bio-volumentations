@@ -89,7 +89,7 @@ class DualTransform(Transform):
     """The base class of transformations applied images and also to all target types.
 
         Targets:
-            image, mask, float mask, keypoint, bounding box
+            image, mask, float mask, key points, bounding boxes
     """
 
     def __call__(self, force_apply, targets, **data):
@@ -117,17 +117,19 @@ class DualTransform(Transform):
         return data
 
     def apply_to_mask(self, mask, **params):
+        # default: use image transformation
         return self.apply(mask, **params)
     
     def apply_to_float_mask(self, float_mask, **params):
+        # default: use mask transformation
         return self.apply_to_mask(float_mask, **params)
 
     def apply_to_keypoints(self, keypoints, keep_all=False, **params):
-        # nothing changed
+        # default: no transformation
         return keypoints
 
     def apply_to_bboxes(self, bboxes, **params):
-        # nothing changed
+        # default: no transformation
         return bboxes
 
 

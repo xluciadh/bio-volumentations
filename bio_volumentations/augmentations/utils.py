@@ -45,7 +45,7 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
     # input_limit = x : float
     # returns (ie-x, ie+x, ie-x, ie+x, ie-x, ie+x)
     elif (type(input_limit) is float) or (type(input_limit) is int):
-        return tuple((identity_element - input_limit, identity_element + input_limit) * 3)
+        return tuple((- input_limit, input_limit) * 3)
 
     # input_limit = (a, b) : TypePairFloat
     # returns (a, b, a, b, a, b)
@@ -66,8 +66,8 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
             # input_limit = (a, b, c)
             # return (ie-a, ie+a, ie-b, ie+b, ie-c, ie+c)
             else:
-                res.append(float(identity_element - item))
-                res.append(float(identity_element + item))
+                res.append(float(- item))
+                res.append(float(item))
         return tuple(res)
 
     # input_limit = (a, b, c, d, e, f)
@@ -121,14 +121,6 @@ def get_image_center(shape: Union[TypeSpatioTemporalCoordinate, TypeSpatialCoord
 
     center = (np.array(shape)[:3] - 1) / 2
 
-    """ TO REMOVE
-    shape = np.array(shape)
-    if len(shape) == 3:
-        center = (shape - 1) / 2
-    else:
-        center = (shape[1:4] - 1) / 2
-
-    """
     if lps:
         center = ras_to_lps(center)
 
@@ -208,7 +200,7 @@ def sitk_to_np(sitk_img: sitk.Image,
         img = np.expand_dims(img, 3)
 
     assert channels * frames == img.shape[-1], (f'Number of channels ({channels}) and frames ({frames})'
-                                                f'do not correspond to the sitk vector size {img.shape[-1]}')
+                                                f'does not correspond to the sitk vector size {img.shape[-1]}')
 
     # split channels and frames
     w, h, d = img.shape[:3]
