@@ -24,7 +24,7 @@
 # ============================================================================================= #
 
 import numpy as np
-from ..typing import TypeTripletFloat
+from ..biovol_typing import TypeTripletFloat
 from typing import Sequence, Optional
 import SimpleITK as sitk
 
@@ -33,12 +33,21 @@ from .utils import get_image_center, ras_to_lps, np_to_sitk, sitk_to_np
 DEBUG = False
 
 SITK_interpolation = {
-    0: 'sitkNearestNeighbor',
-    1: 'sitkLinear'
+    'nearest': 'sitkNearestNeighbor',
+    'linear': 'sitkLinear',
+    'bspline': 'sitkBSpline',
+    'gaussian': 'sitkGaussian'
 }
 
 
-def get_affine_transform(image,
+def parse_itk_interpolation(interpolation: str) -> str:
+
+    assert interpolation in SITK_interpolation.keys(), f'parameter {interpolation} ' \
+                    f'is not in the list of supported interpolation techniques: {SITK_interpolation.keys()}'
+    return SITK_interpolation[interpolation]
+
+
+def get_affine_transform(domain_limit,
                          scales: TypeTripletFloat,
                          degrees: TypeTripletFloat,
                          translation: TypeTripletFloat,
@@ -49,7 +58,7 @@ def get_affine_transform(image,
     rotation = np.asarray(degrees)
     translation = np.asarray(translation)  # * np.asarray(spacing)
 
-    center_lps = get_image_center(image,
+    center_lps = get_image_center(domain_limit,
                                   spacing=spacing,
                                   lps=False)
 
@@ -59,7 +68,7 @@ def get_affine_transform(image,
     )
 
     if DEBUG:
-        print('image.shape', image.shape)
+        print('domain_limit', domain_limit)
         print('center_lps', center_lps)
         print('translation', translation)
         print('scaling', scaling)
@@ -132,10 +141,18 @@ def apply_sitk_transform(
         spacing: TypeTripletFloat = (1., 1., 1.)
 ) -> np.array:
 
-    assert len(image.shape) == 4, f'image.shape: {image.shape}'
+    assert len(image.shape) >= 4, f'image.shape: {image.shape}'
 
+    # resolve the image shape
     ch = image.shape[0]
-    image_expanded = np.expand_dims(image, 4)
+    fr = 1 if len(image.shape) == 4 else image.shape[4]
+
+    if len(image.shape) == 4:
+        image_expanded = np.expand_dims(image, 4)
+        expanded = True
+    else:
+        image_expanded = image
+        expanded = False
 
     # convert numpy array to sitk image
     sitk_image = np_to_sitk(image_expanded)
@@ -150,7 +167,9 @@ def apply_sitk_transform(
     interpolator.SetTransform(sitk_transform)
 
     resampled = interpolator.Execute(floating)
-    np_array = sitk_to_np(resampled, channels=ch, frames=1).squeeze(4)
+    np_array = sitk_to_np(resampled, channels=ch, frames=fr)
+    if expanded:
+        np_array = np_array.squeeze(4)
 
     assert image.shape == np_array.shape, f"image.shape: {image.shape} np_array.shape:, {np_array.shape}"
 

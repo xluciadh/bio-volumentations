@@ -73,11 +73,11 @@ class ConversionToFormat(DualTransform):
             mask_shape = []
             float_shape = []
             for k, v in data.items():
-                if k in targets[0]:
+                if k in targets['img_keywords']:
                     img_shape.append(v.shape) 
-                elif k in targets[1]:
+                elif k in targets['mask_keywords']:
                     mask_shape.append(v.shape) 
-                elif k in targets[2]:
+                elif k in targets['fmask_keywords']:
                     float_shape.append(v.shape) 
             
             if FCT.check_dimensions(img_shape):
@@ -88,7 +88,7 @@ class ConversionToFormat(DualTransform):
                 warn(f"Float masks shapes do not have same length,", UserWarning)
 
             for k, v in data.items():
-                if k in targets[0]:
+                if k in targets['img_keywords']:
                     if len(v.shape) == 3:
                         warn(f"Adding channel dimension to the image", UserWarning)
                         data[k] = v[None, ...]

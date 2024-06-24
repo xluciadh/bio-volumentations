@@ -11,8 +11,9 @@
 # documentation root, use os.path.abspath to make it absolute.
 import os
 import sys
-sys.path.insert(0, os.path.abspath(r'..\..'))
-# sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath(r'../../'))
+sys.path.insert(0, os.path.abspath(r'../../bio_volumentations'))
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
@@ -20,7 +21,7 @@ sys.path.insert(0, os.path.abspath(r'..\..'))
 project = 'bio-volumentations'
 copyright = '2024, Samuel Sulan, Lucia Hradecka, Filip Lux'
 author = 'Samuel Sulan, Lucia Hradecka, Filip Lux'
-release = '1.1.0'
+release = '1.2.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

@@ -38,5 +38,5 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
-from ..augmentations.functional import *
-from ..augmentations.transforms import *
+from .functional import *
+from .transforms import *

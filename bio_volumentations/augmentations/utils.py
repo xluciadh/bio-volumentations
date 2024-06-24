@@ -24,11 +24,14 @@
 # ============================================================================================= #
 
 from typing import Sequence, Union
-from ..typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
+from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat, \
+    TypeSpatioTemporalCoordinate, TypeSpatialCoordinate, TypePairInt, TypeSextetInt
 import numpy as np
 import SimpleITK as sitk
 
 from collections.abc import Iterable
+
+DEBUG = False
 
 
 def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat],
@@ -41,7 +44,7 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
 
     # input_limit = x : float
     # returns (ie-x, ie+x, ie-x, ie+x, ie-x, ie+x)
-    elif len(input_limit) == 1:
+    elif (type(input_limit) is float) or (type(input_limit) is int):
         return tuple((identity_element - input_limit, identity_element + input_limit) * 3)
 
     # input_limit = (a, b) : TypePairFloat
@@ -73,6 +76,30 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
         return input_limit
 
 
+def parse_pads(pad_size: Union[int, TypePairInt, TypeSextetInt]) -> TypeSextetInt:
+
+    # pad_size = None
+    # returns (0, 0, 0, 0, 0, 0)
+    if pad_size is None:
+        return 0, 0, 0, 0, 0, 0
+
+    # pad_size = x : int
+    # returns (x, x, x, x, x, x)
+    elif type(pad_size) is int:
+        return tuple((pad_size,) * 6)
+
+    # input_limit = (a, b) : TypePairFloat
+    # returns (a, b, a, b, a, b)
+    elif len(pad_size) == 2:
+        a, b = pad_size
+        return a, b, a, b, a, b
+
+    # input_limit = (a, b, c, d, e, f)
+    # returns (a, b, c, d, e, f)
+    elif len(pad_size) == 6:
+        return pad_size
+
+
 def parse_coefs(coefs: Union[float, TypeTripletFloat],
                 identity_element: float = 1) -> TypeTripletFloat:
 
@@ -88,22 +115,34 @@ def parse_coefs(coefs: Union[float, TypeTripletFloat],
         return coefs
 
 
-def get_image_center(image: np.array,
+def get_image_center(shape: Union[TypeSpatioTemporalCoordinate, TypeSpatialCoordinate],
                      spacing: TypeTripletFloat = (1., 1., 1.),
                      lps: bool = False) -> TypeTripletFloat:
 
-    shape = np.array(image.shape)
+    center = (np.array(shape)[:3] - 1) / 2
+
+    """ TO REMOVE
+    shape = np.array(shape)
     if len(shape) == 3:
         center = (shape - 1) / 2
-    elif len(shape) == 4:
-        center = (shape[1:4] - 1) / 2
     else:
-        center = np.array((0, 0, 0))
+        center = (shape[1:4] - 1) / 2
 
+    """
     if lps:
         center = ras_to_lps(center)
 
     return center * np.array(spacing)
+
+
+def to_spatio_temporal(shape: tuple) -> TypeSpatioTemporalCoordinate:
+
+    shape = list(shape)
+    if len(shape) == 3:
+        shape.append(0)
+
+    assert len(shape) == 4
+    return tuple(shape)
 
 
 def to_tuple(param, low=None, bias=None):
@@ -180,3 +219,70 @@ def sitk_to_np(sitk_img: sitk.Image,
 
     # shape (c, w, h, d, f)
     return img
+
+
+def validate_bbox(new_bbox: tuple,
+                  old_bbox: tuple,
+                  ratio: float = 0.5) -> bool:
+
+    assert len(new_bbox) == len(old_bbox)
+
+    old_size = get_bbox_size(old_bbox)
+    new_size = get_bbox_size(new_bbox)
+
+    return old_size / new_size >= ratio
+
+
+def get_bbox_size(bbox: tuple) -> float:
+
+    assert len(bbox) % 2 == 0
+    dims = np.reshape(np.array(bbox), (-1, 2))
+
+    volume = 1.
+    for v_min, v_max in dims:
+
+        assert v_max >= v_min, f'The definition of bbox is invalid {bbox}.'
+        volume *= v_max - v_min
+
+    return volume
+
+
+def get_spatio_temporal_domain_limit(sample: dict) -> TypeSpatioTemporalCoordinate:
+    """
+    Returns vector of spatio-temporal coordinates of length 4.
+    The vector limits a domain of the image.
+
+    Args:
+        sample: dictionary
+
+    Returns:
+
+    """
+
+    shape = list(sample['image'].shape)
+    if len(shape) == 3:
+        limit = shape + [1]
+    elif len(shape) == 4:
+        limit = shape[1:] + [1]
+    elif len(shape) == 5:
+        limit = shape[1:5]
+
+    assert len(limit) == 4
+
+    return tuple(limit)
+
+
+def is_included(shape: Union[TypeSpatialCoordinate, TypeSpatioTemporalCoordinate], coo):
+
+    coo_arr = np.array(coo) + 0.5
+    shape_arr = np.array(shape[:3])
+
+    assert len(shape_arr) == len(coo_arr), f'shape: {shape_arr} coo: {coo_arr}'
+    res = all(coo_arr >= 0) and (coo_arr < shape_arr).all()
+
+    if DEBUG:
+        print('IS INCLUDED', shape, coo, res)
+
+    return res
+
+

@@ -42,83 +42,13 @@ import random
 import numpy as np
 from ..core.transforms_interface import DualTransform, ImageOnlyTransform
 from ..augmentations import functional as F
+from ..augmentations.spatial_funcional import get_affine_transform, parse_itk_interpolation
 from ..random_utils import uniform, sample_range_uniform
 from typing import List, Sequence, Tuple, Union
-from ..typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat
-from .utils import parse_limits, parse_coefs, to_tuple
-
-
-# TODO potential upgrade : different sigmas for different channels
-class GaussianNoise(ImageOnlyTransform):
-    """Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.
-
-        Args:
-            var_limit (tuple, optional): Variance of normal distribution is randomly chosen from this interval.
-
-                Defaults to ``(0.001, 0.1)``.
-            mean (float, optional): Mean of normal distribution.
-
-                Defaults to ``0``.
-            always_apply (bool, optional): Always apply this transformation in composition.
-
-                Defaults to ``False``.
-            p (float, optional): Chance of applying this transformation in composition.
-
-                Defaults to ``0.5``.
-
-        Targets:
-            image
-    """
-    def __init__(self, var_limit: tuple = (0.001, 0.1), mean: float = 0,
-                 always_apply: bool = False, p: float = 0.5):
-        super().__init__(always_apply, p)
-        self.var_limit = var_limit
-        self.mean = mean
-
-    def apply(self, img, **params):
-        return F.gaussian_noise(img, sigma=params['sigma'], mean=self.mean)
-
-    def get_params(self, **params):
-        var = uniform(self.var_limit[0], self.var_limit[1])
-        sigma = var ** 0.5
-        return {"sigma": sigma}
-
-    def __repr__(self):
-        return f'GaussianNoise({self.var_limit}, {self.mean}, {self.always_apply}, {self.p})'
-
-
-class PoissonNoise(ImageOnlyTransform):
-    """Adds Poisson noise to the image.
-
-        Args:
-            intensity_limit (tuple): Range to sample the expected intensity of Poisson noise.
-
-                Defaults to ``(1, 10)``.
-            always_apply (bool, optional): Always apply this transformation in composition.
-
-                Defaults to ``False``.
-            p (float, optional): Chance of applying this transformation in composition.
-
-                Defaults to ``0.5``.
-
-        Targets:
-            image
-    """
-    def __init__(self,
-                 intensity_limit=(1, 10),
-                 always_apply: bool = False, p: float = 0.5):
-        super().__init__(always_apply, p)
-        self.intensity_limit = intensity_limit
-
-    def apply(self, img, **params):
-        return F.poisson_noise(img, intensity=params['intensity'])
-
-    def get_params(self, **params):
-        intensity = uniform(self.intensity_limit[0], self.intensity_limit[1])
-        return {"intensity": intensity}
-
-    def __repr__(self):
-        return f'PoissonNoise({self.always_apply}, {self.p})'
+from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat, TypeSpatioTemporalCoordinate,\
+    TypeSextetInt, TypeSpatialCoordinate, TypeSpatialShape
+from .utils import parse_limits, parse_coefs, parse_pads, to_tuple, validate_bbox, get_spatio_temporal_domain_limit,\
+    to_spatio_temporal
 
 
 # TODO anti_aliasing_downsample keep parameter or remove?
@@ -173,7 +103,7 @@ class Resize(DualTransform):
                  always_apply: bool = False, p: float = 1):
         
         super().__init__(always_apply, p)
-        self.shape = shape
+        self.shape: TypeSpatioTemporalCoordinate = to_spatio_temporal(shape)
         self.interpolation = interpolation
         self.border_mode = border_mode
         self.mask_mode = border_mode
@@ -198,6 +128,34 @@ class Resize(DualTransform):
         return F.resize(mask, input_new_shape=self.shape, interpolation=self.interpolation,
                         border_mode=self.mask_mode, cval=self.mval, anti_aliasing_downsample=False,
                         mask=True)
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.resize_keypoints(keypoints,
+                                  domain_limit=params['domain_limit'],
+                                  new_shape=self.shape)
+
+    """
+    def apply_to_bboxes(self, bboxes, **params):
+        for bbox in bboxes:
+            new_bbox = F.resize_keypoints(bbox,
+                                          input_new_shape=self.shape,
+                                          original_shape=params['original_shape'],
+                                          keep_all=True)
+
+            if validate_bbox(bbox, new_bbox, min_overlay_ratio):
+                res.append(new_bbox)
+
+        return res
+    """
+
+    def get_params(self, **data):
+
+        # read shape of the original image
+        domain_limit: TypeSpatioTemporalCoordinate = get_spatio_temporal_domain_limit(data)
+
+        return {
+            "domain_limit": domain_limit,
+        }
         
     def __repr__(self):
         return f'Resize({self.shape}, {self.interpolation}, {self.border_mode} , {self.ival}, {self.mval},' \
@@ -217,9 +175,12 @@ class Scale(DualTransform):
                 The unspecified dimensions (C and possibly T) are not affected.
 
                 Defaults to ``1``.
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
             spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
 
                 Must be either of: ``S``, ``(S1, S2, S3)``, or ``None``.
@@ -257,12 +218,12 @@ class Scale(DualTransform):
             image, mask, float_mask
     """
     def __init__(self, scales: Union[float, TypeTripletFloat] = 1,
-                 interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
+                 interpolation: str = 'linear', spacing: Union[float, TypeTripletFloat] = None,
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 1):
         super().__init__(always_apply, p)
         self.scale = parse_coefs(scales, identity_element=1.)
-        self.interpolation: int = interpolation
+        self.interpolation: str = parse_itk_interpolation(interpolation)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
         self.border_mode = border_mode              # not implemented
         self.mask_mode = border_mode                # not implemented
@@ -281,21 +242,46 @@ class Scale(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=self.scale,
+                                  spacing = self.spacing,
+                                  domain_limit=params['domain_limit'])
+
+    """
+    def apply_to_bboxes(self, bboxes, **params):
+        for bbox in bboxes:
+            new_bbox = F.affine_keypoints(bbox,
+                                          scales=self.scale,
+                                          domain_limit=params['domain_limit'],
+                                          spacing = self.spacing,
+                                          keep_all=True)
+
+            if validate_bbox(bbox, new_bbox):
+                res.append(new_bbox)
+
+        return res
+    """
+
+    def get_params(self, **data):
+        domain_limit: TypeSpatioTemporalCoordinate = get_spatio_temporal_domain_limit(data)
+        return {'domain_limit': domain_limit}
 
     def __repr__(self):
         return f'Scale({self.scale}, {self.interpolation}, {self.border_mode}, {self.ival}, {self.mval},' \
@@ -328,9 +314,12 @@ class RandomScale(DualTransform):
 
                 Defaults to ``(0.9, 1.1)``.
 
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
 
             spacing (float | Tuple[float, float, float] | None, optional): Voxel spacing for individual spatial dimensions.
 
@@ -375,12 +364,12 @@ class RandomScale(DualTransform):
             image, mask, float_mask
     """      
     def __init__(self, scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.9, 1.1),
-                 interpolation: int = 1, spacing: Union[float, TypeTripletFloat] = None,
+                 interpolation: str = 'linear', spacing: Union[float, TypeTripletFloat] = None,
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit)
-        self.interpolation: int = interpolation
+        self.interpolation: str = parse_itk_interpolation(interpolation)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
         self.border_mode = border_mode
         self.mask_mode = border_mode
@@ -392,9 +381,11 @@ class RandomScale(DualTransform):
 
     def get_params(self, **data):
         # set parameters of the transform
+        domain_limit: TypeSpatioTemporalCoordinate = get_spatio_temporal_domain_limit(data)
         scale = sample_range_uniform(self.scaling_limit)
 
         return {
+            "domain_limit": domain_limit,
             "scale": scale,
         }
 
@@ -407,21 +398,27 @@ class RandomScale(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=params["scale"],
+                                  spacing=self.spacing,
+                                  domain_limit=params['domain_limit'])
 
     def __repr__(self):
         return f'RandomScale({self.scaling_limit}, {self.interpolation}, {self.always_apply}, {self.p})'
@@ -449,11 +446,12 @@ class RandomRotate90(DualTransform):
         Targets:
             image, mask, float_mask
     """
-    def __init__(self, axes: List[int] = None, shuffle_axis: bool = False,
+    def __init__(self, axes: List[int] = None, shuffle_axis: bool = False, factor = None,
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.axes = axes
         self.shuffle_axis = shuffle_axis
+        self.factor = factor
 
     def apply(self, img, **params):
         for factor, axes in zip(params["factor"], params["rotation_around"]):
@@ -461,10 +459,17 @@ class RandomRotate90(DualTransform):
         return img
 
     def apply_to_mask(self, mask, **params):
-        for i in range(len(params["rotation_around"])):
-            mask = np.rot90(mask, params["factor"][i], axes=(
-                params["rotation_around"][i][0] - 1, params["rotation_around"][i][1] - 1))
+        for rot, factor in zip(params["rotation_around"], params["factor"]):
+            mask = np.rot90(mask, factor, axes=(rot[0] - 1, rot[1] - 1))
         return mask
+
+    def apply_to_keypoints(self, keypoints, **params):
+        for rot, factor in zip(params["rotation_around"], params["factor"]):
+            keypoints = F.rot90_keypoints(keypoints,
+                                          factor=factor,
+                                          axes=(rot[0], rot[1]),
+                                          img_shape=params['img_shape'])
+        return keypoints
 
     def get_params(self, **data):
 
@@ -484,9 +489,18 @@ class RandomRotate90(DualTransform):
             random.shuffle(rotation_around)
 
         # choose angle to rotate
-        factor = [random.randint(0, 3) for _ in range(len(rotation_around))]
+        if self.factor is None:
+            factor = [random.randint(0, 3) for _ in range(len(rotation_around))]
+        else:
+            factor = [self.factor]
+            rotation_around = [(1, 2)]
+            print('ROT90', factor, rotation_around)
+
+        img_shape = np.array(data['image'].shape[1:4])
+
         return {"factor": factor,
-                "rotation_around": rotation_around}
+                "rotation_around": rotation_around,
+                "img_shape": img_shape}
 
     def __repr__(self):
         return f'RandomRotate90({self.axes}, {self.always_apply}, {self.p})'
@@ -521,12 +535,16 @@ class Flip(DualTransform):
         # Mask has no dimension channel
         return np.flip(mask, axis=[item - 1 for item in params["axes"]])
 
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.flip_keypoints(keypoints,
+                                axes=params['axes'],
+                                img_shape=params['img_shape'])
+
     def get_params(self, **data):
-        if self.axes is None:
-            axes = [1, 2, 3]
-        else:
-            axes = self.axes
-        return {"axes": axes}
+        axes = [1, 2, 3] if self.axes is None else self.axes
+        img_shape = np.array(data['image'].shape[1:4])
+        return {"axes": axes,
+                "img_shape": img_shape}
 
     def __repr__(self):
         return f'Flip({self.axes}, {self.always_apply}, {self.p})'
@@ -537,12 +555,12 @@ class RandomFlip(DualTransform):
     """Flip input around a set of axes randomly chosen from the input list of axis combinations.
 
         Args:
-            axes_to_choose (List[Tuple[int]] or None, optional): List of axis combinations from which one option
+            axes_to_choose (List[Tuple[int]] or None, optional): List of axis indices from which one option
                 is randomly chosen. Recognised axis symbols are ``1`` for Z, ``2`` for Y, and ``3`` for X.
                 The image will be flipped around all axes in the chosen combination.
 
                 If ``None``, a random subset of spatial axes is chosen, corresponding to inputting
-                ``[(1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]``.
+                ``[(,), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]``.
 
                 Defaults to ``None``.
             always_apply (bool, optional): Always apply this transformation in composition. 
@@ -557,6 +575,8 @@ class RandomFlip(DualTransform):
     """
     def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, always_apply=False, p=0.5):
         super().__init__(always_apply, p)
+
+        # TODO: check if input value `axes_to_choice` valid
         self.axes = axes_to_choose
 
     def apply(self, img, **params):
@@ -566,18 +586,18 @@ class RandomFlip(DualTransform):
         # Mask has no dimension channel
         return np.flip(mask, axis=[item - 1 for item in params["axes"]])
 
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return F.flip_keypoints(keypoints,
+                                axes=params['axes'],
+                                img_shape=params['img_shape'])
+
     def get_params(self, **data):
         
-        if self.axes is None or len(self.axes) == 0:
-            # Pick random combination of axes to flip
-            # TODO include possibility to pick empty combination = no flipping
-            combinations = [(1,), (2,), (3,), (1, 2),
-                            (1, 3), (2, 3), (1, 2, 3)]
-            axes = random.choice(combinations)
-        else:
-            # Pick a random choice from input
-            axes = random.choice(self.axes)
-        return {"axes": axes}
+        to_choose = [1, 2, 3] if self.axes is None else self.axes
+        axes = random.sample(to_choose, random.randint(0, len(to_choose)))
+        img_shape = np.array(data['image'].shape[1:4])
+        return {"axes": axes,
+                "img_shape": img_shape}
 
     def __repr__(self):
         return f'Flip({self.axes}, {self.always_apply}, {self.p})'
@@ -626,7 +646,7 @@ class CenterCrop(DualTransform):
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
-        self.shape = np.asarray(shape, dtype=np.intc)
+        self.output_shape = np.asarray(shape, dtype=np.intc)  # TODO: make it len 3
         self.border_mode = border_mode
         self.mask_mode = border_mode
         self.ival = ival
@@ -637,13 +657,38 @@ class CenterCrop(DualTransform):
             self.mval = ignore_index
 
     def apply(self, img, **params):
-        return F.center_crop(img, self.shape, self.border_mode, self.ival, False)
+        return F.crop(img,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=False)
 
     def apply_to_mask(self, mask, **params):
-        return F.center_crop(mask, self.shape, self.mask_mode, self.mval, True)
+        return F.crop(mask,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=True)
+
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return F.crop_keypoints(keypoints,
+                                crop_shape=self.output_shape,
+                                crop_position=params['crop_position'],
+                                pad_dims=params['pad_dims'],
+                                keep_all=keep_all)
+
+    def get_params(self, **data):
+        # get crop coordinates, position of the corner closest to the image origin
+        img_spatial_shape = np.array(data['image'].shape[1:4])
+        position: TypeSpatialCoordinate = (img_spatial_shape - self.output_shape) // 2
+        position = np.maximum(position, 0).astype(int)
+        pad_dims = F.get_pad_dims(img_spatial_shape, self.output_shape)
+
+        return {'crop_position': position,
+                'pad_dims': pad_dims}
 
     def __repr__(self):
-        return f'CenterCrop({self.shape}, {self.always_apply}, {self.p})'
+        return f'CenterCrop({self.output_shape}, {self.always_apply}, {self.p})'
 
 
 class RandomCrop(DualTransform):
@@ -689,7 +734,7 @@ class RandomCrop(DualTransform):
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
-        self.shape = np.asarray(shape, dtype=np.intc)
+        self.output_shape = np.asarray(shape, dtype=np.intc)
         self.border_mode = border_mode
         self.mask_mode = border_mode
         self.ival = ival
@@ -699,20 +744,38 @@ class RandomCrop(DualTransform):
             self.mask_mode = "constant"
             self.mval = ignore_index
 
-    def apply(self, img, crop_start=np.array((0, 0, 0))):
-        return F.random_crop(img, self.shape, crop_start, self.border_mode, self.ival, mask=False)
+    def apply(self, img, **params):
+        return F.crop(img,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=False)
 
-    def apply_to_mask(self, mask, crop_start=np.array((0, 0, 0))):
-        return F.random_crop(mask, self.shape, crop_start, self.mask_mode, self.mval, mask=True)
+    def apply_to_mask(self, mask, **params):
+        return F.crop(mask,
+                      crop_shape=self.output_shape,
+                      crop_position=params['crop_position'],
+                      pad_dims=params['pad_dims'],
+                      border_mode=self.mask_mode, cval=self.mval, mask=True)
+
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        return F.crop_keypoints(keypoints,
+                                crop_shape=self.output_shape,
+                                crop_position=params['crop_position'],
+                                pad_dims=params['pad_dims'],
+                                keep_all=keep_all)
 
     def get_params(self, **data):
-
-        return {
-            "crop_start": [random.random() for _ in range(len(self.shape))]
-        }
+        # get crop coordinates, position of the corner closest to the image origin
+        img_spatial_shape = np.array(data['image'].shape[1:4])
+        ranges: TypeSpatialShape = np.maximum(img_spatial_shape - self.output_shape, 0)
+        position = np.array([random.randint(0, r) for r in ranges])
+        pad_dims = F.get_pad_dims(img_spatial_shape, self.output_shape)
+        return {'crop_position': position,
+                'pad_dims': pad_dims}
 
     def __repr__(self):
-        return f'RandomCrop({self.shape}, {self.always_apply}, {self.p})'
+        return f'RandomCrop({self.output_shape}, {self.always_apply}, {self.p})'
 
 
 class RandomAffineTransform(DualTransform):
@@ -722,24 +785,28 @@ class RandomAffineTransform(DualTransform):
             angle_limit (Tuple[float] | float, optional): Intervals in degrees from which angles of
                 rotation for the spatial axes are chosen.
 
-                Must be either of: ``A``, ``(A1, A2)``, or ``(A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2)``.
+                Must be either of: ``A``, ``(A1, A2)``, ``(A1, A2, A3)``, or ``(A_Z1, A_Z2, A_Y1, A_Y2, A_X1, A_X2)``.
 
                 If a float, equivalent to ``(-A, A, -A, A, -A, A)``.
 
                 If a tuple with 2 items, equivalent to ``(A1, A2, A1, A2, A1, A2)``.
 
+                If a tuple with 3 items, equivalent to ``(-A1, A1, -A2, A2, -A3, A3)``.
+
                 If a tuple with 6 items, angle of rotation is randomly chosen from an interval [A_a1, A_a2] for each
                 spatial axis.
 
                 Defaults to ``(15, 15, 15)``.
-            translation_limit (Tuple[int] | int | None, optional): Intervals from which the translation parameters
+            translation_limit (Tuple[float] | float | None, optional): Intervals from which the translation parameters
                 for the spatial axes are chosen.
 
-                Must be either of: ``T``, ``(T1, T2)``, or ``(T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2)``.
+                Must be either of: ``T``, ``(T1, T2)``, ``(T1, T2, T3)``, or ``(T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2)``.
 
                 If a float, equivalent to ``(-T, T, -T, T, -T, T)``.
 
                 If a tuple with 2 items, equivalent to ``(T1, T2, T1, T2, T1, T2)``.
+
+                If a tuple with 3 items, equivalent to ``(-T1, T1, -T2, T2, -T3, T3)``.
 
                 If a tuple with 6 items, the translation parameter is randomly chosen from an interval [T_a1, T_a2] for
                 each spatial axis.
@@ -747,11 +814,13 @@ class RandomAffineTransform(DualTransform):
                 Defaults to ``(0, 0, 0)``.
             scaling_limit (Tuple[float] | float, optional): Intervals from which the scales for the spatial axes are chosen.
 
-                Must be either of: ``S``, ``(S1, S2)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
+                Must be either of: ``S``, ``(S1, S2)``, ``(S1, S2, S3)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
-                If a float, equivalent to ``(1-S, 1+S, 1-S, 1+S, 1-S, 1+S)``.
+                If a float, equivalent to ``(1 - S, 1 + S, 1 - S, 1 + S, 1 - S, 1 + S)``.
 
                 If a tuple with 2 items, equivalent to ``(S1, S2, S1, S2, S1, S2)``.
+
+                If a tuple with 3 items, equivalent to ``(1 - S1, 1 + S1, 1 - S2, 1 + S2, 1 - S3, 1 + S3)``.
 
                 If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
                 each spatial axis.
@@ -771,9 +840,12 @@ class RandomAffineTransform(DualTransform):
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
 
                 Defaults to ``False``.
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'constant'``.
@@ -799,12 +871,12 @@ class RandomAffineTransform(DualTransform):
         Targets:
             image, mask, float_mask
     """
-    def __init__(self, angle_limit: Union[float, TypePairFloat, TypeSextetFloat] = (15, 15, 15),
-                 translation_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0, 0, 0),
-                 scaling_limit: Union[float, TypePairFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
+    def __init__(self, angle_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (15., 15., 15.),
+                 translation_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0., 0., 0.),
+                 scaling_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat] = (0.2, 0.2, 0.2),
                  spacing: Union[float, TypeTripletFloat] = None,
                  change_to_isotropic: bool = False,
-                 interpolation: int = 1,
+                 interpolation: str = 'linear',
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
@@ -812,7 +884,7 @@ class RandomAffineTransform(DualTransform):
         self.translation_limit: TypeSextetFloat = parse_limits(translation_limit, identity_element=0)
         self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, identity_element=1)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1)
-        self.interpolation: int = interpolation
+        self.interpolation: int = parse_itk_interpolation(interpolation)
         self.border_mode = border_mode                 # not used
         self.mask_mode = border_mode                   # not used
         self.ival = ival
@@ -834,25 +906,33 @@ class RandomAffineTransform(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         degrees=params["angles"],
                         translation=params["translation"],
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=params["scale"],
                         degrees=params["angles"],
                         translation=params["translation"],
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=params["scale"],
+                                  degrees=params["angles"],
+                                  translation=params["translation"],
+                                  spacing=self.spacing,
+                                  domain_limit=params['domain_limit'])
 
     def get_params(self, **data):
 
@@ -860,11 +940,13 @@ class RandomAffineTransform(DualTransform):
         scales = sample_range_uniform(self.scaling_limit)
         angles = sample_range_uniform(self.angle_limit)
         translation = sample_range_uniform(self.translation_limit)
+        domain_limit = get_spatio_temporal_domain_limit(data)
 
         return {
             "scale": scales,
             "angles": angles,
-            "translation": translation
+            "translation": translation,
+            "domain_limit": domain_limit
         }
 
 
@@ -895,9 +977,12 @@ class AffineTransform(DualTransform):
             change_to_isotropic (bool, optional): Change data from anisotropic to isotropic.
 
                 Defaults to ``False``.
-            interpolation (int, optional): Order of spline interpolation.
+            interpolation (str, optional): ITK interpolation type for image data.
 
-                Defaults to ``1``.
+                One of ``linear``, ``nearest``, ``bspline``, ``gaussian``.
+                There is always 'nearest' interpolation for labeled masks.
+
+                Defaults to ``linear``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'constant'``.
@@ -928,7 +1013,7 @@ class AffineTransform(DualTransform):
                  scale: TypeTripletFloat = (1, 1, 1),
                  spacing: TypeTripletFloat = (1, 1, 1),
                  change_to_isotropic: bool = False,
-                 interpolation: int = 1,
+                 interpolation: str = 'linear',
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
@@ -936,7 +1021,7 @@ class AffineTransform(DualTransform):
         self.translation: TypeTripletFloat = parse_coefs(translation, identity_element=0)
         self.scale: TypeTripletFloat = parse_coefs(scale, identity_element=1)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1)
-        self.interpolation: int = interpolation
+        self.interpolation: str = parse_itk_interpolation(interpolation)
         self.border_mode = border_mode                 # not used
         self.mask_mode = border_mode                   # not used
         self.ival = ival
@@ -958,25 +1043,118 @@ class AffineTransform(DualTransform):
                         spacing=self.spacing)
 
     def apply_to_mask(self, mask, **params):
-        interpolation = 0   # refers to 'sitkNearestNeighbor'
-        return F.affine(mask,
+        interpolation = parse_itk_interpolation('nearest')   # refers to 'sitkNearestNeighbor'
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         degrees=self.angles,
                         translation=self.translation,
                         interpolation=interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
 
     def apply_to_float_mask(self, mask, **params):
-        return F.affine(mask,
+        return F.affine(np.expand_dims(mask, 0),
                         scales=self.scale,
                         degrees=self.angles,
                         translation=self.translation,
                         interpolation=self.interpolation,
                         border_mode=self.mask_mode,
                         value=self.mval,
-                        spacing=self.spacing)
+                        spacing=self.spacing)[0]
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.affine_keypoints(keypoints,
+                                  scales=self.scale,
+                                  degrees=self.angles,
+                                  translation=self.translation,
+                                  spacing=self.spacing,
+                                  domain_limit=params['domain_limit'])
+
+    def get_params(self, **data):
+
+        # set parameters of the transform
+        domain_limit = get_spatio_temporal_domain_limit(data)
+
+        return {
+            "domain_limit": domain_limit
+        }
+
+
+# IMAGE ONLY TRANSFORMS
+# TODO potential upgrade : different sigmas for different channels
+class GaussianNoise(ImageOnlyTransform):
+    """Adds Gaussian noise to the image. The noise is drawn from normal distribution with given parameters.
+
+        Args:
+            var_limit (tuple, optional): Variance of normal distribution is randomly chosen from this interval.
+
+                Defaults to ``(0.001, 0.1)``.
+            mean (float, optional): Mean of normal distribution.
+
+                Defaults to ``0``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``0.5``.
+
+        Targets:
+            image
+    """
+
+    def __init__(self, var_limit: tuple = (0.001, 0.1), mean: float = 0,
+                 always_apply: bool = False, p: float = 0.5):
+        super().__init__(always_apply, p)
+        self.var_limit = var_limit
+        self.mean = mean
+
+    def apply(self, img, **params):
+        return F.gaussian_noise(img, sigma=params['sigma'], mean=self.mean)
+
+    def get_params(self, **params):
+        var = uniform(self.var_limit[0], self.var_limit[1])
+        sigma = var ** 0.5
+        return {"sigma": sigma}
+
+    def __repr__(self):
+        return f'GaussianNoise({self.var_limit}, {self.mean}, {self.always_apply}, {self.p})'
+
+
+class PoissonNoise(ImageOnlyTransform):
+    """Adds Poisson noise to the image.
+
+        Args:
+            peak_limit (tuple): Range to sample the expected intensity of Poisson noise.
+
+                Defaults to ``(0.1, 0.5)``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``False``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``0.5``.
+
+        Targets:
+            image
+    """
+
+    def __init__(self,
+                 peak_limit=(0.1, 0.5),
+                 always_apply: bool = False, p: float = 0.5):
+        super().__init__(always_apply, p)
+        self.peak_limit = peak_limit
+
+    def apply(self, img, **params):
+        return F.poisson_noise(img, peak=params['peak'])
+
+    def get_params(self, **params):
+        peak = uniform(self.peak_limit[0], self.peak_limit[1])
+        return {"peak": peak}
+
+    def __repr__(self):
+        return f'PoissonNoise({self.always_apply}, {self.p})'
 
 
 # TODO create checks (mean, std, got good shape, and etc.), what if given list but only one channel, and reverse.
@@ -1005,7 +1183,7 @@ class NormalizeMeanStd(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, mean: Union[List[float], float], std: Union[List[float], float],
+    def __init__(self, mean: Union[Tuple[float], float], std: Union[Tuple[float], float],
                  always_apply: bool = True, p: float = 1.0):
         super().__init__(always_apply, p)
         self.mean = np.array(mean, dtype=np.float32) 
@@ -1302,7 +1480,7 @@ class Pad(DualTransform):
                  ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = True, p : float = 1):
         super().__init__(always_apply, p)
-        self.pad_size = pad_size
+        self.pad_size: TypeSextetInt = parse_pads(pad_size)
         self.border_mode = border_mode
         self.mask_mode = border_mode 
         self.ival = ival
@@ -1317,6 +1495,9 @@ class Pad(DualTransform):
 
     def apply_to_mask(self, mask, **params):
         return F.pad_pixels(mask, self.pad_size, self.mask_mode, self.mval, True)
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.pad_keypoints(keypoints, self.pad_size)
 
     def __repr__(self):
         return f'Pad({self.pad_size}, {self.border_mode}, {self.ival}, {self.mval}, {self.always_apply}, ' \
@@ -1387,8 +1568,9 @@ class Contiguous(DualTransform):
         return f'Contiguous({self.always_apply}, {self.p})'
 
 
-class Float(DualTransform):
-    """Change datatype to ``np.float32`` without changing intensities.
+class StandardizeDatatype(DualTransform):
+    """Change image and float_mask datatype to ``np.float32`` without changing intensities.
+    Change mask datatype to ``np.int32``.
 
         Args:
             always_apply (bool, optional): Always apply this transformation in composition.
@@ -1408,8 +1590,13 @@ class Float(DualTransform):
         return image.astype(np.float32)
 
     def apply_to_mask(self, mask, **params):
+        return mask.astype(np.int32)
+
+    def apply_to_float_mask(self, mask, **params):
         return mask.astype(np.float32)
 
     def __repr__(self):
         return f'Float({self.always_apply}, {self.p})'
+
+
 

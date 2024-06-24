@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+# Put the name of your project on PyPI.
+name = "bio-volumentations"
+
+# Put the version of your project. This field is required, although it is often marked as dynamic:
+version = "1.2.0"
+#dynamic = ["version"]
+# https://stackoverflow.com/questions/21064581/how-to-overwrite-pypi-package-when-doing-upload-from-command-line
+
+# If your project has dependencies, list them like this:
+dependencies = [
+  "numpy",
+  "scipy",
+  "scikit-image",
+  "matplotlib",
+  "SimpleITK",
+]
+# You may want to make some of your dependencies optional, if they are only needed for a specific feature of your package.
+# In that case, put them in optional-dependencies.
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-and-requirements
+
+# Declare the minimum version of Python that you support:
+requires-python = ">=3.1"
+
+# Authors (identified by a name and/or an email address)
+authors = [
+  {name = "Lucia Hradecká"},
+  {name = "Lucia Hradecká", email = "lucia.d.hradecka@gmail.com"},
+  {name = "Filip Lux"},
+  {name = "Filip Lux", email = "lux.filip@gmail.com"},
+  {name = "Samuel Šuľan"},
+]
+# Optionally, can also include the maintainers field
+
+# A one-line description of your project, to show as the “headline” of your project page on PyPI
+# and other places such as lists of search results:
+description = "Library for 3D-5D augmentations of volumetric multi-dimensional biomedical images and their annotations"
+
+# A longer description - can use readme.md
+readme = "README.md"
+
+# Lincense - two possibilities
+#license = {file = "LICENSE"}
+license = {text = "MIT License"}
+
+# Keywords to help PyPI’s search box to suggest your project when people search for these keywords
+keywords = ["image", "augmentation", "3D", "volumetric", "biomedical", "bioimage",
+    "preprocessing", "transformation"]
+
+# Classifiers: this information is used for searching and browsing projects on PyPI
+# https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#classifiers
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+# A list of URLs associated with your project, displayed on the left sidebar of your PyPI project page.
+[project.urls]
+Homepage = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.2.0?ref_type=tags"
+Documentation = "https://biovolumentations.readthedocs.io/1.2.0/"
+Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.2.0?ref_type=tags"

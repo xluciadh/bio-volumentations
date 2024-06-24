@@ -58,6 +58,7 @@ class Compose:
         p (float, optional): Chance of applying the whole pipeline.
 
             Defaults to ``1``.
+        TODO: decompose targets to keywords
         targets (Tuple[List[str]] | List[List[str]], optional): List of targets.
 
             Defaults to ``(['image'], ['mask'], ['float_mask'])``.
@@ -65,15 +66,28 @@ class Compose:
 
             Defaults to ``None``.
     """
-    def __init__(self, transforms, p=1.0, targets=(['image'], ['mask'], ['float_mask']), conversion=None):
+    def __init__(self,
+                 transforms, p=1.0,
+                 img_keywords=('image',),
+                 mask_keywords=('mask',),
+                 fmask_keywords=('float_mask',),
+                 keypoints_keywords=('keypoints',),
+                 bboxes_keywords=('bboxes',),
+                 conversion=None):
+
         assert 0 <= p <= 1
-        self.transforms = ([T.Float(always_apply=True),
+
+        self.transforms = ([T.StandardizeDatatype(always_apply=True),
                             CT.ConversionToFormat(always_apply=True)] +
                            transforms +
-                           [T.Contiguous(always_apply=True)] +
-                           [CT.NoConversion() if conversion is None else conversion])
+                           [T.Contiguous(always_apply=True),
+                            CT.NoConversion() if conversion is None else conversion])
         self.p = p
-        self.targets = targets
+        self.targets = {'img_keywords': img_keywords,
+                        'mask_keywords': mask_keywords,
+                        'fmask_keywords': fmask_keywords,
+                        'keypoint_keywords': keypoints_keywords,
+                        'bbox_keywords': bboxes_keywords}
 
     def get_always_apply_transforms(self):
         res = []
@@ -86,6 +100,7 @@ class Compose:
         need_to_run = force_apply or random.random() < self.p
         transforms = self.transforms if need_to_run else self.get_always_apply_transforms()
 
+        # transformation pipeline
         for tr in transforms:
             data = tr(force_apply, self.targets, **data)
 

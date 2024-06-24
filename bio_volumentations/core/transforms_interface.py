@@ -69,10 +69,11 @@ class Transform:
                 print('RUN', self.__class__.__name__, params)
 
             for k, v in data.items():
-                if k in targets[0]:
+                if k in targets['img_keywords']:
                     data[k] = self.apply(v, **params)
                 else:
-                    data[k] = v
+                    # no transformation
+                    pass
 
         return data
 
@@ -85,10 +86,10 @@ class Transform:
 
 
 class DualTransform(Transform):
-    """The base class of transformations applied to all target types.
+    """The base class of transformations applied images and also to all target types.
 
         Targets:
-            image, mask
+            image, mask, float mask, keypoint, bounding box
     """
 
     def __call__(self, force_apply, targets, **data):
@@ -99,14 +100,19 @@ class DualTransform(Transform):
                 print('RUN', self.__class__.__name__, params)
 
             for k, v in data.items():
-                if k in targets[0]:
+                if k in targets['img_keywords']:
                     data[k] = self.apply(v, **params)
-                elif k in targets[1]:
+                elif k in targets['mask_keywords']:
                     data[k] = self.apply_to_mask(v, **params)
-                elif k in targets[2]:
+                elif k in targets['fmask_keywords']:
                     data[k] = self.apply_to_float_mask(v, **params)
+                elif k in targets['keypoint_keywords']:
+                    data[k] = self.apply_to_keypoints(v, **params)
+                elif k in targets['bbox_keywords']:
+                    data[k] = self.apply_to_bboxes(v, **params)
                 else:
-                    data[k] = v
+                    # no transformation
+                    pass
 
         return data
 
@@ -115,6 +121,14 @@ class DualTransform(Transform):
     
     def apply_to_float_mask(self, float_mask, **params):
         return self.apply_to_mask(float_mask, **params)
+
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        # nothing changed
+        return keypoints
+
+    def apply_to_bboxes(self, bboxes, **params):
+        # nothing changed
+        return bboxes
 
 
 class ImageOnlyTransform(Transform):

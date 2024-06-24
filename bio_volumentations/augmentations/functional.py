@@ -42,12 +42,13 @@ import numpy as np
 from functools import wraps
 import skimage.transform as skt
 from skimage.exposure import equalize_hist
-from scipy.ndimage import zoom
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import zoom, gaussian_filter
 from warnings import warn
+from typing import Union
 
-from ..typing import TypeTripletFloat
+from ..biovol_typing import TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSextetInt, TypeSpatialShape
 from .spatial_funcional import get_affine_transform, apply_sitk_transform
+from .utils import is_included
 
 
 MAX_VALUES_BY_DTYPE = {
@@ -108,133 +109,170 @@ def get_center_crop_coords(img_shape, crop_shape):
 
 
 # Too similar to the random_crop. Could be made into one function
-def center_crop(img, input_crop_shape, border_mode, cval, mask):
-    for i in input_crop_shape:
-        if i < 0:
-            warn(f'CenterCrop(): shape {input_crop_shape} contains zero or negative number, continuing'
-                 f'without CenterCrop.', UserWarning)
-            return img
-    if not mask:
-        crop_shape = np.insert(input_crop_shape, 0, img.shape[0])
+def crop(input_array: np.array,
+         crop_shape: TypeSpatialShape,
+         crop_position: TypeSpatialShape,
+         pad_dims,
+         border_mode, cval, mask):
+
+    input_spatial_shape = get_spatial_shape(input_array, mask)
+
+    if np.any(input_spatial_shape < crop_shape):
+        warn(f'F.crop(): Input size {input_spatial_shape} smaller than crop size {crop_shape}, pad by {border_mode}.',
+             UserWarning)
+
+        # pad
+        input_array = pad(input_array, pad_dims, border_mode, cval, mask)
+
+        # test
+        input_spatial_shape = get_spatial_shape(input_array, mask)
+        assert np.all(input_spatial_shape >= crop_shape)
+
+    x1, y1, z1 = crop_position
+    x2, y2, z2 = np.array(crop_position) + np.array(crop_shape)
+
+    if mask:
+        result = input_array[x1:x2, y1:y2, z1:z2]
+        assert np.all(result.shape[:3] == crop_shape), f'{result.shape} {crop_shape} {mask} {crop_position}'
     else:
-        crop_shape = input_crop_shape
-    img_shape = np.array(img.shape)
+        result = input_array[:, x1:x2, y1:y2, z1:z2]
+        assert np.all(result.shape[1:4] == crop_shape)
 
-    # Adding last dimension, if there is one less in the crop_shape
-    if len(img_shape) == len(crop_shape) + 1:
-        crop_shape = np.append(crop_shape, img_shape[-1])
-    if np.any(img_shape < crop_shape):
-        warn(f'CenterCrop(): image size {img_shape} smaller than crop size {crop_shape}, pad by {border_mode}.', UserWarning)
-        img = pad(img, img_shape, crop_shape, border_mode , cval)
-        img_shape = np.array(img.shape)
-   
-    from_indices, to_indices = get_center_crop_coords(img_shape, crop_shape)
-    return crop_from_to(img, from_indices, to_indices)
+    return result
 
 
-def pad(img, img_shape, crop_shape, border_mode, cval):
-    axes_to_pad = np.where(img_shape < crop_shape)[0]
-    pad_width = []
-    for i in range(len(img_shape)):
-        if i in axes_to_pad:
-            how_many_to_pad = crop_shape[i] - img_shape[i]
-            if how_many_to_pad % 2:
-                pad_width.append((int(how_many_to_pad // 2 + 1), int(how_many_to_pad // 2)))
+def crop_keypoints(keypoints,
+                   crop_shape: TypeSpatialShape,
+                   crop_position: TypeSpatialShape,
+                   pad_dims,
+                   keep_all: bool):
+
+    (px, _), (py, _), (pz, _) = pad_dims
+    pad = np.array((px, py, pz))
+
+    res = []
+    for keypoint in keypoints:
+        k = keypoint[:3] - crop_position + pad
+        if keep_all or (np.all(k >= 0) and np.all((k + .5) < crop_shape)):
+            res.append(k)
+
+    return res
+
+
+def get_spatial_shape(array: np.array, mask: bool) -> TypeSpatialShape:
+    return np.array(array.shape)[:3] if mask else np.array(array.shape)[1:4]
+
+
+def get_pad_dims(spatial_shape: TypeSpatialShape, crop_shape: TypeSpatialShape):
+    pad_dims = []
+    for i in range(3):
+        i_dim, c_dim = spatial_shape[i], crop_shape[i]
+        if i_dim < c_dim:
+            pad_size = c_dim - i_dim
+            if pad_size % 2 != 0:
+                pad_dims.append((int(pad_size // 2 + 1), int(pad_size // 2)))
             else:
-                pad_width.append((int(how_many_to_pad // 2), int(how_many_to_pad // 2)))
+                pad_dims.append((int(pad_size // 2), int(pad_size // 2)))
         else:
-            pad_width.append((0, 0))
+            pad_dims.append((0, 0))
+    return pad_dims
+
+
+def pad(img, pad_width, border_mode, cval, mask=True):
+
+    if not mask:
+        pad_width = [(0, 0)] + pad_width
+    if len(img.shape) > len(pad_width):
+        pad_width = pad_width + [(0, 0)]
+
+    assert len(img.shape) == len(pad_width)
+
     if border_mode == "constant":
         return np.pad(img, pad_width, border_mode, constant_values=cval)
     if border_mode == "linear_ramp":
         return np.pad(img, pad_width, border_mode, end_values=cval)
-    return np.pad(img, pad_width, border_mode)
+
+    result = np.pad(img, pad_width, border_mode)
+
+    return result
 
 
-def pad_pixels(img, input_pad_width, border_mode, cval, mask=False):
-    img_shape = img.shape
-    if not mask:
-        img_shape = img_shape[1:]
+def pad_keypoints(keypoints, pad_size):
+    a, b, c, d, e, f = pad_size
 
-    if isinstance(input_pad_width, (int, tuple)):
-        pad_width = input_pad_width
-    else:
-        pad_width = input_pad_width.copy()
+    res = []
+    for coo in keypoints:
+        padding = np.array((a, c, e)) if len(coo) == 3 else np.array((a, c, e, 0))
+        res.append(coo + padding)
+    return res
 
-    if isinstance(pad_width, int):
-        # padding only spatial dimensions
-        pad_width = [(pad_width, pad_width) if i < 3 else (0, 0) for i in range(len(img_shape))]
-    elif isinstance(pad_width, tuple):
-        if len(pad_width) > 2:
-            warn(f'Pad(): tuple for pad_size {pad_width} have more than 2 elements, ignoring elements after the ' +
-                 f'second one.', UserWarning)
 
-        pad_width = [(pad_width[0], pad_width[1]) if i < 3 else (0, 0) for i in range(len(img_shape))]
+def flip_keypoints(keypoints, axes, img_shape):
 
-    else:
-        # Making tuples out of single numbers
-        for i in range(len(pad_width)):
-            if isinstance(pad_width[i], int):
-                pad_width[i] = (pad_width[i], pad_width[i])
-        # Padding with zeroes
-        if len(pad_width) < len(img_shape):
-            pad_width = pad_width + [(0, 0)] * (len(img_shape) - len(pad_width))
+    # all values in axes are in [1, 2, 3]
+    assert np.all(np.array([ax in [1, 2, 3] for ax in axes])), f'{axes} does not contain values from [1, 2, 3]'
+
+    mult, add = np.ones(3, int), np.zeros(3, int)
+    for ax in axes:
+        mult[ax-1] = -1
+        add[ax-1] = img_shape[ax-1] - 1
+
+    res = []
+    for k in keypoints:
+        flipped = list(np.array(k[:3]) * mult + add)
+        if len(k) == 4:
+            flipped.append(k[-1])
+        res.append(tuple(flipped))
+    return res
+
+
+def rot90_keypoints(keypoints, factor, axes, img_shape):
+
+    if factor == 1:
+        keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
+        keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
+
+    elif factor == 2:
+        keypoints = flip_keypoints(keypoints, axes, img_shape)
+    elif factor == 3:
+
+        keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
+        keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
+
+    return keypoints
+
+
+def transpose_keypoints(keypoints, ax1, ax2):
+
+    # all values in axes are in [1, 2, 3]
+    assert (ax1 in [1, 2, 3]) and (ax2 in [1, 2, 3]), f'[{ax1} {ax2}] does not contain values from [1, 2, 3]'
+
+    res = []
+    for k in keypoints:
+        k = list(k)
+        k[ax1-1], k[ax2-1] = k[ax2-1], k[ax1-1]
+        res.append(tuple(k))
+    return res
+
+
+def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=False):
+
+    a, b, c, d, e, f = input_pad_width
+    pad_width = [(a, b), (c, d), (e, f)]
 
     # zeroes for channel dimension
     if not mask:
         pad_width = [(0, 0)] + pad_width
+
+    # zeroes for temporal dimension
+    if len(img.shape) == 5:
+        pad_width = pad_width + [(0, 0)]
     
     if border_mode == "constant":
         return np.pad(img, pad_width, border_mode, constant_values=cval)
     if border_mode == "linear_ramp":
         return np.pad(img, pad_width, border_mode, end_values=cval)
     return np.pad(img, pad_width, border_mode)
-
-
-def crop_from_to(img, froms, tos):
-    if len(froms) == 3:
-        c1, x1, y1 = froms
-        c2, x2, y2 = tos
-        return img[c1:c2, x1:x2, y1:y2]
-    if len(froms) == 4:
-        c1, x1, y1, z1 = froms
-        c2, x2, y2, z2 = tos
-        return img[c1:c2, x1:x2, y1:y2, z1:z2]
-    
-    if len(froms) == 5:
-        c1, x1, y1, z1, t1 = froms
-        c2, x2, y2, z2, t2 = tos
-        return img[c1:c2, x1:x2, y1:y2, z1:z2, t1:t2]
-
-
-def get_random_crop_coords(img_shape, crop_shape, crop_start):
-    froms = ((img_shape - crop_shape) * crop_start).astype(int)
-    tos = froms + crop_shape
-    return froms, tos
-
-
-# Too similar to the center_crop. Could be made into one function
-def random_crop(img, input_crop_shape, input_crop_start, border_mode, cval, mask):
-    if not mask:
-        crop_shape = np.insert(input_crop_shape, 0, img.shape[0])
-        crop_start = np.insert(input_crop_start, 0, 0)
-    else:
-        crop_shape = input_crop_shape
-        crop_start = input_crop_start
-    img_shape = np.array(img.shape)
-
-    # Adding last dimension, if there is one less in the crop_shape
-    if len(img_shape) == len(crop_shape) + 1:
-        crop_shape = np.append(crop_shape, img_shape[-1])
-        crop_start = np.append(crop_start, 0)
-    if np.any(img_shape < crop_shape):
-        warn(f'Random crop(): image size {img_shape} smaller than crop size {crop_shape}, pad by {border_mode}.',
-             UserWarning)
-        img = pad(img, img_shape, crop_shape, border_mode,cval)
-        img_shape = np.array(img.shape)
-    
-    froms, tos = get_random_crop_coords(img_shape, crop_shape, crop_start)
-    return crop_from_to(img, froms, tos)
 
 
 def normalize_mean_std(img, mean, denominator):
@@ -289,14 +327,13 @@ def normalize(img, input_mean, input_std):
 
 def gaussian_noise(img, mean, sigma):
     img = img.astype("float32")
-    noise = np.random.normal(mean, sigma, img.shape)
+    noise = np.random.normal(mean, sigma, img.shape).astype(np.float32)
     return img + noise
 
 
-def poisson_noise(img, intensity):
+def poisson_noise(img, peak):
     img = img.astype("float32")
-    noise = np.random.poisson(img) * intensity
-    return img + noise
+    return img + np.random.poisson(img).astype(np.float32)
 
 
 # TODO parameter
@@ -305,7 +342,9 @@ def poisson_noise(img, intensity):
 # float mask - how, for now no gaussian filter.
 def resize(img, input_new_shape, interpolation=1, border_mode='reflect', cval=0, mask=False,
            anti_aliasing_downsample=True):
-    new_shape = input_new_shape
+
+    # TODO: random fix, check if it is correct
+    new_shape = list(input_new_shape)[:-1]
 
     # Zero or negative check
     for dimension in new_shape:
@@ -367,6 +406,19 @@ def resize(img, input_new_shape, interpolation=1, border_mode='reflect', cval=0,
     new_img = np.stack(data, axis=0)
     
     return new_img
+
+
+def resize_keypoints(keypoints,
+                     domain_limit: TypeSpatioTemporalCoordinate,
+                     new_shape: TypeSpatioTemporalCoordinate):
+
+    assert len(domain_limit) == len(new_shape) == 4
+
+    # for each dim compute ratio
+    ratio = np.array(new_shape[:3]) / np.array(domain_limit[:3])
+
+    # it supposes that length of keypoint is 3
+    return [keypoint * ratio for keypoint in keypoints]
 
 
 # TODO compare with skt.rescale, new version got channel_axis
@@ -467,15 +519,15 @@ def affine(img: np.array,
            degrees: TypeTripletFloat = (0, 0, 0),
            scales: TypeTripletFloat = (1, 1, 1),
            translation: TypeTripletFloat = (0, 0, 0),
-           interpolation: int = 1,
+           interpolation: str = 'linear',
            border_mode: str = 'constant',
            value: float = 0,
            spacing: TypeTripletFloat = (1, 1, 1)):
     """
     img (np.array) : format (channel, ax1, ax2, ax3, [time])
     """
-
-    transform = get_affine_transform(img,
+    shape = img.shape[1:]
+    transform = get_affine_transform(shape,
                                      scales=scales,
                                      degrees=degrees,
                                      translation=translation,
@@ -483,11 +535,52 @@ def affine(img: np.array,
 
     return apply_sitk_transform(img,
                                 sitk_transform=transform,
-                                interpolation=SITK_interpolation[interpolation],
+                                interpolation=interpolation,
                                 default_value=value,
                                 spacing=spacing)
 
 
+def affine_keypoints(keypoints: list,
+                     domain_limit: TypeSpatioTemporalCoordinate,
+                     degrees: TypeTripletFloat = (0, 0, 0),
+                     scales: TypeTripletFloat = (1, 1, 1),
+                     translation: TypeTripletFloat = (0, 0, 0),
+                     border_mode: str = 'constant',
+                     keep_all: bool = False,
+                     spacing: TypeTripletFloat = (1, 1, 1)):
+    """
+
+    Args:
+        keypoints: list of input keypoints
+        domain_limit: limit of the domain, there keyp-points can appear, it is used to define center of transforms
+                and to filter out output key-point from the outside of the domain
+        degrees:
+        scales:
+        translation:
+        border_mode: not used
+        keep_all: True to keep also key_point frou poutside the domain
+        spacing: relative voxel size
+
+    Returns: list of transformed key-points
+
+    """
+    transform = get_affine_transform(domain_limit,
+                                     scales=scales,
+                                     degrees=degrees,
+                                     translation=translation,
+                                     spacing=spacing)
+
+    transform = transform.GetInverse()
+
+    res = []
+    for point in keypoints:
+        transformed_point = transform.TransformPoint(point)
+        if keep_all or is_included(domain_limit, transformed_point):
+            res.append(transformed_point)
+    return res
+
+
+# TO REMOVE
 def rotation_matrix_calculation(dim, x_angle, y_angle, z_angle):
     rot_matrix = np.identity(dim).astype(np.float32)
     rot_matrix = rot_matrix @ rot_x(x_angle, dim)
