@@ -7,7 +7,7 @@ You can install the `Bio-Volumentations` library from PyPI using:
 
 ``pip install bio-volumentations``
 
-Required packages are:
+The required packages are:
 
 - `NumPy <https://numpy.org/>`_
 - `SciPy <https://scipy.org/>`_
@@ -18,7 +18,7 @@ See `the project's PyPI page <https://pypi.org/project/bio-volumentations/>`_ fo
 
 Importing
 *********
-You can import the `Bio-Volumentations` library to your project using:
+You can import the `Bio-Volumentations` library into your project using:
 
 .. code-block:: python
 
@@ -30,33 +30,40 @@ How to Use Bio-Volumentations?
 The `Bio-Volumentations` library processes 3D, 4D, and 5D images. Each image must be
 represented as :class:`numpy.ndarray` and must conform to the following conventions:
 
-- The order of dimensions is [C, Z, Y, X, T], where C is the channel dimension, T is the time dimension, and Z, Y, and X are the spatial dimensions.
-- The three spatial dimensions (Z, Y, X) must be present. To transform a 2D image, please create a dummy Z dimension first.
+- The order of dimensions is [C, Z, Y, X, T], where C is channel dimension, Z, Y, and X are spatial dimensions, and T is time dimension.
+- The three spatial (Z, Y, X) dimensions must always be present. To transform a 2D image, please create a dummy Z dimension. (Or consider using a more suitable library, such as `Albumentations <https://albumentations.ai/>`_.)
 - The channel (C) dimension is optional for the input image. However, the output image will always be at least 4-dimensional. If the C dimension is not present in the input, the library will automatically create a dummy dimension in its place, so the output image shape will be [1, Z, Y, X].
-- The time (T) dimension is optional and can only be present if the channel (C) dimension is also present in the input data. To process single-channel time-lapse images, please create a dummy C dimension first.
+- The time (T) dimension is optional and can only be present if the channel (C) dimension is also present in the input data. To process single-channel time-lapse images, please create a dummy C dimension.
 
 Thus, an input image is interpreted in the following ways based on its dimensionality:
 
-- 3D - a single-channel volumetric image [Z, Y, X];
-- 4D - a multi-channel volumetric image [C, Z, Y, X];
-- 5D - a multi-channel volumetric image sequence [C, Z, Y, X, T].
+- 3D: a single-channel volumetric image [Z, Y, X];
+- 4D: a multi-channel volumetric image [C, Z, Y, X];
+- 5D: a single- or multi-channel volumetric image sequence [C, Z, Y, X, T].
 
 The shape of the output image will be either [C, Z, Y, X] (for cases 1 & 2) or [C, Z, Y, X, T] (for case 3).
 
-The images are type-casted to a floating-point datatype before transformations, irrespective of their actual datatype.
+The images are type-casted to a floating-point datatype before being transformed, irrespective of their actual datatype.
 
 For the specification of image annotation conventions, please see below.
 
-**It is strongly recommended to use** :class:`Compose` **to create and use transformation pipelines.**
-The :class:`Compose` class automatically checks and adjusts image format and datatype, stacks
-individual transforms to a pipeline, and outputs the image as a contiguous array.
-Optionally, it can also convert the transformed image to a desired format.
-If you call transformations outside of :class:`Compose`, we cannot guarantee the all assumptions are checked and enforced,
-so you might encounter unexpected behaviour.
+The transformations are implemented as callable classes inheriting from an abstract :class:`Transform` class.
+Upon instantiating a transformation object, one has to specify the parameters of the transformation.
+All transformations work in a fully 3D fashion. Individual channels and time points of a data volume
+are usually transformed separately and in the same manner; however, certain transformations can also work
+along these dimensions. For instance, :class:`GaussianBlur` can perform the blurring along the temporal dimension and
+with different strength in individual channels.
 
-Below, there are several examples of how to use the `Bio-Volumentations` library.
-You are also welcome to check
-`our documentation pages <https://biovolumentations.readthedocs.io/1.2.0/>`_.
+The data can be transformed by a call to the transformation object.
+**However, it is strongly recommended to use** :class:`Compose` **to create and use transformation pipelines.**
+An instantiated :class:`Compose` object encapsulates the full transformation pipeline and provides additional support:
+it automatically checks and adjusts image format and datatype, outputs the image as a contiguous array, and
+can optionally convert the transformed image to a desired format.
+If you call transformations outside of :class:`Compose`, we cannot guarantee the all assumptions
+are checked and enforced, so you might encounter unexpected behaviour.
+
+Below, there are several examples of how to use the `Bio-Volumentations` library. You are also welcome to check
+`the API reference <https://biovolumentations.readthedocs.io/1.2.0/modules.html>`_ to learn more about the individual transforms.
 
 Example: Transforming a Single Image
 ************************************
@@ -67,13 +74,20 @@ and then feed a list of these transformations into a new :class:`Compose` object
 
 Optionally, you can specify a datatype conversion transformation that will be applied after the last transformation
 in the list, for example from the default :class:`numpy.ndarray` to a PyTorch :class:`torch.Tensor`.
-You can also specify the probability of actually applying the whole pipeline as a number between 0 and 1.
-The default probability is 1 (always apply).
-See the `docs <https://biovolumentations.readthedocs.io/1.2.0/>`_ for more details.
+You can also specify the probability of applying the whole pipeline as a number between 0 and 1.
+The default probability is 1 - the pipeline is applied for each call. See the
+`docs <https://biovolumentations.readthedocs.io/1.2.0/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
+for more details.
+
+Note: You can also toggle the probability of applying the individual transforms. To do so, you can
+use the parameters :class:`p` and :class:`always_apply` when instantiating the transformation objects.
+If :class:`always_apply == True`, the transformation is applied every time the pipeline is called;
+otherwise, it is applied with probability :class:`p`, which must be a number between 0 and 1.
 
 The :class:`Compose` object is callable. The data is passed as keyword arguments, and the call returns a dictionary
 with the same keywords and corresponding transformed data. This might look like an overkill for a single image,
-but it will come handy when transforming images with additional targets. The default key for the image is :class:`image`.
+but it will come handy when transforming images with additional targets.
+The default keyword for the image data is, unsurprisingly, :class:`'image'`.
 
 .. code-block:: python
 
@@ -97,26 +111,33 @@ but it will come handy when transforming images with additional targets. The def
     aug_data = aug(**data)
     transformed_img = aug_data['image']
 
-Example: Transforming Image Tuples
-***********************************
-Sometimes, it is necessary to consistently transform an image and its corresponding additional targets.
+Example: Transforming Images with Annotations
+*********************************************
+Sometimes, it is necessary to transform an image with some corresponding additional targets.
 To that end, `Bio-Volumentations` define several target types:
 
-- :class:`image` for the image data (:class:`numpy.ndarray` with any datatype allowed, gets converted to floating-point by default);
+- :class:`image` for the image data (:class:`numpy.ndarray` with floating-point datatype);
 - :class:`mask` for integer-valued label images (:class:`numpy.ndarray` with integer datatype);
-- :class:`float mask` for real-valued label images (:class:`numpy.ndarray` with floating-point datatype);
-- :class:`value` for scalar values, such as classification labels (a floating-point number); and
-- :class:`key points` for a list of key points (a list of tuples), where each key point is a tuple of 3 or 4 floating-point numbers (for volumetric and time-lapse volumetric data, respectively) that represent its absolute coordinates in the volume.
+- :class:`float_mask` for real-valued label images (:class:`numpy.ndarray` with floating-point datatype);
+- :class:`value` for scalar values (a floating-point number); and
+- :class:`keypoints` for a list of key points (a list of tuples).
 
-Apart from these, :class:`bounding boxes` target type is defined but not implemented yet.
+Apart from these, a :class:`bounding_boxes` target type is defined but not implemented yet.
 
-The :class:`mask` and :class:`float mask` target types are expected to have the same shape as the :class:`image`
+The :class:`mask` and :class:`float_mask` targets are expected to have the same shape as the :class:`image`
 target except for the channel (C) dimension which must not be included.
-For example, for images of shape ``[150, 300, 300]``, ``[1, 150, 300, 300]``, and
-``[4, 150, 300, 300]``, the corresponding :class:`mask` and :class:`float mask` must be of shape ``[150, 300, 300]``.
-If one wants to use a multi-channel :class:`mask` or :class:`float mask`, one has to split it into
-a set of single-channel :class:`mask` s or :class:`float mask` s, respectively, and input them
-as stand-alone targets (see below).
+For example, a :class:`mask` and/or :class:`float_mask` of shape ``[150, 300, 300]`` can correspond to
+images of shape ``[150, 300, 300]``, ``[1, 150, 300, 300]``, as well as ``[4, 150, 300, 300]``.
+If you want to use a multi-channel :class:`mask` or :class:`float_mask`, you have to split it into
+a set of single-channel :class:`mask` s or :class:`float_mask` s, respectively, and input them
+as stand-alone targets (see below how to transform multiple masks per image).
+
+The :class:`value` target can hold image-level numerical information, such as a classification label.
+Its value does not change during the transformation process.
+
+The :class:`keypoints` target is represented as a list of tuples. Each tuple represents
+the absolute coordinates of a keypoint in the volume, so it must contain either 3 or 4 numbers
+(for volumetric and time-lapse volumetric data, respectively).
 
 If a :class:`Random...` transform receives multiple targets on its input in a single call,
 the same transformation parameters are used to transform all of these targets.
@@ -125,12 +146,12 @@ For example, :class:`RandomAffineTransform` applies the same geometric transform
 Some transformations, such as :class:`RandomGaussianNoise` or :class:`RandomGamma`,
 are only defined for the :class:`image` target
 and leave the other target types unchanged. Please consult the
-`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.2.0/>`_
+`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.2.0/modules.html>`_
 for more details.
 
-The image tuples are fed to the :class:`Compose` object call as keyword arguments and extracted from the outputted
-dictionary using the same keys. The default key values are :class:`image`, :class:`mask`, :class:`float_mask`,
-:class:`keypoints`, :class:`bboxes`, and :class:`class_value`.
+The corresponding targets are fed to the :class:`Compose` object call as keyword arguments and extracted from the outputted
+dictionary using the same keys. The default key values are :class:`'image'`, :class:`'mask'`, :class:`'float_mask'`,
+:class:`'keypoints'`, :class:`'bboxes'`, and :class:`'class_value'`.
 
 .. code-block:: python
 
@@ -157,27 +178,24 @@ dictionary using the same keys. The default key values are :class:`image`, :clas
 
 Example: Transforming Multiple Images of the Same Target Type
 *************************************************************
-You can input arbitrary number of inputs to any transformation. To achieve this, you has to define the keywords (names)
+You can input arbitrary number of inputs to any transformation. To achieve this, you have to define the keywords
 for the individual inputs when creating the :class:`Compose` object.
-
-The value of :class:`targets` must be a list with exactly 3 items: a list with keys of :class:`image`-type targets,
-a list with keys of :class:`mask`-type targets, and
-a list with keys of :class:`float mask`-type targets.
-The specified keys will then be used to input the images to the transformation call as well as to extract the
+The specified keywords will then be used to input the images to the transformation call as well as to extract the
 transformed images from the outputted dictionary.
 
 Specifically, you can define :class:`image`-type target keywords using the :class:`img_keywords` parameter - its value
-must be a tuple of strings, each string representing a single keyword. Similarly, there are the :class:`mask_keywords`,
+must be a tuple of strings, each string representing a single keyword. Similarly, there are :class:`mask_keywords`,
 :class:`fmask_keywords`, :class:`keypoints_keywords`, :class:`bboxes_keywords`, and :class:`value_keywords` parameters
-for other target types.
-Importantly, there must be an :class:`image`-type target with the keyword :class:`'image'`.
+for the respective target types.
+
+Importantly, there must always be an :class:`image`-type target with the keyword :class:`'image'`.
 Otherwise, the keywords can be any valid dictionary keys, and they must be unique within each target type.
 
-You do not need to use all specified keywords in a transformation call. However, at least the :class:`image`
-keyword target must be present in each transformation call.
+You do not need to use all specified keywords in a transformation call. However, at least the target with
+the :class:`'image'` keyword must be present in each transformation call.
 In our example below, there are seven target keywords defined: four keywords defined explicitly (two for :class:`image`,
-one for :class:`mask`, and one for :class:`float mask`) and three defined implicitly (for :class:`value`,
-:class:`key points`, and :class:`bounding boxes`), but we only transform three targets.
+one for :class:`mask`, and one for :class:`float_mask`) and three defined implicitly (for :class:`value`,
+:class:`keypoints`, and :class:`bounding_boxes`), but we only transform three targets.
 
 You cannot define your own target types; that would require re-implementing all existing transforms.
 
@@ -213,8 +231,8 @@ Example: Adding a Custom Transformation
 ***************************************
 
 Each transformation inherits from the :class:`Transform` class. You can thus easily implement your own
-transformations and use them with this library. You can check our implementations to see how this can be done.
-For example, :class:`Flip` can be implemented as follows:
+transformations and use them with this library. You can check our implementations to see how this can be done;
+for example, :class:`Flip` can be implemented as follows:
 
 .. code-block:: python
 

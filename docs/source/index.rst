@@ -14,8 +14,8 @@ and with any major deep learning library.
    :caption: Contents:
 
    intro
-   modules
    examples
+   modules
    contributions
 
 The source codes and more details are also available

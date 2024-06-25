@@ -5,16 +5,17 @@ Introduction
 biomedical images and their annotations.
 
 The library offers a wide range of efficiently implemented image transformations.
-This includes both preprocessing transformations (such as intensity normalisation, padding, and type casting)
-and augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
+This includes both deterministic preprocessing transformations (such as intensity normalisation, padding, and type casting)
+as well as random augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
 
 The `Bio-Volumentations` library is a suitable tool for image data manipulation in machine learning applications.
-It can be used with any major Python deep learning library, including PyTorch, PyTorch Lightning, TensorFlow, and Keras.
+It can transform several types of reference annotations along with the image data and
+it can be used with any major Python deep learning library, including PyTorch, PyTorch Lightning, TensorFlow, and Keras.
 
-This library builds upon wide-spread libraries such as Albumentations and TorchIO (see the Contributions section below).
+This library builds upon wide-spread libraries such as Albumentations and TorchIO.
 Therefore, it can easily be adopted by developers.
 
-The source codes and more details are also available
-`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.2.0?ref_type=tags>`_
-and `at the project's PyPI page <https://pypi.org/project/bio-volumentations/>`_.
+The source codes are available
+`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.2.0?ref_type=tags>`_.
+The package can be also installed using pip - see `the project's PyPI page <https://pypi.org/project/bio-volumentations/>`_.
 

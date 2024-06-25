@@ -17,7 +17,6 @@ dependencies = [
   "numpy",
   "scipy",
   "scikit-image",
-  "matplotlib",
   "SimpleITK",
 ]
 # You may want to make some of your dependencies optional, if they are only needed for a specific feature of your package.

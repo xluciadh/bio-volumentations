@@ -9,7 +9,8 @@ This includes both preprocessing transformations (such as intensity normalisatio
 and augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
 
 The `Bio-Volumentations` library is a suitable tool for image manipulation in machine learning applications. 
-It can be used with any major Python deep learning library, including PyTorch, PyTorch Lightning, TensorFlow, and Keras.
+It can transform several types of reference annotations along with the image data and
+it can be used with any major Python deep learning library, including PyTorch, PyTorch Lightning, TensorFlow, and Keras.
 
 This library builds upon wide-spread libraries such as Albumentations and TorchIO (see the Contributions section below). 
 Therefore, it can easily be adopted by developers.
@@ -21,14 +22,13 @@ Install the package from pip using:
 pip install bio-volumentations
 ```
 
-See [the project's PyPi page](https://pypi.org/project/bio-volumentations/) for more details.
+See [the project's PyPI page](https://pypi.org/project/bio-volumentations/) for more details.
 
 ## Requirements
 
 - [NumPy](https://numpy.org/)
 - [SciPy](https://scipy.org/)
 - [Scikit-image](https://scikit-image.org/)
-- [Matplotlib](https://matplotlib.org/)
 - [SimpleITK](https://simpleitk.org/)
 
 
@@ -48,30 +48,39 @@ represented as a `numpy.ndarray` and must conform to the following conventions:
 
 - The order of dimensions is [C, Z, Y, X, T], where C is the channel dimension, 
    T is the time dimension, and Z, Y, and X are the spatial dimensions.
-- The three spatial dimensions (Z, Y, X) must be present. To transform a 2D image, please create a dummy Z dimension first. 
+- The three spatial dimensions (Z, Y, X) must be present. To transform a 2D image, please create a dummy Z dimension. 
 - The channel (C) dimension is optional. If it is not present, the library will automatically
    create a dummy dimension in its place, so the output image shape will be [1, Z, Y, X].
 - The time (T) dimension is optional and can only be present if the channel (C) dimension is 
-   also present in the input data. To process single-channel time-lapse images, please create a dummy C dimension first.
+   also present in the input data. To process single-channel time-lapse images, please create a dummy C dimension.
 
-Thus, an input image is interpreted in the following ways based on its shape:
+Thus, an input image is interpreted in the following ways based on its dimensionality:
 
-1. [Z, Y, X] ... a single-channel volumetric image;
-2. [C, Z, Y, X] ... a multi-channel volumetric image;
-3. [C, Z, Y, X, T] ... a single-channel as well as multi-channel volumetric image sequence.
+1. 3D: a single-channel volumetric image [Z, Y, X];
+2. 4D: a multi-channel volumetric image [C, Z, Y, X];
+3. 5D: a single- or multi-channel volumetric image sequence [C, Z, Y, X, T].
 
 The shape of the output image is either [C, Z, Y, X] (cases 1 & 2) or [C, Z, Y, X, T] (case 3).
 
-The images are type-casted to a floating-point datatype before transformations, irrespective of their actual datatype.
+The images are type-casted to a floating-point datatype before being transformed, irrespective of their actual datatype.
 
 For the specification of image annotation conventions, please see below.
 
+The transformations are implemented as callable classes inheriting from an abstract `Transform` class.
+Upon instantiating a transformation object, one has to specify the parameters of the transformation.
+
+All transformations work in a fully 3D fashion. Individual channels and time points of a data volume
+are usually transformed separately and in the same manner; however, certain transformations can also work
+along these dimensions. For instance, `GaussianBlur` can perform the blurring along the temporal dimension and
+with different strength in individual channels.
+
+The data can be transformed by a call to the transformation object.
 **It is strongly recommended to use `Compose` to create and use transformation pipelines.** <br>
-The `Compose` class automatically checks and adjusts image format, datatype, stacks
-individual transforms to a pipeline, and outputs the image as a contiguous array. 
-Optionally, it can also convert the transformed image to a desired format. <br>
-If you call transformations outside of `Compose`, we cannot guarantee the all assumptions are checked and enforced, 
-so you might encounter unexpected behaviour.
+An instantiated `Compose` object encapsulates the full transformation pipeline and provides additional support:
+it automatically checks and adjusts image format and datatype, outputs the image as a contiguous array, and
+can optionally convert the transformed image to a desired format.
+If you call transformations outside of `Compose`, we cannot guarantee the all assumptions
+are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use this library. You are also welcome to check 
 [our documentation pages](https://biovolumentations.readthedocs.io/1.2.0/).
@@ -84,12 +93,13 @@ and then feed a list of these transformations into a new `Compose` object.
 
 Optionally, you can specify a datatype conversion transformation that will be applied after the last transformation
 in the list, e.g. from the default `numpy.ndarray` to a `torch.Tensor`. You can also specify the probability
-of actually applying the whole pipeline as a number between 0 and 1. The default probability is 1 (always apply).
-See the [docs](https://biovolumentations.readthedocs.io/1.2.0/) for more details.
+of actually applying the whole pipeline as a number between 0 and 1. 
+The default probability is 1 - the pipeline is applied for each call.
+See the [docs](https://biovolumentations.readthedocs.io/1.2.0/examples.html) for more details.
 
 The `Compose` object is callable. The data is passed as a keyword argument, and the call returns a dictionary 
 with the same keywords and corresponding transformed images. This might look like an overkill for a single image, 
-but will come handy when transforming images with annotations. The default key for the image is `image`.
+but will come handy when transforming images with annotations. The default key for the image is `'image'`.
 
 
 ```python
@@ -98,7 +108,7 @@ from bio_volumentations import Compose, RandomGamma, RandomRotate90, GaussianBlu
 
 # Create the transformation pipeline using Compose
 aug = Compose([
-        RandomGamma(gamma_limit = (0.8, 1,2), p = 0.8),
+        RandomGamma(gamma_limit = (0.8, 1.2), p = 0.8),
         RandomRotate90(axes = [1, 2, 3], p = 1),
         GaussianBlur(sigma = 1.2, p = 0.8)
       ])
@@ -114,22 +124,19 @@ aug_data = aug(**data)
 transformed_img = aug_data['image']
 ```
 
-### Example: Transforming Image Tuples
+### Example: Transforming Images with Annotations
 
-Sometimes, it is necessary to consistently transform a tuple of corresponding images.
+Sometimes, it is necessary to transform an image with some corresponding additional targets.
 To that end, `Bio-Volumentations` define several target types:
 
-- `image` for the image data (any datatype allowed, gets converted to floating-point by default);
-- `mask` for integer-valued label images (expected integer datatype); and
-- `float_mask` for real-valued label images (expected floating-point datatype).
+- `image` for the image data;
+- `mask` for integer-valued label images;
+- `float_mask` for real-valued label images;
+- `value` for scalar values; and
+- `keypoints` for a list of key points.
 
-The `mask` and `float_mask` target types are expected to have the same shape as the `image`
-target except for the channel (C) dimension which must not be included. 
-For example, for images of shape [150, 300, 300], [1, 150, 300, 300], and
-[4, 150, 300, 300], the corresponding `mask` and `float_mask` must be of shape [150, 300, 300].
-If you want to use a multichannel `mask` or `float_mask`, you have to split it into
-a set of single-channel `mask`s or `float_mask`s, respectively, and input them
-as stand-alone targets (see below).
+For more information on the format of individual target types, see the 
+[Getting Started guide](https://biovolumentations.readthedocs.io/1.2.0/examples.html#example-transforming-images-with-annotations)
 
 If a `Random...` transform receives multiple targets on its input in a single call,
 the same transformation parameters are used to transform all of these targets.
@@ -137,10 +144,10 @@ For example, `RandomAffineTransform` applies the same geometric transformation t
 
 Some transformations, such as `RandomGaussianNoise` or `RandomGamma`, are only defined for the `image` target 
 and leave the `mask` and `float_mask` targets unchanged. Please consult the 
-[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.2.0/) for more details.
+[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.2.0/modules.html) for more details.
 
-The image tuples are fed to the `Compose` object call as keyword arguments and extracted from the outputted dictionary
-using the same keys. The default key values are `image`, `mask`, and `float_mask`.
+The corresponding targets are fed to the `Compose` object call as keyword arguments and extracted from the outputted
+dictionary using the same keys. The default key values are `'image'`, `'mask'`, `'float_mask'`, `'class_value'`, and `'keypoints'`.
 
 ```python
 import numpy as np
@@ -148,7 +155,7 @@ from bio_volumentations import Compose, RandomGamma, RandomRotate90, GaussianBlu
 
 # Create the transformation using Compose
 aug = Compose([
-        RandomGamma(gamma_limit = (0.8, 1,2), p = 0.8),
+        RandomGamma(gamma_limit = (0.8, 1.2), p = 0.8),
         RandomRotate90(axes = [1, 2, 3], p = 1),
         GaussianBlur(sigma = 1.2, p = 0.8)
       ])
@@ -168,19 +175,22 @@ transformed_img, transformed_lbl = aug_data['image'], aug_data['mask']
 
 ### Example: Transforming Multiple Images of the Same Target Type
 
-Although there are only three target types, you can input an arbitrary number of images to any
-transformation. To achieve this, you have to define the value of the `targets` argument
-when creating a `Compose` object.
+You can input arbitrary number of inputs to any transformation. To achieve this, you have to define the keywords
+for the individual inputs when creating the `Compose` object.
+The specified keywords will then be used to input the images to the transformation call as well as to extract the
+transformed images from the outputted dictionary.
 
-The value of `targets` must be a list with exactly 3 items: a list with keys of `image`-type targets, 
-a list with keys of `mask`-type targets, and 
-a list with keys of `float_mask`-type targets. 
-The specified keys will then be used to input the images to the transformation call as well as to extract the
-transformed images from the outputted dictionary. 
+Specifically, you can define `image`-type target keywords using the `img_keywords` parameter - its value
+must be a tuple of strings, each string representing a single keyword. Similarly, there are `mask_keywords`,
+`fmask_keywords`, `value_keywords`, and `keypoints_keywords` parameters for the respective target types.
 
-The keys can be any valid dictionary keys; most importantly, they must be unique across all target types.
-You don't need to feed an image for each target to the transformation call: in our example below, we have four targets
-(two `image`, one `mask`, and one `float_mask`), but we only transform three images.
+Importantly, there must always be an `image`-type target with the keyword `'image'`.
+Otherwise, the keywords can be any valid dictionary keys, and they must be unique within each target type.
+
+You do not need to use all specified keywords in a transformation call. However, at least the target with
+the `'image'` keyword must be present in each transformation call.
+In our example below, we only transform three targets even though we defined four target keywords explicitly 
+(and there are some implicit keywords as well for the other target types).
 
 You cannot define your own target types; that would require re-implementing all existing transforms.
 
@@ -190,11 +200,11 @@ from bio_volumentations import Compose, RandomGamma, RandomRotate90, GaussianBlu
 
 # Create the transformation using Compose: do not forget to define targets
 aug = Compose([
-        RandomGamma( gamma_limit = (0.8, 1,2), p = 0.8),
+        RandomGamma(gamma_limit = (0.8, 1.2), p = 0.8),
         RandomRotate90(axes = [1, 2, 3], p = 1),
         GaussianBlur(sigma = 1.2, p = 0.8)
-    ], 
-    targets= [ ['image' , 'image1'] , ['mask'], ['float_mask'] ])
+    ],
+    img_keywords=('image', 'abc'), mask_keywords=('mask',), fmask_keywords=('nothing',))
 
 # Generate the image data: two images and a single int-valued mask
 img = np.random.rand(1, 128, 256, 256)
@@ -204,10 +214,10 @@ lbl = np.random.randint(0, 1, size=(128, 256, 256), dtype=np.uint8)
 # Transform the images
 # Please note that the images must be passed as keyword arguments to the transformation pipeline
 # and extracted from the outputted dictionary.
-data = {'image': img, 'image1': img1, 'mask': lbl}
+data = {'image': img, 'abc': img1, 'mask': lbl}
 aug_data = aug(**data)
 transformed_img = aug_data['image']
-transformed_img1 = aug_data['image1']
+transformed_img1 = aug_data['abc']
 transformed_lbl = aug_data['mask']
 ```
 
@@ -282,12 +292,6 @@ RandomScale
 RandomRotate90
 RandomFlip 
 RandomCrop
-```
-
-Other:
-```python
-Float
-Contiguous
 ```
 
 
