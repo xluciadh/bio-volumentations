@@ -298,21 +298,21 @@ class RandomScale(DualTransform):
                 Must be either of: ``S``, ``(S1, S2)``, ``(S_Z, S_Y, S_X)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
                 If a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from
-                the interval [2-S, S] (equivalent to inputting ``(2-S, S, 2-S, S, 2-S, S)``).
+                the interval [1/S, S] (equivalent to inputting ``(1/S, S, 1/S, S, 1/S, S)``).
 
                 If a tuple of 2 floats, then all spatial dimensions are scaled by a random number drawn uniformly
                 from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).
 
                 If a tuple of 3 floats, then an interval [-S_a, S_a] is constructed for each spatial
                 dimension and the scale is randomly drawn from it
-                (equivalent to inputting ``(2-S_Z, S_Z, 2-S_Y, S_Y, 2-S_X, S_X)``).
+                (equivalent to inputting ``(1/S_Z, S_Z, 1/S_Y, S_Y, 1/S_X, S_X)``).
 
                 If a tuple of 6 floats, the scales for individual spatial dimensions are randomly drawn from the
                 respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
 
                 The unspecified dimensions (C and T) are not affected.
 
-                Defaults to ``(0.9, 1.1)``.
+                Defaults to ``(1.1)``.
 
             interpolation (str, optional): SimpleITK interpolation type for `image` and `float_mask`.
 
@@ -369,7 +369,7 @@ class RandomScale(DualTransform):
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
-        self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, identity_element=1)
+        self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, scale=True)
         self.interpolation: str = parse_itk_interpolation(interpolation)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1.)
         self.border_mode = border_mode
@@ -820,11 +820,11 @@ class RandomAffineTransform(DualTransform):
 
                 Must be either of: ``S``, ``(S1, S2)``, ``(S1, S2, S3)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
-                If a float, equivalent to ``(-S, S, -S, S, -S, S)``.
+                If a float, equivalent to ``(1/S, S, 1/S, S, 1/S, S)``.
 
                 If a tuple with 2 items, equivalent to ``(S1, S2, S1, S2, S1, S2)``.
 
-                If a tuple with 3 items, equivalent to ``(-S1, S1, -S2, S2, -S3, S3)``.
+                If a tuple with 3 items, equivalent to ``(1/S1, S1, 1/S2, S2, 1/S3, S3)``.
 
                 If a tuple with 6 items, the scale is randomly chosen from an interval [S_a1, S_a2] for
                 each spatial axis.
@@ -885,9 +885,9 @@ class RandomAffineTransform(DualTransform):
                  border_mode: str = 'constant', ival: float = 0, mval: float = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
-        self.angle_limit: TypeSextetFloat = parse_limits(angle_limit, identity_element=0)
-        self.translation_limit: TypeSextetFloat = parse_limits(translation_limit, identity_element=0)
-        self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, identity_element=1)
+        self.angle_limit: TypeSextetFloat = parse_limits(angle_limit)
+        self.translation_limit: TypeSextetFloat = parse_limits(translation_limit)
+        self.scaling_limit: TypeSextetFloat = parse_limits(scaling_limit, scale=True)
         self.spacing: TypeTripletFloat = parse_coefs(spacing, identity_element=1)
         self.interpolation: int = parse_itk_interpolation(interpolation)
         self.border_mode = border_mode                 # not used
