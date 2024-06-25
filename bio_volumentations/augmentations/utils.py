@@ -35,18 +35,19 @@ DEBUG = False
 
 
 def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, TypeSextetFloat],
-                 identity_element: float = 1) -> TypeSextetFloat:
+                 scale: bool = False) -> TypeSextetFloat:
 
     # input_limit = None
-    # returns (ie, ie, ie, ie, ie, ie)
+    # returns (0., 0., 0., 0., 0., 0.)
     if input_limit is None:
-        return tuple((identity_element, ) * 6)
+        return (0., ) * 6
 
     # input_limit = x : float
-    # returns (ie-x, ie+x, ie-x, ie+x, ie-x, ie+x) (for x > ie)
+    # returns (-x, +x, -x, +x, -x, +x)
+    # if scale, returns (1/x, x, 1/x, x, 1/x, x)
     elif (type(input_limit) is float) or (type(input_limit) is int):
-        d = input_limit - identity_element if input_limit > identity_element else identity_element - input_limit
-        return tuple((identity_element - d, identity_element + d) * 3)
+        range = sorted([input_limit, 1 / input_limit]) if scale else [-input_limit, input_limit]
+        return tuple((range[0], range[1]) * 3)
 
     # input_limit = (a, b) : TypePairFloat
     # returns (a, b, a, b, a, b)
@@ -55,7 +56,7 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
         return a, b, a, b, a, b
 
     # input_limit = (a, b, c) : TypeTripletFloat
-    # returns (ie-a, ie+a, ie-b, ie+b, ie-c, ie+c)
+    # returns (-a, +a, -b, +b, -c, +c)
     elif len(input_limit) == 3:
         res = []
         for item in input_limit:
@@ -65,10 +66,12 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
                 for val in item:
                     res.append(float(val))
             # input_limit = (a, b, c)
-            # return (ie-a, ie+a, ie-b, ie+b, ie-c, ie+c)
+            # return (-a, +a, -b, +b, -c, +c)
+            # if scale, returns (1/a, a, 1/b, b, 1/c, c)
             else:
-                res.append(float(- item))
-                res.append(float(item))
+                range = sorted([item, 1 / item]) if scale else [-item, item]
+                res.append(float(range[0]))
+                res.append(float(range[1]))
         return tuple(res)
 
     # input_limit = (a, b, c, d, e, f)

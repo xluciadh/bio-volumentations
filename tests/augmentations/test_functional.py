@@ -1,6 +1,4 @@
 import unittest
-from ... import RandomAffineTransform
-
 
 class MyTestTemplate(unittest.TestCase):
     def test_something(self):
