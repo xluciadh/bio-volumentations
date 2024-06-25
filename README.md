@@ -83,7 +83,7 @@ If you call transformations outside of `Compose`, we cannot guarantee the all as
 are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use this library. You are also welcome to check 
-[our documentation pages](https://biovolumentations.readthedocs.io/1.2.0/).
+[our documentation pages](https://biovolumentations.readthedocs.io/1.3.0/).
 
 ### Example: Transforming a Single Image
 
@@ -95,7 +95,7 @@ Optionally, you can specify a datatype conversion transformation that will be ap
 in the list, e.g. from the default `numpy.ndarray` to a `torch.Tensor`. You can also specify the probability
 of actually applying the whole pipeline as a number between 0 and 1. 
 The default probability is 1 - the pipeline is applied for each call.
-See the [docs](https://biovolumentations.readthedocs.io/1.2.0/examples.html) for more details.
+See the [docs](https://biovolumentations.readthedocs.io/1.3.0/examples.html) for more details.
 
 The `Compose` object is callable. The data is passed as a keyword argument, and the call returns a dictionary 
 with the same keywords and corresponding transformed images. This might look like an overkill for a single image, 
@@ -136,7 +136,7 @@ To that end, `Bio-Volumentations` define several target types:
 - `value` for non-transformed values.
 
 For more information on the format of individual target types, see the 
-[Getting Started guide](https://biovolumentations.readthedocs.io/1.2.0/examples.html#example-transforming-images-with-annotations)
+[Getting Started guide](https://biovolumentations.readthedocs.io/1.3.0/examples.html#example-transforming-images-with-annotations)
 
 If a `Random...` transform receives multiple targets on its input in a single call,
 the same transformation parameters are used to transform all of these targets.
@@ -144,7 +144,7 @@ For example, `RandomAffineTransform` applies the same geometric transformation t
 
 Some transformations, such as `RandomGaussianNoise` or `RandomGamma`, are only defined for the `image` target 
 and leave the `mask` and `float_mask` targets unchanged. Please consult the 
-[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.2.0/modules.html) for more details.
+[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.3.0/modules.html) for more details.
 
 The corresponding targets are fed to the `Compose` object call as keyword arguments and extracted from the outputted
 dictionary using the same keys. The default key values are `'image'`, `'mask'`, `'float_mask'`, `'keypoints'`, and `'value'`.
