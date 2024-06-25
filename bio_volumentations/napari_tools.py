@@ -55,7 +55,7 @@ def show_sample(sample: dict,
             img_np = np.expand_dims(np.expand_dims(img, axis=0), axis=-1)
         elif n_dims == 4:
             img_np = np.expand_dims(img, axis=-1)
-        elif d_dims == 5:
+        elif n_dims == 5:
             img_np = img
         else:
             print(f'Warning: cannot decide about the image shape {img.shape}')
@@ -90,7 +90,7 @@ def show_sample(sample: dict,
         # make mask 4D
         if n_dims == 3:
             mask_np = np.expand_dims(mask, axis=-1)
-        elif d_dims == 4:
+        elif n_dims == 4:
             mask_np = mask
         else:
             print(f'Warning: cannot decide about the image shape {mask.shape}')

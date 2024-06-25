@@ -28,7 +28,8 @@ import unittest
 from bio_volumentations.augmentations.transforms import (
     GaussianNoise, PoissonNoise, Resize, Pad, Scale, Flip, CenterCrop, AffineTransform,
     RandomScale, RandomRotate90, RandomFlip, RandomCrop, RandomAffineTransform, RandomGamma,
-    NormalizeMeanStd, GaussianBlur, Normalize, HistogramEqualization, RandomBrightnessContrast)
+    NormalizeMeanStd, GaussianBlur, Normalize, HistogramEqualization, RandomBrightnessContrast,
+    RandomGaussianBlur)
 from bio_volumentations.core.composition import Compose
 import numpy as np
 
@@ -127,6 +128,37 @@ def get_shape_tests(transform,
     res.append((tr_img['image'], (4, w_, h_, d_, 5), np.float32))
     res.append((tr_img['mask'], (w_, h_, d_, 5), np.int32))
     res.append((tr_img['float_mask'], (w_, h_, d_, 5), np.float32))
+
+    return res
+
+
+def get_shape_tests_5d(transform, in_shape: tuple, params={}):
+    """
+    Iterates over all the possibilities, hot the array can passed throught the transform
+    Args:
+        transform: biovol transform,
+        in_shape: spatial dimension of the input image
+        params: optional, params of the biovol transform
+
+    Returns:
+        list of outputs and expected shapes
+
+    """
+
+    c, w, h, d, t = in_shape
+    w_, h_, d_ = params['shape'] if 'shape' in params.keys() else (w, h, d)
+
+    res = []
+    tr = Compose([transform(**params, p=1)])
+
+    # img (C, W, H, D, T), mask (W, H, D, T)
+    img = np.ones((c, w, h, d, t), dtype=np.single)
+    mask = np.ones((w, h, d, t), dtype=int)
+    fmask = np.ones((w, h, d, t), dtype=np.single)
+    tr_img = tr(image=img, mask=mask, float_mask=fmask)
+    res.append((tr_img['image'], (c, w_, h_, d_, t), np.float32))
+    res.append((tr_img['mask'], (w_, h_, d_, t), np.int32))
+    res.append((tr_img['float_mask'], (w_, h_, d_, t), np.float32))
 
     return res
 
@@ -547,6 +579,31 @@ class TestGaussianBlur(unittest.TestCase):
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
 
+    def test_shape_5d(self):
+        for params in [{'sigma': 1}, {'sigma': (1, 2, 2)}, {'sigma': (1, 2, 2, 3)},
+                       {'sigma': [1, 2]}, {'sigma': [(1, 2, 2), (1, 2, 2)]}, {'sigma': [(1, 2, 2, 3), (1, 2, 2, 3)]}]:
+            tests = get_shape_tests_5d(GaussianBlur, (2, 31, 32, 33, 5), params=params)
+            for tr_img, expected_shape, data_type in tests:
+                self.assertTupleEqual(tr_img.shape, expected_shape)
+                self.assertEqual(tr_img.dtype, data_type)
+
+
+class TestRandomGaussianBlur(unittest.TestCase):
+    def test_shape(self):
+        tests = get_shape_tests(RandomGaussianBlur, (31, 32, 33))
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+    def test_shape_5d(self):
+        for params in [{'max_sigma': 1}, {'max_sigma': (1, 2, 2)}, {'max_sigma': (1, 2, 2, 3)},
+                       {'max_sigma': [1, 2]}, {'max_sigma': [(1, 2, 2), (1, 2, 2)]},
+                       {'max_sigma': [(1, 2, 2, 3), (1, 2, 2, 3)]}]:
+            tests = get_shape_tests_5d(RandomGaussianBlur, (2, 31, 32, 33, 5), params=params)
+            for tr_img, expected_shape, data_type in tests:
+                self.assertTupleEqual(tr_img.shape, expected_shape)
+                self.assertEqual(tr_img.dtype, data_type)
+
 
 class TestRandomGamma(unittest.TestCase):
     def test_shape(self):
@@ -586,6 +643,83 @@ class TestNormalize(unittest.TestCase):
         for tr_img, expected_shape, data_type in tests:
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
+
+
+class TestInputArgs(unittest.TestCase):
+    def test_individual_transforms(self):
+        tr = Compose([
+            Resize((20, 30, 40)),
+            Scale(0.8), Scale((0.9, 0.3, 1.2)),
+            RandomScale(0.5), RandomScale((0.5, 0.8)), RandomScale((0.2, 0.5, 1.1)),
+            RandomScale((0.2, 0.4, 0.8, 0.9, 1.1, 1.2)),
+            RandomRotate90([1]), RandomRotate90([1, 2, 3]), RandomRotate90(None), RandomRotate90([1, 1, 1]),
+            Flip([1]), Flip([1, 2, 3]), Flip(None), Flip([1, 1, 1]),
+            RandomFlip([(1,), (2, 3)]), RandomFlip(None),
+            CenterCrop((20, 30, 40)),
+            RandomCrop((20, 30, 40)),
+            RandomAffineTransform(angle_limit=45), RandomAffineTransform(angle_limit=(45, 60)),
+            RandomAffineTransform(angle_limit=(45, 60, 90)),
+            RandomAffineTransform(angle_limit=(30, 35, 50, 60, 80, 90)),
+            RandomAffineTransform(translation_limit=45), RandomAffineTransform(translation_limit=(45, 60)),
+            RandomAffineTransform(translation_limit=(45, 60, 90)),
+            RandomAffineTransform(translation_limit=(30, 35, 50, 60, 80, 90)),
+            RandomAffineTransform(scaling_limit=0.45), RandomAffineTransform(scaling_limit=(0.45, 0.60)),
+            RandomAffineTransform(scaling_limit=(0.45, 0.60, 0.90)),
+            RandomAffineTransform(scaling_limit=(0.30, 0.35, 0.50, 0.60, 0.80, 0.90)),
+            AffineTransform(angles=(45, 60, 90), translation=(45, 60, 90), scale=(0.5, 0.8, 0.8)),
+            GaussianNoise((0.3, 0.5), 8),
+            PoissonNoise((0.3, 0.5)),
+            NormalizeMeanStd(3, 4), NormalizeMeanStd((3, 4), (3, 4)),
+            GaussianBlur(1), GaussianBlur((1, 2, 2)), GaussianBlur((1, 2, 2, 3)),
+            GaussianBlur([1, 2]), GaussianBlur([(1, 2, 2), (1, 2, 2)]),
+            GaussianBlur([(1, 2, 2, 3), (1, 2, 2, 3)]),
+            RandomGaussianBlur(1), RandomGaussianBlur((1, 2, 2)), RandomGaussianBlur((1, 2, 2, 3)),
+            RandomGaussianBlur([1, 2]), RandomGaussianBlur([(1, 2, 2), (1, 2, 2)]),
+            RandomGaussianBlur([(1, 2, 2, 3), (1, 2, 2, 3)]),
+            RandomGamma((0.5, 0.9)),
+            RandomBrightnessContrast(1, 1), RandomBrightnessContrast((1, 2), (1, 3)),
+            RandomBrightnessContrast(1, (2, 3)),
+            HistogramEqualization(30),
+            Pad(10), Pad((10, 30)), Pad((10, 20, 40, 15, 20, 20)),
+            Normalize(2, 4), Normalize([1, 2], [1, 3]),
+        ])
+
+    def test_individual_transforms_incorrect_initialisation(self):
+
+        # TODO the commented-out ones do not raise exception during initialisation, but could (to catch errors early)
+
+        with self.assertRaises(BaseException):
+            tr = Compose([Resize((30, 40))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([Resize((30, 40, 20, 20))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([Scale((30, 40, 20, 20))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([RandomFlip([1, 3])])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([CenterCrop((30, 40))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([CenterCrop((30, 40, 20, 20))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([GaussianNoise(0.5, (1, 2))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([PoissonNoise(0.5)])
+
+        with self.assertRaises(BaseException):
+            tr = Compose([NormalizeMeanStd(3, (4, 5))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([GaussianBlur(([1], [2], [2]))])
+
+        # with self.assertRaises(BaseException):
+        #     tr = Compose([Normalize(2, [3, 4])])
 
 
 if __name__ == '__main__':

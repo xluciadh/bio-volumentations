@@ -1,5 +1,5 @@
 # ============================================================================================= #
-#  Author:       Filip Lux                                                                      #
+#  Author:       Filip Lux, Lucia Hradecká                                                      #
 #  Copyright:    Filip Lux          lux.filip@gmail.com                                         #
 #                                                                                               #
 #  MIT License.                                                                                 #
@@ -43,9 +43,10 @@ def parse_limits(input_limit: Union[float, TypePairFloat, TypeTripletFloat, Type
         return tuple((identity_element, ) * 6)
 
     # input_limit = x : float
-    # returns (ie-x, ie+x, ie-x, ie+x, ie-x, ie+x)
+    # returns (ie-x, ie+x, ie-x, ie+x, ie-x, ie+x) (for x > ie)
     elif (type(input_limit) is float) or (type(input_limit) is int):
-        return tuple((- input_limit, input_limit) * 3)
+        d = input_limit - identity_element if input_limit > identity_element else identity_element - input_limit
+        return tuple((identity_element - d, identity_element + d) * 3)
 
     # input_limit = (a, b) : TypePairFloat
     # returns (a, b, a, b, a, b)
@@ -88,7 +89,7 @@ def parse_pads(pad_size: Union[int, TypePairInt, TypeSextetInt]) -> TypeSextetIn
     elif type(pad_size) is int:
         return tuple((pad_size,) * 6)
 
-    # input_limit = (a, b) : TypePairFloat
+    # input_limit = (a, b) : TypePairInt
     # returns (a, b, a, b, a, b)
     elif len(pad_size) == 2:
         a, b = pad_size
@@ -100,8 +101,9 @@ def parse_pads(pad_size: Union[int, TypePairInt, TypeSextetInt]) -> TypeSextetIn
         return pad_size
 
 
-def parse_coefs(coefs: Union[float, TypeTripletFloat],
-                identity_element: float = 1) -> TypeTripletFloat:
+def parse_coefs(coefs: Union[float, tuple],
+                identity_element: float = 1,
+                d4: bool = False) -> tuple:
 
     # input_limit = None
     # return (ie, ie, ie)
@@ -112,6 +114,9 @@ def parse_coefs(coefs: Union[float, TypeTripletFloat],
         return coefs, coefs, coefs
     # return (a, b, c)
     elif len(coefs) == 3:
+        return coefs
+    # return (a, b, c, d) for time-lapse (4D) data
+    elif d4 and len(coefs) == 4:
         return coefs
 
 

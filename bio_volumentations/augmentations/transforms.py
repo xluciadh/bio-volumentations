@@ -46,8 +46,7 @@ from ..augmentations import functional as F
 from ..augmentations.spatial_funcional import get_affine_transform, parse_itk_interpolation
 from ..random_utils import uniform, sample_range_uniform
 from typing import List, Sequence, Tuple, Union
-from ..biovol_typing import TypeSextetFloat, TypeTripletFloat, TypePairFloat, TypeSpatioTemporalCoordinate,\
-    TypeSextetInt, TypeSpatialCoordinate, TypeSpatialShape
+from ..biovol_typing import *
 from .utils import parse_limits, parse_coefs, parse_pads, to_tuple, validate_bbox, get_spatio_temporal_domain_limit,\
     to_spatio_temporal
 
@@ -64,9 +63,9 @@ class Resize(DualTransform):
         Args:
             shape (tuple of ints): The desired image shape.
 
-                Must be of either of: ``(Z, Y, X)`` or ``(Z, Y, X, T)``.
+                Must be ``(Z, Y, X)``.
 
-                The unspecified dimensions (C and possibly T) are not affected.
+                The unspecified dimensions (C and T) are not affected.
             interpolation (int, optional): Order of spline interpolation.
 
                 Defaults to ``1``.
@@ -99,7 +98,7 @@ class Resize(DualTransform):
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, shape: tuple, interpolation: int = 1, border_mode: str = 'reflect', ival: float = 0,
+    def __init__(self, shape: TypeSpatialShape, interpolation: int = 1, border_mode: str = 'reflect', ival: float = 0,
                  mval: float = 0, anti_aliasing_downsample: bool = True, ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1):
         
@@ -299,14 +298,14 @@ class RandomScale(DualTransform):
                 Must be either of: ``S``, ``(S1, S2)``, ``(S_Z, S_Y, S_X)``, or ``(S_Z1, S_Z2, S_Y1, S_Y2, S_X1, S_X2)``.
 
                 If a float ``S``, then all spatial dimensions are scaled by a random number drawn uniformly from
-                the interval [-S, S] (equivalent to inputting ``(-S, S, -S, S, -S, S)``).
+                the interval [2-S, S] (equivalent to inputting ``(2-S, S, 2-S, S, 2-S, S)``).
 
                 If a tuple of 2 floats, then all spatial dimensions are scaled by a random number drawn uniformly
                 from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).
 
                 If a tuple of 3 floats, then an interval [-S_a, S_a] is constructed for each spatial
                 dimension and the scale is randomly drawn from it
-                (equivalent to inputting ``(-S_Z, S_Z, -S_Y, S_Y, -S_X, S_X)``).
+                (equivalent to inputting ``(2-S_Z, S_Z, 2-S_Y, S_Y, 2-S_X, S_X)``).
 
                 If a tuple of 6 floats, the scales for individual spatial dimensions are randomly drawn from the
                 respective intervals [S_Z1, S_Z2], [S_Y1, S_Y2], [S_X1, S_X2].
@@ -647,7 +646,7 @@ class CenterCrop(DualTransform):
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, shape: Tuple[int], border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
+    def __init__(self, shape: TypeSpatialShape, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
@@ -735,7 +734,7 @@ class RandomCrop(DualTransform):
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, shape: tuple, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
+    def __init__(self, shape: TypeSpatialShape, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
@@ -807,11 +806,11 @@ class RandomAffineTransform(DualTransform):
 
                 Must be either of: ``T``, ``(T1, T2)``, ``(T1, T2, T3)``, or ``(T_Z1, T_Z2, T_Y1, T_Y2, T_X1, T_X2)``.
 
-                If a float, equivalent to ``(-T, T, -T, T, -T, T)``.
+                If a float, equivalent to ``(2-T, T, 2-T, T, 2-T, T)``.
 
                 If a tuple with 2 items, equivalent to ``(T1, T2, T1, T2, T1, T2)``.
 
-                If a tuple with 3 items, equivalent to ``(-T1, T1, -T2, T2, -T3, T3)``.
+                If a tuple with 3 items, equivalent to ``(2-T1, T1, 2-T2, T2, 2-T3, T3)``.
 
                 If a tuple with 6 items, the translation parameter is randomly chosen from an interval [T_a1, T_a2] for
                 each spatial axis.
@@ -1111,7 +1110,7 @@ class GaussianNoise(ImageOnlyTransform):
             image
     """
 
-    def __init__(self, var_limit: tuple = (0.001, 0.1), mean: float = 0,
+    def __init__(self, var_limit: TypePairFloat = (0.001, 0.1), mean: float = 0,
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.var_limit = var_limit
@@ -1147,8 +1146,7 @@ class PoissonNoise(ImageOnlyTransform):
             image
     """
 
-    def __init__(self,
-                 peak_limit=(0.1, 0.5),
+    def __init__(self, peak_limit: TypePairFloat = (0.1, 0.5),
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.peak_limit = peak_limit
@@ -1169,17 +1167,19 @@ class NormalizeMeanStd(ImageOnlyTransform):
     """Normalize image values to have mean 0 and standard deviation 1, given channel-wise means and standard deviations.
 
         For a single-channel image, the normalization is applied by the formula: :math:`img = (img - mean) / std`.
-        If the image contains more channels, then the previous formula is used for each channel separately.
+        If the image contains more channels, then the formula is used for each channel separately.
 
         It is recommended to input dataset-wide means and standard deviations.
 
         Args:
             mean (float | List[float]): Channel-wise image mean.
 
-                Must be either of: ``M``, ``(M_1, M_2, ..., M_C)``.
+                Must be either of: ``M`` (for single-channel images),
+                ``(M_1, M_2, ..., M_C)`` (for multi-channel images).
             std (float | List[float]): Channel-wise image standard deviation.
 
-                Must be either of: ``S``, ``(S_1, S_2, ..., S_C)``.
+                Must be either of: ``S`` (for single-channel images),
+                ``(S_1, S_2, ..., S_C)`` (for multi-channel images).
             always_apply (bool, optional): Always apply this transformation in composition. 
             
                 Defaults to ``True``.
@@ -1190,11 +1190,12 @@ class NormalizeMeanStd(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, mean: Union[Tuple[float], float], std: Union[Tuple[float], float],
+    def __init__(self, mean: Union[tuple, float], std: Union[tuple, float],
                  always_apply: bool = True, p: float = 1.0):
         super().__init__(always_apply, p)
-        self.mean = np.array(mean, dtype=np.float32) 
-        self.std = np.array(std, dtype=np.float32) 
+        self.mean: np.ndarray = np.array(mean, dtype=np.float32)
+        self.std: np.ndarray = np.array(std, dtype=np.float32)
+        assert self.mean.shape == self.std.shape
         self.denominator = np.reciprocal(self.std, dtype=np.float32)
 
     def apply(self, image, **params):
@@ -1242,7 +1243,7 @@ class GaussianBlur(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, sigma: Union[float , Tuple[float], List[Union[Tuple[float], float]]] = 0.8,
+    def __init__(self, sigma: Union[float , tuple, List[Union[tuple, float]]] = 0.8,
                  border_mode: str = "reflect", cval: float = 0,
                  always_apply: bool = False, p: float = 0.5):
         
@@ -1299,11 +1300,11 @@ class RandomGaussianBlur(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, max_sigma: Union[float, TypeTripletFloat] = 0.8,
+    def __init__(self, max_sigma: Union[float, tuple, List[Union[float, tuple]]] = 0.8,
                  min_sigma: float = 0, border_mode: str = "reflect", cval: float = 0,
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
-        self.max_sigma = parse_coefs(max_sigma)
+        self.max_sigma = max_sigma  # parse_coefs(max_sigma, d4=True)
         self.min_sigma = min_sigma
         self.border_mode = border_mode
         self.cval = cval
@@ -1322,7 +1323,7 @@ class RandomGaussianBlur(ImageOnlyTransform):
                 if isinstance(channel, (float, int)):
                     sigma.append(random.uniform(self.min_sigma, channel))
                 else:
-                    sigma.append(tuple([random.uniform(self.min_sigma, channel) for i in range(len(channel))]))
+                    sigma.append(tuple([random.uniform(self.min_sigma, channel[i]) for i in range(len(channel))]))
         return {"sigma": sigma}
 
 
@@ -1344,7 +1345,7 @@ class RandomGamma(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, gamma_limit: Tuple[float] = (0.8, 1.2),
+    def __init__(self, gamma_limit: TypePairFloat = (0.8, 1.2),
                  always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.gamma_limit = gamma_limit
@@ -1392,7 +1393,9 @@ class RandomBrightnessContrast(ImageOnlyTransform):
         Targets:
             image
     """
-    def __init__(self, brightness_limit=0.2, contrast_limit=0.2, always_apply=False, p=0.5,):
+    def __init__(self, brightness_limit: Union[float, TypePairFloat] = 0.2,
+                 contrast_limit: Union[float, TypePairFloat] = 0.2,
+                 always_apply: bool = False, p: float = 0.5):
         super().__init__(always_apply, p)
         self.brightness_limit = to_tuple(brightness_limit)
         self.contrast_limit = to_tuple(contrast_limit)
@@ -1443,16 +1446,15 @@ class Pad(DualTransform):
     """Pads the input.
 
         Args:
-            pad_size (int | Tuple[int] | List[int | Tuple[int]]): Number of pixels padded to the edges of each axis.
+            pad_size (int | Tuple[int]): Number of pixels padded to the edges of each axis.
 
-                Must be either of: ``P``, ``(P1, P2)``, ``[P_Z, P_Y, P_X]``, or
-                ``[(P_Z1, P_Z2), (P_Y1, P_Y2), (P_X1, P_X2)]``.
+                Must be either of: ``P``, ``(P1, P2)``, or ``(P_Z1, P_Z2, P_Y1, P_Y2, P_X1, P_X2)``.
 
-                If an integer, it is equivalent to ``[(P, P), (P, P), (P, P)]``.
+                If an integer, it is equivalent to ``(P, P, P, P, P, P)``.
 
-                If a tuple, it is equivalent to ``[(P1, P2), (P1, P2), (P1, P2)]``.
+                If a tuple of two numbers, it is equivalent to ``(P1, P2, P1, P2, P1, P2)``.
 
-                If a list, it must specify padding for all spatial dimensions.
+                Otherwise, it must specify padding for all spatial dimensions.
 
                 The unspecified dimensions (C and T) are not affected.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
@@ -1482,8 +1484,8 @@ class Pad(DualTransform):
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, pad_size: Union[int, Tuple[int],  List[Union[int, Tuple[int]]]], border_mode: str = 'constant',
-                 ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
+    def __init__(self, pad_size: Union[int, TypePairInt, TypeSextetInt],
+                 border_mode: str = 'constant', ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = True, p : float = 1):
         super().__init__(always_apply, p)
         self.pad_size: TypeSextetInt = parse_pads(pad_size)
@@ -1516,12 +1518,14 @@ class Normalize(ImageOnlyTransform):
         Args:
             mean (float | List[float], optional): The desired channel-wise means.
 
-                Must be either of: ``M``, ``[M_1, M_2, ..., M_C]``.
+                Must be either of: ``M`` (for single-channel images),
+                ``[M_1, M_2, ..., M_C]`` (for multi-channel images).
 
                 Defaults to ``0``.
             std (float | List[float], optional): The desired channel-wise standard deviations.
 
-                Must be either of: ``S``, ``[S_1, S_2, ..., S_C]``.
+                Must be either of: ``S`` (for single-channel images),
+                ``[S_1, S_2, ..., S_C]`` (for multi-channel images).
 
                 Defaults to ``1``.
             always_apply (bool, optional): Always apply this transformation in composition. 
