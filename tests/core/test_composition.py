@@ -73,6 +73,31 @@ class TestComposeConversion(unittest.TestCase):
             NormalizeMeanStd(mean=35.27, std=27.42, always_apply=True)  # normalize voxel values
         ], img_keywords=('image',), mask_keywords = ('mask', 'centers'), fmask_keywords = ('weights',))
 
+    def test_value_targets(self):
+        from bio_volumentations import Compose, RandomScale, RandomCrop, RandomFlip, RandomBrightnessContrast, \
+            RandomGaussianBlur, NormalizeMeanStd
+
+        augmentation_pipeline = Compose([
+            RandomScale(scaling_limit=(1.1, 1.6, 0.4, 0.6, 0.4, 0.6), always_apply=True),
+            # match the size of nuclei in target data: enlarge in z axis and shrink in x and y axes
+            RandomCrop(shape=(32, 320, 320), always_apply=True),  # crop to the desired model input shape
+            RandomFlip(axes_to_choose=None, p=1),  # random flipping
+            RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, always_apply=True),
+            # match intensity characteristics of the target data
+            RandomGaussianBlur(max_sigma=(1, 1.5, 1.5), p=0.8),  # match the noise/blur characteristics
+            NormalizeMeanStd(mean=35.27, std=27.42, always_apply=True)  # normalize voxel values
+        ], value_keywords=('val1', 'val2'))
+
+        value_num = 2
+        value_str = 'Some nice image of only ones.'
+        input_dict = {'image': np.ones((100, 400, 400)), 'val1': value_num, 'val2': value_str}
+
+        output_dict = augmentation_pipeline(**input_dict)
+
+        self.assertTupleEqual(output_dict['image'].shape, (1, 32, 320, 320))
+        self.assertEqual(output_dict['val1'], value_num)
+        self.assertEqual(output_dict['val2'], value_str)
+
 
 if __name__ == '__main__':
     unittest.main()

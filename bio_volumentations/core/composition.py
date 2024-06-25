@@ -81,7 +81,7 @@ class Compose:
 
         value_keywords (Tuple[str], optional): List of `value` target names.
 
-            Defaults to ``('class_value',)``.
+            Defaults to ``('value',)``.
 
         conversion (Transform | None, optional): Image datatype conversion transform, applied after the transformations.
 
@@ -94,7 +94,7 @@ class Compose:
                  fmask_keywords=('float_mask',),
                  keypoints_keywords=('keypoints',),
                  bboxes_keywords=('bboxes',),
-                 value_keywords=('class_value',),
+                 value_keywords=('value',),
                  conversion=None):
 
         assert 0 <= p <= 1
@@ -130,5 +130,8 @@ class Compose:
         return data
 
     def __repr__(self):
-        return f'Compose({self.transforms[2:-2]}, {self.p}, {self.targets}, {self.transforms[-1]})'
+        return f'Compose({self.transforms[2:-2]}, {self.p}, {self.targets["img_keywords"]}, ' \
+               f'{self.targets["mask_keywords"]}, {self.targets["fmask_keywords"]}, ' \
+               f'{self.targets["keypoint_keywords"]}, {self.targets["bbox_keywords"]}, ' \
+               f'{self.targets["value_keywords"]}, {self.transforms[-1]})'
 

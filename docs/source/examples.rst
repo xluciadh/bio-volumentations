@@ -45,10 +45,12 @@ The shape of the output image will be either [C, Z, Y, X] (for cases 1 & 2) or [
 
 The images are type-casted to a floating-point datatype before being transformed, irrespective of their actual datatype.
 
-For the specification of image annotation conventions, please see below.
+For the specification of image annotation conventions, please see
+`the respective sections below <https://biovolumentations.readthedocs.io/1.2.0/examples.html#example-transforming-images-with-annotations>`_.
 
 The transformations are implemented as callable classes inheriting from an abstract :class:`Transform` class.
 Upon instantiating a transformation object, one has to specify the parameters of the transformation.
+
 All transformations work in a fully 3D fashion. Individual channels and time points of a data volume
 are usually transformed separately and in the same manner; however, certain transformations can also work
 along these dimensions. For instance, :class:`GaussianBlur` can perform the blurring along the temporal dimension and
@@ -75,13 +77,13 @@ and then feed a list of these transformations into a new :class:`Compose` object
 Optionally, you can specify a datatype conversion transformation that will be applied after the last transformation
 in the list, for example from the default :class:`numpy.ndarray` to a PyTorch :class:`torch.Tensor`.
 You can also specify the probability of applying the whole pipeline as a number between 0 and 1.
-The default probability is 1 - the pipeline is applied for each call. See the
+The default probability is 1; the pipeline is applied for each call. See the :class:`Compose`
 `docs <https://biovolumentations.readthedocs.io/1.2.0/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
 for more details.
 
 Note: You can also toggle the probability of applying the individual transforms. To do so, you can
 use the parameters :class:`p` and :class:`always_apply` when instantiating the transformation objects.
-If :class:`always_apply == True`, the transformation is applied every time the pipeline is called;
+If :class:`always_apply==True`, the transformation is applied every time the pipeline is called;
 otherwise, it is applied with probability :class:`p`, which must be a number between 0 and 1.
 
 The :class:`Compose` object is callable. The data is passed as keyword arguments, and the call returns a dictionary
@@ -119,8 +121,8 @@ To that end, `Bio-Volumentations` define several target types:
 - :class:`image` for the image data (:class:`numpy.ndarray` with floating-point datatype);
 - :class:`mask` for integer-valued label images (:class:`numpy.ndarray` with integer datatype);
 - :class:`float_mask` for real-valued label images (:class:`numpy.ndarray` with floating-point datatype);
-- :class:`value` for scalar values (a floating-point number); and
-- :class:`keypoints` for a list of key points (a list of tuples).
+- :class:`keypoints` for a list of key points (a list of tuples); and
+- :class:`value` for any non-transformed data.
 
 Apart from these, a :class:`bounding_boxes` target type is defined but not implemented yet.
 
@@ -132,12 +134,12 @@ If you want to use a multi-channel :class:`mask` or :class:`float_mask`, you hav
 a set of single-channel :class:`mask` s or :class:`float_mask` s, respectively, and input them
 as stand-alone targets (see below how to transform multiple masks per image).
 
-The :class:`value` target can hold image-level numerical information, such as a classification label.
-Its value does not change during the transformation process.
-
 The :class:`keypoints` target is represented as a list of tuples. Each tuple represents
 the absolute coordinates of a keypoint in the volume, so it must contain either 3 or 4 numbers
 (for volumetric and time-lapse volumetric data, respectively).
+
+The :class:`value` target can hold any other data whose value does not change during the transformation process.
+This can be for example image-level information such as a classification labels.
 
 If a :class:`Random...` transform receives multiple targets on its input in a single call,
 the same transformation parameters are used to transform all of these targets.
@@ -151,7 +153,7 @@ for more details.
 
 The corresponding targets are fed to the :class:`Compose` object call as keyword arguments and extracted from the outputted
 dictionary using the same keys. The default key values are :class:`'image'`, :class:`'mask'`, :class:`'float_mask'`,
-:class:`'keypoints'`, :class:`'bboxes'`, and :class:`'class_value'`.
+:class:`'keypoints'`, :class:`'bboxes'`, and :class:`'value'`.
 
 .. code-block:: python
 
@@ -194,8 +196,8 @@ Otherwise, the keywords can be any valid dictionary keys, and they must be uniqu
 You do not need to use all specified keywords in a transformation call. However, at least the target with
 the :class:`'image'` keyword must be present in each transformation call.
 In our example below, there are seven target keywords defined: four keywords defined explicitly (two for :class:`image`,
-one for :class:`mask`, and one for :class:`float_mask`) and three defined implicitly (for :class:`value`,
-:class:`keypoints`, and :class:`bounding_boxes`), but we only transform three targets.
+one for :class:`mask`, and one for :class:`float_mask`) and three defined implicitly (for :class:`keypoints`,
+:class:`bounding_boxes`, and :class:`value`), but we only transform three targets.
 
 You cannot define your own target types; that would require re-implementing all existing transforms.
 

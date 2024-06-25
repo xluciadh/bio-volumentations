@@ -132,8 +132,8 @@ To that end, `Bio-Volumentations` define several target types:
 - `image` for the image data;
 - `mask` for integer-valued label images;
 - `float_mask` for real-valued label images;
-- `value` for scalar values; and
-- `keypoints` for a list of key points.
+- `keypoints` for a list of key points; and
+- `value` for non-transformed values.
 
 For more information on the format of individual target types, see the 
 [Getting Started guide](https://biovolumentations.readthedocs.io/1.2.0/examples.html#example-transforming-images-with-annotations)
@@ -147,7 +147,7 @@ and leave the `mask` and `float_mask` targets unchanged. Please consult the
 [documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.2.0/modules.html) for more details.
 
 The corresponding targets are fed to the `Compose` object call as keyword arguments and extracted from the outputted
-dictionary using the same keys. The default key values are `'image'`, `'mask'`, `'float_mask'`, `'class_value'`, and `'keypoints'`.
+dictionary using the same keys. The default key values are `'image'`, `'mask'`, `'float_mask'`, `'keypoints'`, and `'value'`.
 
 ```python
 import numpy as np
