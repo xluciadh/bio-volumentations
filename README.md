@@ -36,22 +36,22 @@ See [the project's PyPI page](https://pypi.org/project/bio-volumentations/) for 
 
 ### The First Example
 
-To check out our library, you can run the example pipeline provided in the `example` folder.
+To check out our library on test data, you can run the example provided in the `example` folder.
 
-There, you will find a test sample consisting of a 3D image (`image.tif`) and an associated binary mask
+There, you will find a test sample consisting of a 3D image (`image.tif`) with an associated binary mask
 (`segmentation_mask.tif`), a runnable Python script, and the transformed sample (`image_transformed.tif` and 
 `segmentation_mask_transformed.tif`).
 
-To run the example, please install `bio-volumentations` and the `tiffile` and `imagecodecs` packages.
-Then run the script from command line using:
+To run the example, please install to your Python `bio-volumentations`, the `tiffile` and `imagecodecs` packages.
+Then run the following script from the command line:
 
 ```commandline
 cd example
 python transformation_example.py
 ```
 
-This will generate a new randomly transformed sample and save it into the `image_transformed.tif` and 
-`segmentation_mask_transformed.tif` files. All tiff files can be opened using ImageJ.
+The script will generate a new randomly transformed sample and save it into the `image_transformed.tif` and 
+`segmentation_mask_transformed.tif` files. These files can be opened using ImageJ.
 
 This example uses data from the _Fluo-N3DH-CE_ dataset [1] from the Cell Tracking Challenge repository [2].
 
