@@ -18,7 +18,7 @@ Therefore, it can easily be adopted by developers.
 # Installation
 
 Install the package from pip using:
-```python
+```commandline
 pip install bio-volumentations
 ```
 
@@ -33,6 +33,34 @@ See [the project's PyPI page](https://pypi.org/project/bio-volumentations/) for 
 
 
 # Usage
+
+### The First Example
+
+To check out our library on test data, you can run the example provided in the `example` folder.
+
+There, you will find a test sample consisting of a 3D image (`image.tif`) with an associated binary mask
+(`segmentation_mask.tif`), a runnable Python script, and the transformed sample (`image_transformed.tif` and 
+`segmentation_mask_transformed.tif`).
+
+To run the example, please install to your Python `bio-volumentations`, the `tiffile` and `imagecodecs` packages.
+Then run the following script from the command line:
+
+```commandline
+cd example
+python transformation_example.py
+```
+
+The script will generate a new randomly transformed sample and save it into the `image_transformed.tif` and 
+`segmentation_mask_transformed.tif` files. These files can be opened using ImageJ.
+
+This example uses data from the _Fluo-N3DH-CE_ dataset [1] from the Cell Tracking Challenge repository [2].
+
+[1] Murray, J., Bao, Z., Boyle, T. et al. Automated analysis of embryonic gene expression with cellular 
+resolution in _C. elegans_. _Nat Methods_ **5**, 703–709 (2008). https://doi.org/10.1038/nmeth.1228.
+
+[2] Maška, M., Ulman, V., Delgado-Rodriguez, P. et al. The Cell Tracking Challenge: 10 years of objective 
+benchmarking. _Nat Methods_ **20**, 1010–1020 (2023). https://doi.org/10.1038/s41592-023-01879-y.
+Repository: https://celltrackingchallenge.net/3d-datasets/.
 
 ### Importing
 
