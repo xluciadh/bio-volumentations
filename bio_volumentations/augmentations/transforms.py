@@ -1551,6 +1551,195 @@ class Normalize(ImageOnlyTransform):
         return f'Normalize({self.mean}, {self.std}, {self.always_apply}, {self.p})'
 
 
+class Rescale(DualTransform):
+    """ Rescales input and changes its shape accordingly.
+
+        Internally, the ``skimage.transform.resize`` function is used.
+        The ``interpolation``, ``border_mode``, ``ival``, ``mval``,
+        and ``anti_aliasing_downsample`` arguments are forwarded to it. More details at:
+        https://scikit-image.org/docs/stable/api/skimage.transform.html#skimage.transform.resize.
+
+        Args:
+            scales (float|List[float], optional): Value by which the input should be scaled.
+
+                Must be either of: ``S``, ``[S_Z, S_Y, S_X]``.
+
+                If a float, then all spatial dimensions are scaled by it (equivalent to ``[S, S, S]``).
+
+                The unspecified dimensions (C and T) are not affected.
+
+                Defaults to ``1``.
+            interpolation (int, optional): Order of spline interpolation.
+
+                Defaults to ``1``.
+            border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+                Defaults to ``'reflect'``.
+            ival (float, optional): Value of `image` voxels outside of the `image` domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            mval (float, optional): Value of `mask` and `float_mask` voxels outside of the domain. Only applied when ``border_mode = 'constant'``.
+
+                Defaults to ``0``.
+            anti_aliasing_downsample (bool, optional): Controls if the Gaussian filter should be applied before
+                downsampling. Recommended.
+
+                Defaults to ``True``.
+            ignore_index (float | None, optional): If a float, then transformation of `mask` is done with
+                ``border_mode = 'constant'`` and ``mval = ignore_index``.
+
+                If ``None``, this argument is ignored.
+
+                Defaults to ``None``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``True``.
+            p (float, optional): Chance of applying this transformation in composition.
+
+                Defaults to ``1``.
+
+        Targets:
+            image, mask, float mask, key points, bounding boxes
+        """
+
+    def __init__(self, scales=1, interpolation: int = 1, border_mode: str = 'reflect', ival: float = 0,
+                 mval: float = 0, anti_aliasing_downsample: bool = True, ignore_index=None,
+                 always_apply: bool = True, p: float = 1, **kwargs):
+        super().__init__(always_apply, p)
+        self.scale = parse_coefs(scales, identity_element=1.)
+        self.interpolation = interpolation
+        self.border_mode = border_mode
+        self.mask_mode = border_mode
+        self.ival = ival
+        self.mval = mval
+        self.anti_aliasing_downsample = anti_aliasing_downsample
+        if not (ignore_index is None):
+            self.mask_mode = "constant"
+            self.mval = ignore_index
+
+    def apply(self, img, **params):
+        return F.resize(img, input_new_shape=params['new_shape'], interpolation=self.interpolation, cval=self.ival,
+                        border_mode=self.border_mode, anti_aliasing_downsample=self.anti_aliasing_downsample)
+
+    def apply_to_mask(self, mask, **params):
+        return F.resize(mask, input_new_shape=params['new_shape'], interpolation=0, cval=self.mval,
+                        border_mode=self.mask_mode, anti_aliasing_downsample=False, mask=True)
+
+    def apply_to_float_mask(self, mask, **params):
+        return F.resize(mask, input_new_shape=params['new_shape'], interpolation=self.interpolation, cval=self.mval,
+                        border_mode=self.mask_mode, anti_aliasing_downsample=False, mask=True)
+
+    def apply_to_keypoints(self, keypoints, **params):
+        return F.resize_keypoints(keypoints,
+                                  domain_limit=params['domain_limit'],
+                                  new_shape=params['new_shape'])
+
+    """
+    def apply_to_bboxes(self, bboxes, **params):
+        for bbox in bboxes:
+            new_bbox = F.resize_keypoints(bbox,
+                                          input_new_shape=params['new_shape'],
+                                          original_shape=params['original_shape'],
+                                          keep_all=True)
+
+            if validate_bbox(bbox, new_bbox, min_overlay_ratio):
+                res.append(new_bbox)
+
+        return res
+    """
+
+    def get_params(self, **data):
+        # read shape of the original image
+        domain_limit: TypeSpatioTemporalCoordinate = get_spatio_temporal_domain_limit(data)
+
+        # compute shape of the resize dimage
+        # TODO +(0,) because of the F.resize error/hotfix
+        new_shape = tuple(np.asarray(domain_limit[:3]) * np.asarray(self.scale)) + (0,)
+
+        return {
+            "domain_limit": domain_limit,
+            "new_shape": new_shape,
+        }
+
+    def __repr__(self):
+        return f'Rescale({self.scale}, {self.interpolation}, {self.border_mode} , {self.ival}, {self.mval},' \
+               f'{self.anti_aliasing_downsample}, {self.always_apply}, {self.p})'
+
+
+class RemoveBackgroundGaussian(ImageOnlyTransform):
+    """
+    Removes background by subtracting a blurred image from the original image.
+
+    The background image is created using Gaussian blurring. In case of a multi-channel image, individual channels
+    are blured separately.
+
+    Internally, the ``scipy.ndimage.gaussian_filter`` function is used. The ``border_mode`` and ``cval``
+    arguments are forwarded to it. More details at:
+    https://docs.scipy.org/doc/scipy/reference/generated/scipy.ndimage.gaussian_filter.html.
+
+    Args:
+        sigma (float, Tuple(float), List[Tuple(float) | float] , optional): Gaussian sigma.
+
+            Must be either of: ``S``, ``(S_Z, S_Y, S_X)``, ``(S_Z, S_Y, S_X, S_T)``, ``[S_1, S_2, ..., S_C]``,
+            ``[(S_Z1, S_Y1, S_X1), (S_Z2, S_Y2, S_X2), ..., (S_ZC, S_YC, S_XC)]``, or
+            ``[(S_Z1, S_Y1, S_X1, S_T1), (S_Z2, S_Y2, S_X2, S_T2), ..., (S_ZC, S_YC, S_XC, S_TC)]``.
+
+            If a float, the spatial dimensions are blurred with the same strength (equivalent to ``(S, S, S)``).
+
+            If a tuple, the sigmas for spatial dimensions and possibly the time dimension must be specified.
+
+            If a list, sigmas for each channel must be specified either as a single number or as a tuple.
+
+            Defaults to ``10``.
+        mode (str, optional): How to compute the background and remove it. Possible values:
+            ``'default'`` (subtract blurred image from the input image),
+            ``'bright_objects'`` (subtract the point-wise minimum of (blurred image, input image) from the input image),
+            ``'dark_objects'`` (subtract the input image from the point-wise maximum of (blurred image, input image)).
+
+            Defaults to ``'default'``.
+        border_mode (str, optional): Values outside image domain are filled according to this mode.
+
+            Defaults to ``'reflect'``.
+        cval (float, optional): Value to fill past edges of image. Only applied when ``border_mode = 'constant'``.
+
+            Defaults to ``0``.
+        always_apply (bool, optional): Always apply this transformation in composition.
+
+            Defaults to ``True``.
+        p (float, optional): Chance of applying this transformation in composition.
+
+            Defaults to ``1.0``.
+
+    Targets:
+        image
+    """
+
+    def __init__(self, sigma: Union[float, tuple, List[Union[tuple, float]]] = 10, mode: str = 'default',
+                 border_mode: str = "reflect", cval: float = 0,
+                 always_apply: bool = True, p: float = 1.0):
+
+        super().__init__(always_apply, p)
+        self.sigma = sigma
+        self.mode = mode
+        self.border_mode = border_mode
+        self.cval = cval
+
+    def apply(self, img, **params):
+        background = F.gaussian_blur(img, self.sigma, self.border_mode, self.cval)
+
+        if self.mode == 'bright_objects':
+            return img - np.minimum(background, img)
+
+        if self.mode == 'dark_objects':
+            return np.maximum(background, img) - img
+
+        return img - background
+
+    def __repr__(self):
+        return f'RemoveBackgroundGaussian({self.sigma}, {self.mode}, {self.border_mode} , {self.cval}, ' \
+               f'{self.always_apply}, {self.p})'
+
+
 class Contiguous(DualTransform):
     """Transform the image data to a contiguous array.
 

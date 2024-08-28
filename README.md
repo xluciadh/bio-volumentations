@@ -304,6 +304,7 @@ NormalizeMeanStd
 Local transformations:
 ```python
 GaussianBlur 
+RemoveBackgroundGaussian
 RandomGaussianBlur
 ```
 
@@ -312,6 +313,7 @@ Geometrical transformations:
 AffineTransform
 Resize 
 Scale
+Rescale
 Flip 
 CenterCrop 
 Pad
