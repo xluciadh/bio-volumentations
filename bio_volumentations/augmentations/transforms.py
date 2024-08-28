@@ -163,7 +163,7 @@ class Resize(DualTransform):
 
 
 class Scale(DualTransform):
-    """Rescale input by the given scale.
+    """Rescale the input image content by the given scale. Image shape remains unchanged.
 
         Args:
             scales (float|List[float], optional): Value by which the input should be scaled.
@@ -290,7 +290,7 @@ class Scale(DualTransform):
 
 
 class RandomScale(DualTransform):
-    """Randomly rescale input.
+    """Randomly rescale the input image content by the given scale. Image shape remains unchanged.
 
         Args:
             scaling_limit (float | Tuple[float], optional): Limits of scaling factors.
@@ -783,7 +783,7 @@ class RandomCrop(DualTransform):
 
 
 class RandomAffineTransform(DualTransform):
-    """Affine transformation of the input image with randomly chosen parameters.
+    """Affine transformation of the input image with randomly chosen parameters. Image shape remains unchanged.
 
         Args:
             angle_limit (Tuple[float] | float, optional): Intervals in degrees from which angles of
@@ -956,7 +956,7 @@ class RandomAffineTransform(DualTransform):
 
 
 class AffineTransform(DualTransform):
-    """Affine transformation of the input image with given parameters.
+    """Affine transformation of the input image with given parameters. Image shape remains unchanged.
 
         Args:
             angles (Tuple[float], optional): Angles of rotation for the spatial axes.
