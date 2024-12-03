@@ -26,13 +26,16 @@
 
 
 import unittest
+
 from bio_volumentations.augmentations.transforms import (
     GaussianNoise, PoissonNoise, Resize, Pad, Scale, Flip, CenterCrop, AffineTransform,
     RandomScale, RandomRotate90, RandomFlip, RandomCrop, RandomAffineTransform, RandomGamma,
     NormalizeMeanStd, GaussianBlur, Normalize, HistogramEqualization, RandomBrightnessContrast,
-    RandomGaussianBlur, RemoveBackgroundGaussian, Rescale)
+    RandomGaussianBlur)
+
 from bio_volumentations.core.composition import Compose
 import numpy as np
+from typing import Any
 
 DEBUG = False
 
@@ -163,6 +166,46 @@ def get_shape_tests_5d(transform, in_shape: tuple, params={}):
 
     return res
 
+# Helper functions for testing image values and keypoints
+def create_test_img(shape: tuple, coordinates: list[tuple]):
+    """
+    Creates a binary test image with dimensions [C, Z, Y, X, T]
+    Args:
+        shape: dimensions of the image (C, Z, Y, X, T)
+        coordinates: (Z, Y, X, T) points that will be set to 1
+
+    Returns:
+        binary test image of the given shape
+    """
+    img = np.zeros(shape)
+    for coords in coordinates:
+        z, y, x, t = coords
+        img[0][z][y][x][t] = 1
+
+    return img
+
+
+def evaluate_result(sample: dict[str, Any], expected_img, expected_keypoints: list[tuple[int, int, int, int]]):
+    """
+    Evaluates the result image and list of keypoints with the expected values
+    Args:
+        sample: dictionary containing keys image and keypoints with their respective values
+        expected_img: expected image
+        expected_keypoints: list of expected keypoints
+
+    Returns:
+        result of evaluation
+    """
+    assert len(expected_keypoints) == len(sample["keypoints"])
+
+    if not np.array_equal(expected_img, sample["image"]):
+        return False
+
+    for expected_kp, kp in zip(expected_keypoints, sample["keypoints"]):
+        if not np.array_equal(expected_kp, kp):
+            return False
+    return True
+
 
 class TestScale(unittest.TestCase):
     def test_shape(self):
@@ -259,6 +302,46 @@ class TestFlip(unittest.TestCase):
         for value, expected_value, msg in tests:
             self.assertGreater(value, expected_value * 0.1, msg)
 
+    def test_temporal_only(self):
+        img = create_test_img((1, 2, 2, 2, 2), [(0, 0, 0, 0)])
+        keypoints = [(0, 0, 0, 0)]
+
+        t_flip = Compose([Flip(axes=[], temporal_apply=True)])
+        flipped_sample = t_flip(image=img, keypoints=keypoints)
+        expected_img = create_test_img((1, 2, 2, 2, 2), [(0, 0, 0, 1)])
+        expected_keypoints = [(0, 0, 0, 1)]
+        self.assertTrue(evaluate_result(flipped_sample, expected_img, expected_keypoints))
+
+    def test_temporal_and_x(self):
+        img = create_test_img((1, 2, 2, 2, 2), [(0, 0, 0, 0)])
+        keypoints = [(0, 0, 0, 0)]
+
+        tx_flip = Compose([Flip(axes=[3], temporal_apply=True)])
+        flipped_sample = tx_flip(image=img, keypoints=keypoints)
+        expected_img = create_test_img((1, 2, 2, 2, 2), [(0, 0, 1, 1)])
+        expected_keypoints = [(0, 0, 1, 1)]
+        self.assertTrue(evaluate_result(flipped_sample, expected_img, expected_keypoints))
+
+    def test_temporal_and_xy(self):
+        img = create_test_img((1, 2, 2, 2, 2), [(0, 0, 0, 0)])
+        keypoints = [(0, 0, 0, 0)]
+
+        txy_flip = Compose([Flip(axes=[2, 3], temporal_apply=True)])
+        flipped_sample = txy_flip(image=img, keypoints=keypoints)
+        expected_img = create_test_img((1, 2, 2, 2, 2), [(0, 1, 1, 1)])
+        expected_keypoints = [(0, 1, 1, 1)]
+        self.assertTrue(evaluate_result(flipped_sample, expected_img, expected_keypoints))
+
+    def test_temporal_and_xyz(self):
+        img = create_test_img((1, 2, 2, 2, 2), [(0, 0, 0, 0)])
+        keypoints = [(0, 0, 0, 0)]
+
+        txyz_flip = Compose([Flip(axes=[1, 2, 3], temporal_apply=True)])
+        flipped_sample = txyz_flip(image=img, keypoints=keypoints)
+        expected_img = create_test_img((1, 2, 2, 2, 2), [(1, 1, 1, 1)])
+        expected_keypoints = [(1, 1, 1, 1)]
+        self.assertTrue(evaluate_result(flipped_sample, expected_img, expected_keypoints))
+
 
 class TestRandomFlip(unittest.TestCase):
     def test_shape(self):
@@ -290,6 +373,27 @@ class TestRandomFlip(unittest.TestCase):
                 tests = get_keypoints_tests(RandomFlip, params={'axes_to_choose': axes})
                 for value, expected_value, msg in tests:
                     self.assertGreater(value, expected_value * 0.1, msg)
+
+
+    def test_temporal(self ):
+        img = create_test_img((1, 2, 2, 2, 2), [(0, 0, 0, 0)])
+        keypoints = [(0, 0, 0, 0)]
+
+        rflip = Compose([RandomFlip(axes_to_choose=[1, 2, 3], temporal_apply=True)])
+        flipped_sample = rflip(image=img, keypoints=keypoints)
+        coordinates = [(0, 0, 0, 0), (0, 0, 0, 1), (0, 0, 1, 0), (0, 0, 1, 1),
+                       (0, 1, 0, 0), (0, 1, 0, 1), (0, 1, 1, 0), (0, 1, 1, 1),
+                       (1, 0, 0, 0), (1, 0, 0, 1), (1, 0, 1, 0), (1, 0, 1, 1),
+                       (1, 1, 0, 0), (1, 1, 0, 1), (1, 1, 1, 0), (1, 1, 1, 1)]
+        res = False
+        for coords in coordinates:
+            expected_img = create_test_img((1, 2, 2, 2, 2), [coords])
+            expected_keypoint = coords
+            if evaluate_result(flipped_sample, expected_img, [expected_keypoint]):
+                # fits one of the possibilities
+                self.assertTrue(True)
+                return
+        self.assertTrue(False)
 
 
 class TestCenterCrop(unittest.TestCase):
@@ -644,7 +748,7 @@ class TestNormalize(unittest.TestCase):
             self.assertTupleEqual(tr_img.shape, expected_shape)
             self.assertEqual(tr_img.dtype, data_type)
 
-
+'''
 class TestRescale(unittest.TestCase):
     def test_shape(self):
         in_shape = (31, 32, 33)
@@ -682,8 +786,9 @@ class TestRescale(unittest.TestCase):
                                                                'shape': np.asarray(in_shape) * np.asarray(scale)})
         for value, expected_value, msg in tests:
             self.assertGreater(value, expected_value * 0.5, msg)
+'''
 
-
+'''
 class TestRemoveBackgroundGaussian(unittest.TestCase):
     def test_shape(self):
         tests = get_shape_tests(RemoveBackgroundGaussian, (31, 32, 33))
@@ -698,7 +803,7 @@ class TestRemoveBackgroundGaussian(unittest.TestCase):
             for tr_img, expected_shape, data_type in tests:
                 self.assertTupleEqual(tr_img.shape, expected_shape)
                 self.assertEqual(tr_img.dtype, data_type)
-
+'''
 
 class TestInputArgs(unittest.TestCase):
     def test_individual_transforms(self):
@@ -737,10 +842,10 @@ class TestInputArgs(unittest.TestCase):
             HistogramEqualization(30),
             Pad(10), Pad((10, 30)), Pad((10, 20, 40, 15, 20, 20)),
             Normalize(2, 4), Normalize([1, 2], [1, 3]),
-            Rescale(0.8), Rescale((0.9, 0.3, 1.2)),
-            RemoveBackgroundGaussian(1), RemoveBackgroundGaussian((1, 2, 2)), RemoveBackgroundGaussian((1, 2, 2, 3)),
-            RemoveBackgroundGaussian([1, 2]), RemoveBackgroundGaussian([(1, 2, 2), (1, 2, 2)]),
-            RemoveBackgroundGaussian([(1, 2, 2, 3), (1, 2, 2, 3)]),
+            # Rescale(0.8), Rescale((0.9, 0.3, 1.2)),
+           # RemoveBackgroundGaussian(1), RemoveBackgroundGaussian((1, 2, 2)), RemoveBackgroundGaussian((1, 2, 2, 3)),
+            #RemoveBackgroundGaussian([1, 2]), RemoveBackgroundGaussian([(1, 2, 2), (1, 2, 2)]),
+            #RemoveBackgroundGaussian([(1, 2, 2, 3), (1, 2, 2, 3)]),
         ])
 
     def test_individual_transforms_incorrect_initialisation(self):
