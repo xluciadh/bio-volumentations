@@ -519,19 +519,24 @@ class Flip(DualTransform):
                 ``1`` for Z, ``2`` for Y, and ``3`` for X. If ``None``, will be flipped around all spatial axes.
 
                 Defaults to ``None``.
-            always_apply (bool, optional): Always apply this transformation in composition. 
-            
+            temporal_apply (bool, optional): Applies this transformation to the temporal dimension. To apply the
+                transformation to the temporal dimension only, set the axes argument to an empty list ([]).
+
+                Defaults to ``False``.
+            always_apply (bool, optional): Always apply this transformation in composition.
+
                 Defaults to ``False``.
             p (float, optional): Chance of applying this transformation in composition. 
-            
+
                 Defaults to ``1``.
 
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, axes: List[int] = None, always_apply=False, p=1):
+    def __init__(self, axes: List[int] = None, temporal_apply=False, always_apply=False, p=1):
         super().__init__(always_apply, p)
         self.axes = axes
+        self.temporal_apply = temporal_apply
 
     def apply(self, img, **params):
         return np.flip(img, params["axes"])
@@ -547,7 +552,12 @@ class Flip(DualTransform):
 
     def get_params(self, **data):
         axes = [1, 2, 3] if self.axes is None else self.axes
-        img_shape = np.array(data['image'].shape[1:4])
+        if self.temporal_apply:
+            axes.append(4)
+            img_shape = np.array(data['image'].shape[1:5])
+        else:
+            img_shape = np.array(data['image'].shape[1:4])
+
         return {"axes": axes,
                 "img_shape": img_shape}
 
@@ -567,6 +577,10 @@ class RandomFlip(DualTransform):
                 ``[(,), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]``.
 
                 Defaults to ``None``.
+            temporal_apply (bool, optional): Adds temporal dimension to the list of axis indices from which
+                one option is randomly chosen.
+
+                Defaults to ``False``.
             always_apply (bool, optional): Always apply this transformation in composition. 
             
                 Defaults to ``False``.
@@ -577,11 +591,12 @@ class RandomFlip(DualTransform):
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, always_apply=False, p=0.5):
+    def __init__(self, axes_to_choose: Union[None, List[Tuple[int]]] = None, temporal_apply=False, always_apply=False, p=0.5):
         super().__init__(always_apply, p)
 
         # TODO: check if input value `axes_to_choose` valid
         self.axes = axes_to_choose
+        self.temporal_apply = temporal_apply
 
     def apply(self, img, **params):
         return np.flip(img, params["axes"])
@@ -596,10 +611,14 @@ class RandomFlip(DualTransform):
                                 img_shape=params['img_shape'])
 
     def get_params(self, **data):
-        
         to_choose = [1, 2, 3] if self.axes is None else self.axes
+        if self.temporal_apply:
+            to_choose.append(4)
+            img_shape = np.array(data['image'].shape[1:5])
+        else:
+            img_shape = np.array(data['image'].shape[1:4])
+
         axes = random.sample(to_choose, random.randint(0, len(to_choose)))
-        img_shape = np.array(data['image'].shape[1:4])
         return {"axes": axes,
                 "img_shape": img_shape}
 

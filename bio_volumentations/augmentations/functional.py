@@ -209,19 +209,23 @@ def pad_keypoints(keypoints, pad_size):
 
 
 def flip_keypoints(keypoints, axes, img_shape):
+    dims = len(img_shape)  # either spatial(3) or temporal-spatial(4)
+    if dims == 3:
+        assert np.all(np.array([ax in [1, 2, 3] for ax in axes])), f'{axes} does not contain values from [1, 2, 3]'
+    elif dims == 4:
+        assert np.all(np.array([ax in [1, 2, 3, 4] for ax in axes])), f'{axes} does not contain values from [1, 2, 3, 4]'
+    else:
+        assert False, f'Wrong number of dimensions {dims}'
 
-    # all values in axes are in [1, 2, 3]
-    assert np.all(np.array([ax in [1, 2, 3] for ax in axes])), f'{axes} does not contain values from [1, 2, 3]'
-
-    mult, add = np.ones(3, int), np.zeros(3, int)
+    mult, add = np.ones(dims, int), np.zeros(dims, int)
     for ax in axes:
-        mult[ax-1] = -1
-        add[ax-1] = img_shape[ax-1] - 1
+        mult[ax - 1] = -1
+        add[ax - 1] = img_shape[ax - 1] - 1
 
     res = []
     for k in keypoints:
-        flipped = list(np.array(k[:3]) * mult + add)
-        if len(k) == 4:
+        flipped = list(np.array(k[:dims]) * mult + add)
+        if len(k) == 4 and dims == 3:  # 3d keypoint in
             flipped.append(k[-1])
         res.append(tuple(flipped))
     return res
