@@ -31,26 +31,24 @@ from bio_volumentations.augmentations import *
 
 import time
 
-size_sample = [(1, 64, 65, 66), (1, 128, 128, 128), (1, 256, 256, 256), (1, 512, 512, 64)]
+# size_sample = [(1, 256, 256, 256), (3, 256, 256, 256), (1, 256, 256, 256, 10), (3, 256, 256, 256, 10)]
+size_sample = [(1, 128, 128, 128)]
 
-size_sample = [(1, 64, 65, 66), (1, 128, 128, 128), (1, 256, 256, 256)]
+# num_repeat = 100
+num_repeat = 10
 
-
-
-# None are placeholders
 augmentations_to_check = [
-    RandomAffineTransform(angle_limit=[22.5, 22.5, 22.5], p=1),
+    # RandomAffineTransform(angle_limit=[22.5, 22.5, 22.5], p=1),
     RandomAffineTransform(angle_limit=[22.5, 22.5, 22.5],
                           translation_limit=[10, 10, 10],
                           scaling_limit=[.2, .2, .2],
                           spacing=[1, 0.5, 2],
                           p=1),
-    RandomScale(scaling_limit=(0.75, 1), p=1),
-    RandomScale(scaling_limit=(1, 1.5), p=1),
+    # RandomScale(scaling_limit=(0.75, 1), p=1),
+    # RandomScale(scaling_limit=(1, 1.5), p=1),
     Scale(scales=0.75, p=1),
-    Scale(scales=1.5, p=1)
-
-    # Flip(axes=[1, 2, 3], p=1),
+    Scale(scales=1.5, p=1),
+    Flip(axes=[1, 2, 3], p=1),
     # GaussianBlur(sigma=0, p=1),
     # GaussianNoise(var_limit=(0.001, 0.1), mean=0, p=1),
     # HistogramEqualization(bins=256, p=1),
@@ -62,54 +60,37 @@ augmentations_to_check = [
     # RandomGaussianBlur(max_sigma=0.8, p=1),
     # RandomRotate90(axes=[1, 2, 3] , p=1),
     # Scale(scale_factor=1.5, p=1),
-    # Scale(scale_factor=0.75, p=1),"""
+    # Scale(scale_factor=0.75, p=1),
 ]
 
 
-def get_augmentations(number: int, shape):
-    bigger_shape = (shape[1] * 1.5, shape[2] * 1.5, shape[3] * 1.5)
-    smaller_shape = (shape[1] * 0.75, shape[2] * 0.75, shape[3] * 0.75)
-    augmentations = [
-        CenterCrop(shape=bigger_shape, p=1),
-        CenterCrop(shape=smaller_shape, p=1),
-        RandomCrop(shape=bigger_shape, p=1),
-        RandomCrop(shape=smaller_shape, p=1),
-        Resize(bigger_shape, p=1),
-        Resize(smaller_shape, p=1),
-    ]
-    return augmentations[number]
-
-
-def single_transform(iterations, size, augumentation):
-    cummulative = 0
+def single_transform(iterations, size, augmentation):
+    cumulative = 0
     maximum = 0
     for i in range(iterations):
         test = np.random.uniform(low=0, high=1, size=size)
-        aug = Compose(transforms=[augumentation], p=1)
+        aug = Compose(transforms=[augmentation], p=1)
         data = {'image': test}
         second_time = time.time()
         aug_data = aug(**data)
         _ = aug_data['image'].shape
         time_spent = time.time() - second_time
-        cummulative += time_spent
+        cumulative += time_spent
         if time_spent > maximum:
             maximum = time_spent
-    return maximum, cummulative
-
-
-def augmentation_getter(augmentations, iteration):
-    if augmentations[iteration] is not None:
-        return augmentations[iteration]
+    return maximum, cumulative
 
 
 def transformation_speed_benchmark(iterations):
-    f = open("./100iterationCorrections_aff.txt", "w")
+    f = open(f"./runtime-{num_repeat}_iterations.txt", "w")
 
     for i, augmentation in enumerate(augmentations_to_check):  # random_scale_transform
+
+        # augmentation = augmentation_getter(augmentations_to_check, i, size)
+        aug_name = augmentation.__class__.__name__
+        print(aug_name)
+
         for size in size_sample:
-            # augumentation = augumentation_getter(augmentations_to_check, i, size)
-            aug_name = augmentation.__class__.__name__
-            print(aug_name)
             test_sample = np.random.uniform(low=0, high=1, size=size)
             test = test_sample.copy()
 
@@ -120,13 +101,14 @@ def transformation_speed_benchmark(iterations):
             first_result = time.time() - first_time
             maximum, cumulative = single_transform(iterations, size, augmentation)
             result_time = cumulative / iterations
-            f.write(f"Transform: {aug_name},  Size: {size}, FirstRun: {first_result:.3f}, " +
-                    f"Average: {result_time:.3f}, Iterations: {iterations}, maximum: {maximum:.3f} \n")
-            print(f"Transform: {aug_name},  Size: {size}, FirstRun: {first_result:.3f}, " +
-                    f"Average: {result_time:.3f}, Iterations: {iterations}, maximum: {maximum:.3f} \n")
+            log_message = f"Runtime in seconds. " \
+                          f"FirstRun: {first_result:.3f}, Average: {result_time:.3f}, Maximum: {maximum:.3f}. " \
+                          f"(Transform: {aug_name}, Iterations: {iterations}, ImageSize: {size})\n"
+            f.write(log_message)
+            print(log_message)
 
     f.close()
 
 
 if __name__ == '__main__':
-    transformation_speed_benchmark(10)
+    transformation_speed_benchmark(num_repeat)
