@@ -514,6 +514,54 @@ class TestPad(unittest.TestCase):
         for value, expected_value, msg in tests:
             self.assertGreater(value, expected_value * 0.5, msg)
 
+    def test_temporal_only(self):
+        img = np.ones((1, 1, 1, 1, 1))
+        keypoints = [(0, 0, 0, 0)]
+        p1, p2 = 1, 2
+
+        t_pad = Compose([Pad(pad_size=0, temporal_pad_size=(p1, p2))])
+        padded_sample = t_pad(image=img, keypoints=keypoints)
+
+        expected_img = create_test_img((1, 1, 1, 1,  p1 + 1 + p2), [(0, 0, 0, 1)])
+        expected_keypoints = [(0, 0, 0, 1)]
+        self.assertTrue(evaluate_result(padded_sample, expected_img, expected_keypoints))
+
+    def test_temporal_x(self):
+        img = np.ones((1, 1, 1, 1, 1))
+        keypoints = [(0, 0, 0, 0)]
+        p1, p2 = 1, 2
+
+        tx_pad = Compose([Pad(pad_size=(0, 0, 0, 0, 1, 2), temporal_pad_size=(p1, p2))])
+        padded_sample = tx_pad(image=img, keypoints=keypoints)
+
+        expected_img = create_test_img((1, 1, 1,  p1 + 1 + p2,  p1 + 1 + p2), [(0, 0, 1, 1)])
+        expected_keypoints = [(0, 0, 1, 1)]
+        self.assertTrue(evaluate_result(padded_sample, expected_img, expected_keypoints))
+
+
+    def test_temporal_xy(self):
+        img = np.ones((1, 1, 1, 1, 1))
+        keypoints = [(0, 0, 0, 0)]
+        p1, p2 = 1, 2
+
+        txy_pad = Compose([Pad(pad_size=(0, 0, 1, 2, 1, 2), temporal_pad_size=(p1, p2))])
+        padded_sample = txy_pad(image=img, keypoints=keypoints)
+        expected_img = create_test_img((1, 1,  p1 + 1 + p2,  p1 + 1 + p2, p1 + 1 + p2), [(0, 1, 1, 1)])
+        expected_keypoints = [(0, 1, 1, 1)]
+        self.assertTrue(evaluate_result(padded_sample, expected_img, expected_keypoints))
+
+    def test_temporal_xyz(self):
+        img = np.ones((1, 1, 1, 1, 1))
+        keypoints = [(0, 0, 0, 0)]
+        p1, p2 = 1, 2
+
+        txyz_pad = Compose([Pad(pad_size=(1, 2, 1, 2, 1, 2), temporal_pad_size=(p1, p2))])
+        padded_sample = txyz_pad(image=img, keypoints=keypoints)
+        expected_img = create_test_img((1,  p1 + 1 + p2,  p1 + 1 + p2,  p1 + 1 + p2,  p1 + 1 + p2),
+                                       [(1, 1, 1, 1)])
+        expected_keypoints = [(1, 1, 1, 1)]
+        self.assertTrue(evaluate_result(padded_sample, expected_img, expected_keypoints))
+
 
 class TestRandomAffineTransform(unittest.TestCase):
     def test_shape(self):
