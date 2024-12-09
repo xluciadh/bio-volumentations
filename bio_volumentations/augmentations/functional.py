@@ -47,7 +47,8 @@ from scipy.ndimage import zoom, gaussian_filter
 from warnings import warn
 from typing import Union
 
-from ..biovol_typing import TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSextetInt, TypeSpatialShape
+from ..biovol_typing import (TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSextetInt, TypeSpatialShape,
+                             TypeOctetInt)
 from .spatial_funcional import get_affine_transform, apply_sitk_transform
 from .utils import is_included
 
@@ -198,12 +199,12 @@ def pad(img, pad_width, border_mode, cval, mask=True):
     return result
 
 
-def pad_keypoints(keypoints, pad_size):
-    a, b, c, d, e, f = pad_size
+def pad_keypoints(keypoints, pad_size: TypeOctetInt):
+    a, _, b, _, c, _, d, _ = pad_size
 
     res = []
     for coo in keypoints:
-        padding = np.array((a, c, e)) if len(coo) == 3 else np.array((a, c, e, 0))
+        padding = np.array((a, b, c)) if len(coo) == 3 else np.array((a, b, c, d))
         res.append(coo + padding)
     return res
 
@@ -260,19 +261,19 @@ def transpose_keypoints(keypoints, ax1, ax2):
     return res
 
 
-def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=False):
+def pad_pixels(img, input_pad_width: TypeOctetInt, border_mode, cval, mask=False):
 
-    a, b, c, d, e, f = input_pad_width
+    a, b, c, d, e, f, g, h = input_pad_width
     pad_width = [(a, b), (c, d), (e, f)]
 
     # zeroes for channel dimension
     if not mask:
         pad_width = [(0, 0)] + pad_width
 
-    # zeroes for temporal dimension
+    # temporal padding
     if len(img.shape) == 5:
-        pad_width = pad_width + [(0, 0)]
-    
+        pad_width = pad_width + [(g, h)]
+
     if border_mode == "constant":
         return np.pad(img, pad_width, border_mode, constant_values=cval)
     if border_mode == "linear_ramp":

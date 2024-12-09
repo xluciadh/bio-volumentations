@@ -1475,7 +1475,18 @@ class Pad(DualTransform):
 
                 Otherwise, it must specify padding for all spatial dimensions.
 
-                The unspecified dimensions (C and T) are not affected.
+                The unspecified dimensions (C and T) are not affected. ``temporal_pad_size`` argument
+                is used to specify padding for T dimension.
+            temporal_pad_size (int | Tuple[int], optional): Number of pixels padded to the edges of the
+                temporal axis.
+
+                Must be either of: ``P`` or ``(P1, P2)``
+
+                If an integer, it is equivalent to ``(P, P)``
+
+                Otherwise, it must specify padding for temporal dimension ``(P1, P2)``
+
+                Defaults to ``0``
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'constant'``.
@@ -1504,10 +1515,13 @@ class Pad(DualTransform):
             image, mask, float mask, key points, bounding boxes
     """
     def __init__(self, pad_size: Union[int, TypePairInt, TypeSextetInt],
+                 temporal_pad_size: Union[int, TypePairInt] = 0,
                  border_mode: str = 'constant', ival: Union[float, Sequence] = 0, mval: Union[float, Sequence] = 0,
                  ignore_index: Union[float, None] = None, always_apply: bool = True, p : float = 1):
         super().__init__(always_apply, p)
         self.pad_size: TypeSextetInt = parse_pads(pad_size)
+        self.temporal_pad_size: TypePairInt = \
+            (temporal_pad_size, temporal_pad_size) if type(temporal_pad_size) is int else temporal_pad_size
         self.border_mode = border_mode
         self.mask_mode = border_mode 
         self.ival = ival
@@ -1518,13 +1532,13 @@ class Pad(DualTransform):
             self.mval = ignore_index
 
     def apply(self, img, **params):
-        return F.pad_pixels(img, self.pad_size, self.border_mode, self.ival)
+        return F.pad_pixels(img, self.pad_size + self.temporal_pad_size, self.border_mode, self.ival)
 
     def apply_to_mask(self, mask, **params):
-        return F.pad_pixels(mask, self.pad_size, self.mask_mode, self.mval, True)
+        return F.pad_pixels(mask, self.pad_size + self.temporal_pad_size, self.mask_mode, self.mval, True)
 
     def apply_to_keypoints(self, keypoints, **params):
-        return F.pad_keypoints(keypoints, self.pad_size)
+        return F.pad_keypoints(keypoints, self.pad_size + self.temporal_pad_size)
 
     def __repr__(self):
         return f'Pad({self.pad_size}, {self.border_mode}, {self.ival}, {self.mval}, {self.always_apply}, ' \
