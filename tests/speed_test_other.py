@@ -45,6 +45,7 @@ import volumentations
 
 # libs = ['biovol', 'torchio', 'volum', 'gunpowder', 'torchvision', 'album']
 libs = ['biovol', 'torchio', 'volum']
+# libs = ['volum']
 
 # num_repeat = 100
 num_repeat = 10
@@ -104,7 +105,7 @@ augmentations_volumentations = [
     [volumentations.RandomScale(scaling_limit[:2], p=1),
      volumentations.Rotate(x_limit=rotate_limit_vol, y_limit=rotate_limit_vol, z_limit=rotate_limit_vol, p=1)],
     # MISSING: anisotropic affine (or anisotropic anything)
-    volumentations.Blur(blur_limit=(3, 7), p=1),  # TODO: unclear meaning of param blur_limit; is it Gaussian?
+    # MISSING: implementation of Blur ... volumentations.Blur(blur_limit=(3, 7), p=1),  # TODO: unclear meaning of param blur_limit; is it Gaussian? / alternative: GlassBlur - but docs say it's noise + it isn't gaussian blur only
     volumentations.GaussianNoise(var_limit=noise_sigma_limits, mean=0, p=1),
     volumentations.RandomBrightnessContrast(brightness_limit=brightness_limit, contrast_limit=constrast_limit, p=1),
     volumentations.Normalize(range_norm=False, p=1),
@@ -153,7 +154,8 @@ def get_input_data(lib, shape):
         return {'image': np.random.uniform(low=0, high=1, size=shape)}
     if lib == 'torchio':
         # (C, W, H, D)
-        return np.random.uniform(low=0, high=1, size=shape.transpose((0, 3, 2, 1)))
+        shape_torchio = (shape[0], shape[3], shape[2], shape[1])  # np.asarray(shape).transpose((0, 3, 2, 1))
+        return np.random.uniform(low=0, high=1, size=shape_torchio)
     if lib == 'volum':
         # TODO shape
         return {'image': np.random.uniform(low=0, high=1, size=shape)}
@@ -182,19 +184,25 @@ def transform_data(lib, data, pipeline):
         pass
 
 
-def single_transform(iterations, size, augmentation, lib):
+def single_transform(iterations, shape, augmentation, lib):
     cumulative = 0
     maximum = 0
+
     for i in range(iterations):
-        test = np.random.uniform(low=0, high=1, size=size)
+        # prepare data and transformation pipeline
         transformation_pipeline = init_compose(lib, augmentation)
-        data = {'image': test}
+        data = get_input_data(lib, shape)
+
+        # run and measure
         t_0 = time.time()
         _ = transform_data(lib, data, transformation_pipeline)
         time_spent = time.time() - t_0
+
+        # accumulate time
         cumulative += time_spent
         if time_spent > maximum:
             maximum = time_spent
+
     return maximum, cumulative
 
 
@@ -206,23 +214,24 @@ def transformation_speed_benchmark(iterations):
 
         for i, augmentation in enumerate(get_transformation_list(lib)):
             aug_name = augmentation.__class__.__name__
+            if isinstance(augmentation, list):
+                aug_name = ''.join(['Composed'] + ['-' + a.__class__.__name__ for a in augmentation])
             print(aug_name)
 
             for shape in image_shape_list:
-                # prepare data and transformation pipeline
+
+                # the first run (prepare the environment)
                 transformation_pipeline = init_compose(lib, augmentation)
                 data = get_input_data(lib, shape)
-
-                # run once (prepare the environment)
                 first_time = time.time()
                 _ = transform_data(lib, data, transformation_pipeline)
                 first_result = time.time() - first_time
 
-                # run the measured tries
+                # the measured runs
                 maximum, cumulative = single_transform(iterations, shape, augmentation, lib)
                 result_time = cumulative / iterations
 
-                # log
+                # logging
                 log_message = f"Runtime in seconds. " \
                               f"FirstRun: {first_result:.3f}, Average: {result_time:.3f}, Maximum: {maximum:.3f}. " \
                               f"(Library: {lib}, Transform: {aug_name}, Iterations: {iterations}, ImageSize: {shape})\n"
