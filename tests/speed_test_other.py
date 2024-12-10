@@ -24,34 +24,38 @@
 # ============================================================================================= #
 
 import time
-
-import funlib.persistence
 import numpy as np
 
-# # bio-volumentations
-# import bio_volumentations.core.composition as biovol_compose
-# import bio_volumentations.augmentations as biovol
-#
-# # TorchIO: requires pytorch, torchIO (pip) (had networkx 2.8.8)
-# import torchio
-# # volumentations: with opencv (pip)
-# import volumentations
-# gunpowder: requires gunpowder (pip) (installed networkx 3.2.1), python>=3.10
-import gunpowder
-raw = gunpowder.ArrayKey('RAW')  # declare arrays to use in the pipeline
+# bio-volumentations
+import bio_volumentations.core.composition as biovol_compose
+import bio_volumentations.augmentations as biovol
 
-# torchvision: requires pytorch, torchvision
+# TorchIO: requires pytorch, torchIO (pip) (had networkx 2.8.8)
+import torchio
+# volumentations: with opencv (pip)
+import volumentations
+# # gunpowder: requires gunpowder (pip) (installed networkx 3.2.1), python>=3.10
+# import gunpowder
+# import funlib.persistence
+# raw = gunpowder.ArrayKey('RAW')  # declare arrays to use in the pipeline
+
+# # torchvision: requires pytorch, torchvision
 # import torchvision.transforms.v2 as torchvision_v2
-# albumentations: require albumentations
+# # albumentations: require albumentations
 # import albumentations
 
 
 # libs = ['biovol', 'torchio', 'volum', 'gunpowder', 'torchvision', 'album']
-# libs = ['volum', 'biovol', 'torchio']
-libs = ['gunpowder']
+libs = ['volum', 'biovol', 'torchio']
+# libs = ['gunpowder']
 
-# num_repeat = 100
-num_repeat = 10
+num_repeat = 100
+# num_repeat = 10
+
+if 'gunpowder' in libs[0]:
+    out_file_name = f"./runtime-{num_repeat}_iterations-gunpowder.txt"
+else:
+    out_file_name = f"./runtime-{num_repeat}_iterations-all-1.txt"
 
 
 # image_shape_list = [(1, 256, 256, 256), (3, 256, 256, 256), (1, 256, 256, 256, 10), (3, 256, 256, 256, 10)]
@@ -110,8 +114,8 @@ def get_transformation_list(lib):
             volumentations.PadIfNeeded(shape=pad_shape, border_mode='constant', p=1),  # TODO only pad ??
             volumentations.Flip(axis=None, p=1),  # this is random variant (no deterministic exists)
             # MISSING: affine and translation -> using a sequence of rotation and scale at least
-            [volumentations.RandomScale(scaling_limit[:2], p=1),
-             volumentations.Rotate(x_limit=rotate_limit_vol, y_limit=rotate_limit_vol, z_limit=rotate_limit_vol, p=1)],
+            [volumentations.Rotate(x_limit=rotate_limit_vol, y_limit=rotate_limit_vol, z_limit=rotate_limit_vol, p=1),
+             volumentations.RandomScale(scaling_limit[:2], p=1)],
             # MISSING: anisotropic affine (or anisotropic anything)
             # MISSING: implementation of Blur ... volumentations.Blur(blur_limit=(3, 7), p=1),  # TODO: unclear meaning of param blur_limit; is it Gaussian? / alternative: GlassBlur - but docs say it's noise + it isn't gaussian blur only
             volumentations.GaussianNoise(var_limit=noise_sigma_limits, mean=0, p=1),
@@ -125,16 +129,23 @@ def get_transformation_list(lib):
             [gunpowder.Crop(key=raw, roi=gunpowder.Roi((0,) * 4, (1,) + crop_shape)), gunpowder.RandomLocation()], # only random crop  # TODO this probably operates at smaller image from the begining
             gunpowder.Pad(key=raw, size=gunpowder.Coordinate((0,) + (pad_size,) * 3)),  # only pad  # TODO this pads the image but only retrieves the original-sized image at the end
             gunpowder.SimpleAugment(transpose_probs=[0, 0, 0, 0], p=1),  # only mirror=flip
-            # MISSING: affine (only have DeformAugment = elastic transform (rotation, scaling, jitter; needs physical units)
+            # MISSING: affine (only have DeformAugment = elastic transform (rotation, scaling, jitter; needs physical units), and deprecated ElasticAugment)
+            # gunpowder.DeformAugment(control_point_spacing=gunpowder.Coordinate((1, 16, 16, 16)),
+            #                         jitter_sigma=gunpowder.Coordinate((0,)*4),
+            #                         scale_interval=scaling_limit[:2], rotate=True, spatial_dims=3, p=1),  # TODO no way to control rotation + throws some error related to voxel size (WTF?)
             # MISSING: affine anisotropic
             # MISSING: blur
-            gunpowder.NoiseAugment(array=raw, mode='gaussian', clip=False, p=1),
-            # TODO image should be of type float and within range [-1, 1] or [0, 1]
+            gunpowder.NoiseAugment(array=raw, mode='gaussian', clip=False, p=1), # TODO image should be of type float and within range [-1, 1] or [0, 1]
             gunpowder.IntensityAugment(array=raw, scale_min=1 - constrast_limit, scale_max=1 + constrast_limit,
                                        shift_min=-brightness_limit, shift_max=brightness_limit, z_section_wise=False,
                                        clip=False, p=1),
-            # MISSING: normalize to 0 mean and 1 variance ... there's only normalization to [0,1] interval: gunpowder.Normalize(array='raw')
+            # MISSING: normalize to 0 mean and 1 variance ... there's only normalization to [0,1] interval: gunpowder.Normalize(array=raw)
         ]
+
+    # elastic_augment = gp.ElasticAugment(
+    #   control_point_spacing=(16, 16),
+    #   jitter_sigma=(4.0, 4.0),
+    #   rotation_interval=(0, math.pi/2))
     if lib == 'torchvision':
         pass
     if lib == 'album':
@@ -188,7 +199,7 @@ def get_input_data(lib, shape):
         # formulate a request for "raw"
         request = gunpowder.BatchRequest()
         request[raw] = gunpowder.Roi((0,)*len(shape), shape)  # an offset and a size
-        # request[raw] = gunpowder.Roi((0,)*4, (None,)*4)  # TODO can I get "the whole image"?
+        # request[raw] = gunpowder.Roi((0,)*4, (None,)*4)  # TODO can I get "the whole image"? Why does this fail?
 
         return {'source': source, 'request': request}
     if lib == 'torchvision':
@@ -212,7 +223,7 @@ def transform_data(lib, data, pipeline):
             data['request'][raw] = gunpowder.Roi((0,)*(1+len(crop_shape)), (1,) + crop_shape)
         with gunpowder.build(whole_pipeline):
             batch = whole_pipeline.request_batch(data['request'])
-        return batch[raw].data  # TODO what is this data?
+        return batch[raw].data.shape  # batch[raw].data is np.ndarray - do something to enforce performing the action
     if lib == 'torchvision':
         pass
     if lib == 'album':
@@ -242,7 +253,7 @@ def single_transform(iterations, shape, augmentation, lib):
 
 
 def transformation_speed_benchmark(iterations):
-    f = open(f"./runtime-{num_repeat}_iterations-all.txt", "w")
+    f = open(out_file_name, "w")
 
     for lib in libs:
         print(f'*************** LIBRARY {lib} ***************')
