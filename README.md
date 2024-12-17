@@ -8,21 +8,33 @@ The library offers a wide range of efficiently implemented image transformations
 This includes both preprocessing transformations (such as intensity normalisation, padding, and type casting) 
 and augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
 
-The `Bio-Volumentations` library is a suitable tool for image manipulation in machine learning applications. 
-It can transform several types of reference annotations along with the image data and
-it can be used with any major Python deep learning library, including PyTorch, PyTorch Lightning, TensorFlow, and Keras.
 
-This library builds upon wide-spread libraries such as Albumentations and TorchIO (see the Contributions section below). 
-Therefore, it can easily be adopted by developers.
+# Why use Bio-Volumentations?
+
+`Bio-Volumentations` are a handy tool for image manipulation in machine learning applications. 
+The library can transform **3D to 5D images** with **image-based and point-based annotations**, 
+gives you **fine-grained control** over the transformation pipelines, 
+and can be used with **any major Python deep learning library** 
+(including PyTorch, PyTorch Lightning, TensorFlow, and Keras) 
+in **a wide range of applications** including classification, object detection, semantic & instance 
+segmentation, and object tracking.
+
+`Bio-Volumentations` build upon wide-spread libraries such as Albumentations and TorchIO 
+(see the Contributions section below) and are accompanied by 
+[detailed documentation and a user guide](https://biovolumentations.readthedocs.io/1.3.0/). 
+Therefore, they can easily be adopted by developers.
+
 
 # Installation
 
-Install the package from pip using:
+Simply install the package from pip using:
 ```commandline
 pip install bio-volumentations
 ```
 
-See [the project's PyPI page](https://pypi.org/project/bio-volumentations/) for more details.
+That's it :)
+
+For more details, see [the project's PyPI page](https://pypi.org/project/bio-volumentations/).
 
 ## Requirements
 
@@ -55,11 +67,11 @@ The script will generate a new randomly transformed sample and save it into the 
 
 This example uses data from the _Fluo-N3DH-CE_ dataset [1] from the Cell Tracking Challenge repository [2].
 
-[1] Murray, J., Bao, Z., Boyle, T. et al. Automated analysis of embryonic gene expression with cellular 
-resolution in _C. elegans_. _Nat Methods_ **5**, 703–709 (2008). https://doi.org/10.1038/nmeth.1228.
+[1] Murray J, Bao Z, Boyle T, et al. Automated analysis of embryonic gene expression with cellular 
+resolution in _C. elegans_. _Nat Methods_ 2008;**5**:703–709. https://doi.org/10.1038/nmeth.1228.
 
-[2] Maška, M., Ulman, V., Delgado-Rodriguez, P. et al. The Cell Tracking Challenge: 10 years of objective 
-benchmarking. _Nat Methods_ **20**, 1010–1020 (2023). https://doi.org/10.1038/s41592-023-01879-y.
+[2] Maška M, Ulman V, Delgado-Rodriguez P, et al. The Cell Tracking Challenge: 10 years of objective 
+benchmarking. _Nat Methods_ 2023;**20**:1010–1020. https://doi.org/10.1038/s41592-023-01879-y.
 Repository: https://celltrackingchallenge.net/3d-datasets/.
 
 ### Importing
@@ -292,31 +304,31 @@ class Flip(DualTransform):
 
 Point transformations:
 ```python
-GaussianNoise 
-PoissonNoise
-RandomGamma 
-RandomBrightnessContrast 
-HistogramEqualization 
 Normalize
 NormalizeMeanStd
+HistogramEqualization 
+GaussianNoise 
+PoissonNoise
+RandomBrightnessContrast 
+RandomGamma
 ```
 
 Local transformations:
 ```python
 GaussianBlur 
-RemoveBackgroundGaussian
 RandomGaussianBlur
+RemoveBackgroundGaussian
 ```
 
-Geometrical transformations:
+Geometric transformations:
 ```python
 AffineTransform
 Resize 
 Scale
 Rescale
 Flip 
-CenterCrop 
 Pad
+CenterCrop 
 RandomAffineTransform
 RandomScale 
 RandomRotate90
@@ -324,14 +336,76 @@ RandomFlip
 RandomCrop
 ```
 
+### Runtime
+
+Execution times of individual transformations from the `Bio-Volumentations` library 
+with respect to input image size (average over 100 runs, in milliseconds).
+The shape of inputs is (1, 32, 32, 32, 1), (4, 32, 32, 32, 5), (4, 64, 64, 64, 5), 
+and (4, 128, 128, 128, 5), respectively.
+The measurements were done on a single workstation with an i7-7700 CPU @ 3.60GHz.
+
+| Transformation           | 32k voxels |  655k voxels |    5M voxels |  42M voxels |
+|:-------------------------|-----------:|-------------:|-------------:|------------:|
+| AffineTransform          |       3 ms |        26 ms |       113 ms |      845 ms |
+| RandomAffineTransform    |       2 ms |        19 ms |       110 ms |      899 ms |
+| Scale                    |       2 ms |        19 ms |       103 ms |      854 ms |
+| RandomScale              |       2 ms |        22 ms |       132 ms |      937 ms |
+| Flip                     |     < 1 ms |         1 ms |        11 ms |       86 ms |
+| RandomFlip               |     < 1 ms |         1 ms |         8 ms |       66 ms |
+| RandomRotate90           |     < 1 ms |         1 ms |        14 ms |      197 ms |
+| GaussianBlur             |       1 ms |         9 ms |        82 ms |      855 ms |
+| RandomGaussianBlur       |     < 1 ms |         8 ms |        74 ms |      788 ms |
+| GaussianNoise            |       1 ms |        15 ms |       124 ms |      989 ms |
+| PoissonNoise             |       1 ms |        21 ms |       176 ms |     1427 ms |
+| HistogramEqualization    |       2 ms |        35 ms |       285 ms |     2330 ms |
+| Normalize                |     < 1 ms |         2 ms |        17 ms |      158 ms |
+| NormalizeMeanStd         |     < 1 ms |         1 ms |         7 ms |       58 ms |
+| RandomBrightnessContrast |     < 1 ms |       < 1 ms |         4 ms |       38 ms |
+| RandomGamma              |     < 1 ms |         7 ms |        55 ms |      453 ms |
+
+
+### Runtime: Comparison to Other Libraries
+
+Execution times (average over 100 runs in milliseconds) of eight basic transformations from libraries 
+capable of processing volumetric image data: `TorchIO` [3], `Volumentations` [4, 5], `Gunpowder` [6], and `Bio-Volumentations`. 
+Asterisks (*) denote transformations that only partially correspond to the desired functionality. 
+Dashes (-) mark transformations that are missing from the respective library. 
+The fastest implementation of each transformation is underlined.
+The measurements were done for a volumetric input image of size (256, 256, 256) on a single workstation with a Ryzen 7-3700X CPU @ 3.60GHz.
+
+| Transformation                 |      `TorchIO` |     `Volumentations` |  `Gunpowder` |      `Bio-Volumentations` |
+|:-------------------------------|---------------:|---------------------:|-------------:|--------------------------:|
+| Cropping                       |         *26 ms |                20 ms |     **7 ms** |                     20 ms |
+| Flipping                       |          48 ms |                39 ms |    **31 ms** |                     34 ms |
+| Affine transform               |     **931 ms** |             *4177 ms |            - |                   2719 ms |
+| Affine transform (anisotropic) |              - |                    - |            - |               **2723** ms |
+| Gaussian blur                  |        4699 ms |                    - |            - |               **3149** ms |
+| Gaussian noise                 |     **182 ms** |               405 ms |      *340 ms |                    400 ms |
+| Brightness and contrast change |              - |                75 ms |       183 ms |                 **28 ms** |
+| Padding                        |          68 ms |            **30 ms** |        54 ms |                     43 ms |
+| Z-normalization                |         214 ms |           **119 ms** |            - |                    133 ms |
+
+[3] Pérez-García F, Sparks R, Ourselin S. TorchIO: A Python library for efficient loading, 
+preprocessing, augmentation and patch-based sampling of medical images in deep learning. 
+_Comput Meth Prog Bio_ 2021;**208**:106236. https://www.sciencedirect.com/science/article/pii/S0169260721003102?via%3Dihub
+
+[4] Volumentations maintainers and contributors. Volumentations 3D. Version 1.0.4 [software]. 
+GitHub, 2020 [cited 2024 Dec 16]. https://github.com/ZFTurbo/volumentations
+
+[5] Solovyev R, Kalinin AA, Gabruseva T. 3D convolutional neural networks
+for stalled brain capillary detection. _Comput Biol Med_ 2022;**141**:105089.
+https://doi.org/10.1016/j.compbiomed.2021.105089
+
+[6] Gunpowder maintainers and contributors. Gunpowder. Version 1.4.0 [software]. 
+GitHub, 2024 [cited 2024 Dec 16]. https://github.com/funkelab/gunpowder
 
 # Contributions
 
-Authors of the Bio-Volumentations library: Samuel Šuľan, Lucia Hradecká, Filip Lux.
+Authors of the `Bio-Volumentations` library: Samuel Šuľan, Lucia Hradecká, Filip Lux.
 - Lucia Hradecká: lucia.d.hradecka@gmail.com   
 - Filip Lux: lux.filip@gmail.com     
 
-The Bio-Volumentations library is based on the following image augmentation libraries:
+The `Bio-Volumentations` library is based on the following image augmentation libraries:
 - [Albumentations](https://github.com/albumentations-team/albumentations)  
 - [Volumentations](https://github.com/ashawkey/volumentations)                  
 - [Volumentations: Continued Development](https://github.com/ZFTurbo/volumentations)                   
