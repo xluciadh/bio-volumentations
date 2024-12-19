@@ -36,7 +36,7 @@ That's it :)
 
 For more details, see [the project's PyPI page](https://pypi.org/project/bio-volumentations/).
 
-## Requirements
+### Requirements
 
 - [NumPy](https://numpy.org/)
 - [SciPy](https://scipy.org/)
@@ -338,11 +338,13 @@ RandomCrop
 
 ### Runtime
 
-Execution times of individual transformations from the `Bio-Volumentations` library 
-with respect to input image size (average over 100 runs, in milliseconds).
-The shape of inputs is (1, 32, 32, 32, 1), (4, 32, 32, 32, 5), (4, 64, 64, 64, 5), 
-and (4, 128, 128, 128, 5), respectively.
-The measurements were done on a single workstation with an i7-7700 CPU @ 3.60GHz.
+We present the execution times of individual transformations from our library 
+with respect to input image size.
+
+The shape (size) of inputs was [1, 32, 32, 32, 1] (32k voxels), [4, 32, 32, 32, 5] (655k voxels), 
+[4, 64, 64, 64, 5] (5M voxels), and [4, 128, 128, 128, 5] (42M voxels), respectively. 
+The runtimes, presented in milliseconds, were averaged over 100 runs.
+All measurements were done on a single workstation with an i7-7700 CPU @ 3.60GHz.
 
 | Transformation           | 32k voxels |  655k voxels |    5M voxels |  42M voxels |
 |:-------------------------|-----------:|-------------:|-------------:|------------:|
@@ -366,28 +368,32 @@ The measurements were done on a single workstation with an i7-7700 CPU @ 3.60GHz
 
 ### Runtime: Comparison to Other Libraries
 
-Execution times (average over 100 runs in milliseconds) of eight basic transformations from libraries 
-capable of processing volumetric image data: `TorchIO` [3], `Volumentations` [4, 5], `Gunpowder` [6], and `Bio-Volumentations`. 
-Asterisks (*) denote transformations that only partially correspond to the desired functionality. 
-Dashes (-) mark transformations that are missing from the respective library. 
-The fastest implementation of each transformation is underlined.
-The measurements were done for a volumetric input image of size (256, 256, 256) on a single workstation with a Ryzen 7-3700X CPU @ 3.60GHz.
+We also present the execution times of eight basic transformations from libraries 
+capable of processing volumetric image data: `TorchIO` [3], `Volumentations` [4, 5], `Gunpowder` [6], 
+and `Bio-Volumentations`. 
 
-| Transformation                 |      `TorchIO` |     `Volumentations` |  `Gunpowder` |      `Bio-Volumentations` |
-|:-------------------------------|---------------:|---------------------:|-------------:|--------------------------:|
-| Cropping                       |         *26 ms |                20 ms |     **7 ms** |                     20 ms |
-| Flipping                       |          48 ms |                39 ms |    **31 ms** |                     34 ms |
-| Affine transform               |     **931 ms** |             *4177 ms |            - |                   2719 ms |
-| Affine transform (anisotropic) |              - |                    - |            - |               **2723** ms |
-| Gaussian blur                  |        4699 ms |                    - |            - |               **3149** ms |
-| Gaussian noise                 |     **182 ms** |               405 ms |      *340 ms |                    400 ms |
-| Brightness and contrast change |              - |                75 ms |       183 ms |                 **28 ms** |
-| Padding                        |          68 ms |            **30 ms** |        54 ms |                     43 ms |
-| Z-normalization                |         214 ms |           **119 ms** |            - |                    133 ms |
+Asterisks (*) denote transformations that only partially correspond to the desired functionality. 
+Dashes (-) denote transformations that are missing from the respective library. 
+The fastest implementation of each transformation is highlighted in bold.
+The runtimes, presented in milliseconds, were averaged over 100 runs.
+All measurements were done with a volumetric input image of size (256, 256, 256) 
+on a single workstation with a Ryzen 7-3700X CPU @ 3.60GHz.
+
+| Transformation                       |      `TorchIO` |     `Volumentations` |  `Gunpowder` |      `Bio-Volumentations` |
+|:-------------------------------------|---------------:|---------------------:|-------------:|--------------------------:|
+| Cropping                             |         *26 ms |                20 ms |     **7 ms** |                     20 ms |
+| Flipping                             |          48 ms |                39 ms |    **31 ms** |                     34 ms |
+| Affine transform                     |     **931 ms** |             *4177 ms |            - |                   2719 ms |
+| Affine transform (anisotropic image) |              - |                    - |            - |               **2723** ms |
+| Gaussian blur                        |        4699 ms |                    - |            - |               **3149** ms |
+| Gaussian noise                       |     **182 ms** |               405 ms |      *340 ms |                    400 ms |
+| Brightness and contrast change       |              - |                75 ms |       183 ms |                 **28 ms** |
+| Padding                              |          68 ms |            **30 ms** |        54 ms |                     43 ms |
+| Z-normalization                      |         214 ms |           **119 ms** |            - |                    133 ms |
 
 [3] Pérez-García F, Sparks R, Ourselin S. TorchIO: A Python library for efficient loading, 
 preprocessing, augmentation and patch-based sampling of medical images in deep learning. 
-_Comput Meth Prog Bio_ 2021;**208**:106236. https://www.sciencedirect.com/science/article/pii/S0169260721003102?via%3Dihub
+_Comput Meth Prog Bio_ 2021;**208**:106236. https://www.sciencedirect.com/science/article/pii/S0169260721003102
 
 [4] Volumentations maintainers and contributors. Volumentations 3D. Version 1.0.4 [software]. 
 GitHub, 2020 [cited 2024 Dec 16]. https://github.com/ZFTurbo/volumentations
@@ -399,9 +405,9 @@ https://doi.org/10.1016/j.compbiomed.2021.105089
 [6] Gunpowder maintainers and contributors. Gunpowder. Version 1.4.0 [software]. 
 GitHub, 2024 [cited 2024 Dec 16]. https://github.com/funkelab/gunpowder
 
-# Contributions
+# Contributions and Acknowledgements
 
-Authors of the `Bio-Volumentations` library: Samuel Šuľan, Lucia Hradecká, Filip Lux.
+Authors of `Bio-Volumentations`: Samuel Šuľan, Lucia Hradecká, Filip Lux.
 - Lucia Hradecká: lucia.d.hradecka@gmail.com   
 - Filip Lux: lux.filip@gmail.com     
 
