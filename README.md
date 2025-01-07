@@ -5,7 +5,7 @@
 biomedical images and their annotations.
 
 The library offers a wide range of efficiently implemented image transformations.
-This includes both preprocessing transformations (such as intensity normalisation, padding, and type casting) 
+This includes both preprocessing transformations (such as intensity normalisation and padding) 
 and augmentation transformations (such as affine transform, noise addition and removal, and contrast manipulation).
 
 
@@ -19,8 +19,8 @@ and can be used with **any major Python deep learning library**
 in **a wide range of applications** including classification, object detection, semantic & instance 
 segmentation, and object tracking.
 
-`Bio-Volumentations` build upon wide-spread libraries such as Albumentations and TorchIO 
-(see the Contributions section below) and are accompanied by 
+`Bio-Volumentations` build upon widely used libraries such as Albumentations and TorchIO 
+(see the _Contributions and Acknowledgements_ section below) and are accompanied by 
 [detailed documentation and a user guide](https://biovolumentations.readthedocs.io/1.3.0/). 
 Therefore, they can easily be adopted by developers.
 
@@ -54,8 +54,9 @@ There, you will find a test sample consisting of a 3D image (`image.tif`) with a
 (`segmentation_mask.tif`), a runnable Python script, and the transformed sample (`image_transformed.tif` and 
 `segmentation_mask_transformed.tif`).
 
-To run the example, please install to your Python `bio-volumentations`, the `tiffile` and `imagecodecs` packages.
-Then run the following script from the command line:
+To run the example, please download the `example` folder and 
+install the `bio-volumentations`, `tiffile` and `imagecodecs` packages to your Python environment. 
+Then run the following from the command line:
 
 ```commandline
 cd example
@@ -88,7 +89,7 @@ represented as a `numpy.ndarray` and must conform to the following conventions:
 
 - The order of dimensions is [C, Z, Y, X, T], where C is the channel dimension, 
    T is the time dimension, and Z, Y, and X are the spatial dimensions.
-- The three spatial dimensions (Z, Y, X) must be present. To transform a 2D image, please create a dummy Z dimension. 
+- The three spatial dimensions (Z, Y, X) must be present. To transform a 2D image, please create a dummy Z dimension first. 
 - The channel (C) dimension is optional. If it is not present, the library will automatically
    create a dummy dimension in its place, so the output image shape will be [1, Z, Y, X].
 - The time (T) dimension is optional and can only be present if the channel (C) dimension is 
@@ -129,17 +130,17 @@ Below, there are several examples of how to use this library. You are also welco
 
 To create the transformation pipeline, you just need to instantiate all desired transformations
 (with the desired parameter values)
-and then feed a list of these transformations into a new `Compose` object. 
+and then feed a list of these transformation objects into a new `Compose` object. 
 
 Optionally, you can specify a datatype conversion transformation that will be applied after the last transformation
 in the list, e.g. from the default `numpy.ndarray` to a `torch.Tensor`. You can also specify the probability
 of actually applying the whole pipeline as a number between 0 and 1. 
-The default probability is 1 - the pipeline is applied for each call.
+The default probability is 1 (i.e., the pipeline is applied in each call).
 See the [docs](https://biovolumentations.readthedocs.io/1.3.0/examples.html) for more details.
 
 The `Compose` object is callable. The data is passed as a keyword argument, and the call returns a dictionary 
-with the same keywords and corresponding transformed images. This might look like an overkill for a single image, 
-but will come handy when transforming images with annotations. The default key for the image is `'image'`.
+with the same keyword and the corresponding transformed image. This might look like an overkill for a single image, 
+but it will come handy when transforming images with annotations. The default key for an image is `'image'`.
 
 
 ```python
@@ -175,6 +176,8 @@ To that end, `Bio-Volumentations` define several target types:
 - `keypoints` for a list of key points; and
 - `value` for non-transformed values.
 
+You cannot define your own target types; that would require re-implementing all existing transforms.
+
 For more information on the format of individual target types, see the 
 [Getting Started guide](https://biovolumentations.readthedocs.io/1.3.0/examples.html#example-transforming-images-with-annotations)
 
@@ -183,7 +186,7 @@ the same transformation parameters are used to transform all of these targets.
 For example, `RandomAffineTransform` applies the same geometric transformation to all target types in a single call.
 
 Some transformations, such as `RandomGaussianNoise` or `RandomGamma`, are only defined for the `image` target 
-and leave the `mask` and `float_mask` targets unchanged. Please consult the 
+and leave the other targets unchanged. Please consult the 
 [documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.3.0/modules.html) for more details.
 
 The corresponding targets are fed to the `Compose` object call as keyword arguments and extracted from the outputted
@@ -213,7 +216,7 @@ transformed_img, transformed_lbl = aug_data['image'], aug_data['mask']
 ```
 
 
-### Example: Transforming Multiple Images of the Same Target Type
+### Example: Transforming Multiple Targets of the Same Type
 
 You can input arbitrary number of inputs to any transformation. To achieve this, you have to define the keywords
 for the individual inputs when creating the `Compose` object.
@@ -222,17 +225,16 @@ transformed images from the outputted dictionary.
 
 Specifically, you can define `image`-type target keywords using the `img_keywords` parameter - its value
 must be a tuple of strings, each string representing a single keyword. Similarly, there are `mask_keywords`,
-`fmask_keywords`, `value_keywords`, and `keypoints_keywords` parameters for the respective target types.
+`fmask_keywords`, `value_keywords`, and `keypoints_keywords` parameters for the other target types. 
+Setting any of these parameters overwrites its default value.
 
-Importantly, there must always be an `image`-type target with the keyword `'image'`.
-Otherwise, the keywords can be any valid dictionary keys, and they must be unique within each target type.
+Please note that there must always be an `image`-type target with the keyword `'image'`.
+Otherwise, the keywords can be any valid dictionary keys, and they must be unique.
 
 You do not need to use all specified keywords in a transformation call. However, at least the target with
 the `'image'` keyword must be present in each transformation call.
 In our example below, we only transform three targets even though we defined four target keywords explicitly 
 (and there are some implicit keywords as well for the other target types).
-
-You cannot define your own target types; that would require re-implementing all existing transforms.
 
 ```python
 import numpy as np
@@ -291,7 +293,7 @@ class Flip(DualTransform):
     #def apply_to_float_mask(self, float_mask, **params):
     #    return self.apply_to_mask(float_mask, **params)
 
-    # Get transformation parameters. Useful especially for RandomXXX transforms to ensure consistent transformation of image tuples.
+    # Set transformation parameters. Useful especially for RandomXXX transforms to ensure consistent transformation of image tuples.
     def get_params(self, **data):
         axes = self.axes if self.axes is not None else [1, 2, 3]
         return {"axes": axes}
@@ -338,7 +340,7 @@ RandomCrop
 
 ### Runtime
 
-We present the execution times of individual transformations from our library 
+Here, we present the execution times of individual transformations from our library 
 with respect to input image size.
 
 The shape (size) of inputs was [1, 32, 32, 32, 1] (32k voxels), [4, 32, 32, 32, 5] (655k voxels), 
@@ -368,28 +370,28 @@ All measurements were done on a single workstation with an i7-7700 CPU @ 3.60GHz
 
 ### Runtime: Comparison to Other Libraries
 
-We also present the execution times of eight basic transformations from libraries 
-capable of processing volumetric image data: `TorchIO` [3], `Volumentations` [4, 5], `Gunpowder` [6], 
-and `Bio-Volumentations`. 
+We also present the execution times of eight commonly used transformations, comparing the performance 
+of our `Bio-Volumentations` to other libraries capable of processing volumetric image data: 
+`TorchIO` [3], `Volumentations` [4, 5], and `Gunpowder` [6].
 
 Asterisks (*) denote transformations that only partially correspond to the desired functionality. 
 Dashes (-) denote transformations that are missing from the respective library. 
 The fastest implementation of each transformation is highlighted in bold.
 The runtimes, presented in milliseconds, were averaged over 100 runs.
-All measurements were done with a volumetric input image of size (256, 256, 256) 
+All measurements were done with a single-channel volumetric input image of size (256, 256, 256) 
 on a single workstation with a Ryzen 7-3700X CPU @ 3.60GHz.
 
-| Transformation                       |      `TorchIO` |     `Volumentations` |  `Gunpowder` |      `Bio-Volumentations` |
-|:-------------------------------------|---------------:|---------------------:|-------------:|--------------------------:|
-| Cropping                             |         *26 ms |                20 ms |     **7 ms** |                     20 ms |
-| Flipping                             |          48 ms |                39 ms |    **31 ms** |                     34 ms |
-| Affine transform                     |     **931 ms** |             *4177 ms |            - |                   2719 ms |
-| Affine transform (anisotropic image) |              - |                    - |            - |               **2723** ms |
-| Gaussian blur                        |        4699 ms |                    - |            - |               **3149** ms |
-| Gaussian noise                       |     **182 ms** |               405 ms |      *340 ms |                    400 ms |
-| Brightness and contrast change       |              - |                75 ms |       183 ms |                 **28 ms** |
-| Padding                              |          68 ms |            **30 ms** |        54 ms |                     43 ms |
-| Z-normalization                      |         214 ms |           **119 ms** |            - |                    133 ms |
+| Transformation                       |      `TorchIO` |     `Volumentations` |  `Gunpowder` | `Bio-Volumentations` |
+|:-------------------------------------|---------------:|---------------------:|-------------:|---------------------:|
+| Cropping                             |         *26 ms |                20 ms |     **7 ms** |                20 ms |
+| Flipping                             |          48 ms |                39 ms |    **31 ms** |                34 ms |
+| Affine transform                     |     **931 ms** |             *4177 ms |            - |              2719 ms |
+| Affine transform (anisotropic image) |              - |                    - |            - |            **2723 ms** |
+| Gaussian blur                        |        4699 ms |                    - |            - |          **3149 ms** |
+| Gaussian noise                       |     **182 ms** |               405 ms |      *340 ms |               400 ms |
+| Brightness and contrast change       |              - |                75 ms |       183 ms |            **28 ms** |
+| Padding                              |          68 ms |            **30 ms** |        54 ms |                43 ms |
+| Z-normalization                      |         214 ms |           **119 ms** |            - |               133 ms |
 
 [3] Pérez-García F, Sparks R, Ourselin S. TorchIO: A Python library for efficient loading, 
 preprocessing, augmentation and patch-based sampling of medical images in deep learning. 

@@ -38,7 +38,7 @@ authors = [
 
 # A one-line description of your project, to show as the “headline” of your project page on PyPI
 # and other places such as lists of search results:
-description = "Library for 3D-5D augmentations of volumetric multi-dimensional biomedical images and their annotations"
+description = "Library for 3D-5D augmentations of volumetric multi-dimensional time-lapse biomedical images with annotations"
 
 # A longer description - can use readme.md
 readme = "README.md"
