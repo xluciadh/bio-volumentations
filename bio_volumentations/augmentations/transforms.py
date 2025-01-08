@@ -163,7 +163,7 @@ class Resize(DualTransform):
 
 
 class Scale(DualTransform):
-    """Rescale the input image content by the given scale. Image shape remains unchanged.
+    """Rescale the input image content by the given scale. The image shape remains unchanged.
 
         Args:
             scales (float|List[float], optional): Value by which the input should be scaled.
@@ -290,7 +290,7 @@ class Scale(DualTransform):
 
 
 class RandomScale(DualTransform):
-    """Randomly rescale the input image content by the given scale. Image shape remains unchanged.
+    """Randomly rescale the input image content by the given scale. The image shape remains unchanged.
 
         Args:
             scaling_limit (float | Tuple[float], optional): Limits of scaling factors.
@@ -303,7 +303,7 @@ class RandomScale(DualTransform):
                 If a tuple of 2 floats, then all spatial dimensions are scaled by a random number drawn uniformly
                 from the interval [S1, S2] (equivalent to inputting ``(S1, S2, S1, S2, S1, S2)``).
 
-                If a tuple of 3 floats, then an interval [-S_a, S_a] is constructed for each spatial
+                If a tuple of 3 floats, then an interval [1/S_a, S_a] is constructed for each spatial
                 dimension and the scale is randomly drawn from it
                 (equivalent to inputting ``(1/S_Z, S_Z, 1/S_Y, S_Y, 1/S_X, S_X)``).
 
@@ -1445,6 +1445,10 @@ class HistogramEqualization(ImageOnlyTransform):
 class Pad(DualTransform):
     """Pads the input.
 
+        Internally, the ``numpy.pad`` function is used. The ``border_mode``, ``ival`` and ``mval``
+        arguments are forwarded to it. More details at:
+        https://numpy.org/doc/stable/reference/generated/numpy.pad.html.
+
         Args:
             pad_size (int | Tuple[int]): Number of pixels padded to the edges of each axis.
 
@@ -1552,7 +1556,7 @@ class Normalize(ImageOnlyTransform):
 
 
 class Rescale(DualTransform):
-    """ Rescales input and changes its shape accordingly.
+    """ Rescales the input and changes its shape accordingly.
 
         Internally, the ``skimage.transform.resize`` function is used.
         The ``interpolation``, ``border_mode``, ``ival``, ``mval``,
