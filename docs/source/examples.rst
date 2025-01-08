@@ -133,7 +133,7 @@ images of shape ``[150, 300, 300]``, ``[1, 150, 300, 300]``, as well as ``[4, 15
 If you want to use a multi-channel :class:`mask` or :class:`float_mask`, you have to split it into
 a set of single-channel :class:`mask` or :class:`float_mask` targets, respectively, and input them
 as stand-alone targets (see
-`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-multiple-targes-of-the-same-type>`_.
+`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-multiple-targets-of-the-same-type>`_.
 below on transforming multiple masks with a single image).
 
 The :class:`keypoints` target is represented as a list of tuples. Each tuple represents
@@ -186,7 +186,7 @@ for more details.
 Another example of transforming an annotated image is available
 `at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1/example?ref_type=tags>`_,
 where a runnable Python script and a test data sample are provided.
-See `the repo's readme<https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/README.md?ref_type=tags#the-first-example>`_ for more details.
+See `the readme at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/README.md?ref_type=tags#the-first-example>`_ for more details.
 
 Example: Transforming Multiple Targets of the Same Type
 *******************************************************

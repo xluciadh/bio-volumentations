@@ -22,6 +22,10 @@ Here, you can find documentation pages for the individual transformations.
 
    bio_volumentations.core
 
-In addition, the execution times of individual transformations from our library
+
+Runtime
+*******
+
+The execution times of individual transformations from our library
 and their comparison to other libraries capable of processing volumetric image data
 are available `at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/README.md?ref_type=tags#runtime>`_.
