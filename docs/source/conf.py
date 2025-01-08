@@ -19,9 +19,9 @@ sys.path.insert(0, os.path.abspath(r'../../bio_volumentations'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'bio-volumentations'
-copyright = '2024, Samuel Sulan, Lucia Hradecka, Filip Lux'
+copyright = '2025, Samuel Sulan, Lucia Hradecka, Filip Lux'
 author = 'Samuel Sulan, Lucia Hradecka, Filip Lux'
-release = '1.3.0'
+release = '1.3.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

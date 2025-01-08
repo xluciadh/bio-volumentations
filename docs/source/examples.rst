@@ -46,7 +46,7 @@ The shape of the output image will be either [C, Z, Y, X] (for cases 1 & 2) or [
 The images are type-casted to a floating-point datatype before being transformed, irrespective of their actual datatype.
 
 For the specification of image annotation conventions, please see
-`the respective sections below <https://biovolumentations.readthedocs.io/1.3.0/examples.html#example-transforming-images-with-annotations>`_.
+`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-images-with-annotations>`_.
 
 All transformations are implemented as callable classes inheriting from an abstract :class:`Transform` class.
 Upon instantiating a transformation object, one has to specify the parameters of the transformation.
@@ -65,7 +65,7 @@ If you call transformations outside of :class:`Compose`, we cannot guarantee the
 are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use the `Bio-Volumentations` library. You are also welcome to check
-`the API reference <https://biovolumentations.readthedocs.io/1.3.0/modules.html>`_ to learn more about the individual transforms.
+`the API reference <https://biovolumentations.readthedocs.io/1.3.1/modules.html>`_ to learn more about the individual transforms.
 
 Example: Transforming a Single Image
 ************************************
@@ -78,7 +78,7 @@ Optionally, you can specify a datatype conversion transformation that will be ap
 in the list, for example from the default :class:`numpy.ndarray` to a PyTorch :class:`torch.Tensor`.
 You can also specify the probability of applying the whole pipeline as a number between 0 and 1.
 The default probability is 1 (i.e., the pipeline is applied in each call). See the :class:`Compose`
-`docs <https://biovolumentations.readthedocs.io/1.3.0/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
+`docs <https://biovolumentations.readthedocs.io/1.3.1/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
 for more details.
 
 Note: You can also toggle the probability of applying the individual transforms. To do so, you can
@@ -132,7 +132,9 @@ For example, a :class:`mask` and/or :class:`float_mask` of shape ``[150, 300, 30
 images of shape ``[150, 300, 300]``, ``[1, 150, 300, 300]``, as well as ``[4, 150, 300, 300]``.
 If you want to use a multi-channel :class:`mask` or :class:`float_mask`, you have to split it into
 a set of single-channel :class:`mask` or :class:`float_mask` targets, respectively, and input them
-as stand-alone targets (see the section below on transforming multiple masks with a single image).
+as stand-alone targets (see
+`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-multiple-targes-of-the-same-type>`_.
+below on transforming multiple masks with a single image).
 
 The :class:`keypoints` target is represented as a list of tuples. Each tuple represents
 the absolute coordinates of a keypoint in the volume, so it must contain either 3 or 4 numbers
@@ -178,13 +180,13 @@ For example, :class:`RandomAffineTransform` applies the same geometric transform
 Some transformations, such as :class:`RandomGaussianNoise` or :class:`RandomGamma`,
 are only defined for the :class:`image` target
 and leave the other target types unchanged. Please consult the
-`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.3.0/modules.html>`_
+`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.3.1/modules.html>`_
 for more details.
 
 Another example of transforming an annotated image is available
-`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.0/example?ref_type=tags>`_,
+`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1/example?ref_type=tags>`_,
 where a runnable Python script and a test data sample are provided.
-See `the repo's readme<https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.0/README.md?ref_type=tags#the-first-example>`_ for more details.
+See `the repo's readme<https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/README.md?ref_type=tags#the-first-example>`_ for more details.
 
 Example: Transforming Multiple Targets of the Same Type
 *******************************************************

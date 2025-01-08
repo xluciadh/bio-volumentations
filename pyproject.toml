@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 name = "bio-volumentations"
 
 # Put the version of your project. This field is required, although it is often marked as dynamic:
-version = "1.3.0"
+version = "1.3.1"
 #dynamic = ["version"]
 # https://stackoverflow.com/questions/21064581/how-to-overwrite-pypi-package-when-doing-upload-from-command-line
 
@@ -61,6 +61,6 @@ classifiers = [
 
 # A list of URLs associated with your project, displayed on the left sidebar of your PyPI project page.
 [project.urls]
-Homepage = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.0?ref_type=tags"
-Documentation = "https://biovolumentations.readthedocs.io/1.3.0/"
-Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.0?ref_type=tags"
+Homepage = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1?ref_type=tags"
+Documentation = "https://biovolumentations.readthedocs.io/1.3.1/"
+Repository = "https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1?ref_type=tags"

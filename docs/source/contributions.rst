@@ -3,10 +3,10 @@ Copyright
 
 Copyright
 *********
-Copyright (c) 2024 Samuel Šuľan, Lucia Hradecká, Filip Lux
+Copyright (c) 2025 Samuel Šuľan, Lucia Hradecká, Filip Lux
 
 The `Bio-Volumentations` library is distributed under the MIT License.
-For more details, see `the licence file at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.0/LICENSE?ref_type=tags>`_.
+For more details, see `the licence file at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/LICENSE?ref_type=tags>`_.
 
 
 Contributions
