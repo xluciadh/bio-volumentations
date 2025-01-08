@@ -1,6 +1,6 @@
 # Bio-Volumentations
 
-`Bio-Volumentations` is an image augmentation and preprocessing package for 3D (volumetric), 
+`Bio-Volumentations` is an **image augmentation and preprocessing package** for 3D (volumetric), 
 4D (time-lapse volumetric or multi-channel volumetric), and 5D (time-lapse multi-channel volumetric) 
 biomedical images and their annotations.
 
