@@ -23,7 +23,7 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
-from typing import Tuple
+from typing import Tuple, Union
 
 TypePairFloat = Tuple[float, float]
 TypeTripletFloat = Tuple[float, float, float]
@@ -38,3 +38,4 @@ TypeSpatialCoordinate = Tuple[float, float, float]
 
 TypeSpatioTemporalShape = Tuple[int, int, int, int]
 TypeSpatialShape = Tuple[int, int, int]
+TypeShapes = Union[TypeSpatialShape, TypeSpatioTemporalShape]

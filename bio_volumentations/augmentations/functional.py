@@ -47,8 +47,8 @@ from scipy.ndimage import zoom, gaussian_filter
 from warnings import warn
 from typing import Union
 
-from ..biovol_typing import (TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSextetInt, TypeSpatialShape,
-                             TypeOctetInt)
+from ..biovol_typing import (TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSpatialShape,
+                             TypeOctetInt, TypeShapes)
 from .spatial_funcional import get_affine_transform, apply_sitk_transform
 from .utils import is_included
 
@@ -109,66 +109,101 @@ def get_center_crop_coords(img_shape, crop_shape):
     tos = froms + crop_shape
     return froms, tos
 
-
-# Too similar to the random_crop. Could be made into one function
 def crop(input_array: np.array,
-         crop_shape: TypeSpatialShape,
-         crop_position: TypeSpatialShape,
+         crop_shape: TypeShapes,
+         crop_position: TypeShapes,
          pad_dims,
          border_mode, cval, mask):
 
-    input_spatial_shape = get_spatial_shape(input_array, mask)
+    # spatial or spatio-temporal
+    input_shape = get_shape(input_array, mask)
+    # TODO: check if the crop shape is not greater than input shape
+    if len(input_shape) == len(crop_shape):
+        output_shape = crop_shape
+    else:
+        output_shape = np.append(crop_shape, 0)
 
-    if np.any(input_spatial_shape < crop_shape):
-        warn(f'F.crop(): Input size {input_spatial_shape} smaller than crop size {crop_shape}, pad by {border_mode}.',
+    if np.any(input_shape < output_shape):
+        warn(f'F.crop(): Input size {input_shape} smaller than crop size {crop_shape}, pad by {border_mode}.',
              UserWarning)
 
         # pad
         input_array = pad(input_array, pad_dims, border_mode, cval, mask)
+        input_shape = get_shape(input_array, mask)
 
         # test
-        input_spatial_shape = get_spatial_shape(input_array, mask)
-        assert np.all(input_spatial_shape >= crop_shape)
+        if len(input_shape) == len(crop_shape):
+            output_shape = crop_shape
+        else:
+            output_shape = np.append(crop_shape, 0)
+        assert np.all(input_shape >= output_shape)
 
-    x1, y1, z1 = crop_position
-    x2, y2, z2 = np.array(crop_position) + np.array(crop_shape)
+    if len(crop_shape) == 3:
+        x1, y1, z1 = crop_position
+        x2, y2, z2 = np.array(crop_position) + np.array(crop_shape)
 
-    if mask:
-        result = input_array[x1:x2, y1:y2, z1:z2]
-        assert np.all(result.shape[:3] == crop_shape), f'{result.shape} {crop_shape} {mask} {crop_position}'
-    else:
-        result = input_array[:, x1:x2, y1:y2, z1:z2]
-        assert np.all(result.shape[1:4] == crop_shape)
+        if mask:
+            result = input_array[x1:x2, y1:y2, z1:z2]
+            assert np.all(result.shape[:3] == crop_shape), f'{result.shape} {crop_shape} {mask} {crop_position}'
+        else:
+            result = input_array[:, x1:x2, y1:y2, z1:z2]
+            assert np.all(result.shape[1:4] == crop_shape)
+    else:  # spatio-temporal
+        x1, y1, z1, t1 = crop_position
+        x2, y2, z2, t2 = np.array(crop_position) + np.array(crop_shape)
+
+        if mask:
+            result = input_array[x1:x2, y1:y2, z1:z2, t1:t2]
+            assert np.all(result.shape[:4] == crop_shape), f'{result.shape} {crop_shape} {mask} {crop_position}'
+        else:
+            result = input_array[:, x1:x2, y1:y2, z1:z2, t1:t2]
+            assert np.all(result.shape[1:5] == crop_shape)
 
     return result
 
-
 def crop_keypoints(keypoints,
-                   crop_shape: TypeSpatialShape,
-                   crop_position: TypeSpatialShape,
+                   crop_shape: TypeShapes,
+                   crop_position: TypeShapes,
                    pad_dims,
                    keep_all: bool):
 
-    (px, _), (py, _), (pz, _) = pad_dims
-    pad = np.array((px, py, pz))
+    if len(pad_dims) == 3:
+        (px, _), (py, _), (pz, _) = pad_dims
+        pad = np.array((px, py, pz))
+    else:
+        (px, _), (py, _), (pz, _), (pt, _) = pad_dims
+        pad = np.array((px, py, pz, pt))
 
     res = []
     for keypoint in keypoints:
-        k = keypoint[:3] - crop_position + pad
+        k = keypoint[:len(pad_dims)] - crop_position + pad
         if keep_all or (np.all(k >= 0) and np.all((k + .5) < crop_shape)):
             res.append(k)
 
     return res
 
+def get_shape(array: np.array, mask: bool) -> TypeShapes:
+    dims = len(array.shape)
+    if mask:
+        return np.array(array.shape)[:dims]
+    return np.array(array.shape)[1:dims+1]
 
-def get_spatial_shape(array: np.array, mask: bool) -> TypeSpatialShape:
-    return np.array(array.shape)[:3] if mask else np.array(array.shape)[1:4]
+def get_pad_dims(img_shape: TypeShapes, crop_shape: TypeShapes):
+    """
+        Calculate padding required for each dimension to match the crop shape.
 
+        Args:
+            img_shape (TypeShapes): The dimensions of the input ((Z, Y, X) or (Z, Y, X, T)).
+            crop_shape (TypeShapes): The desired dimensions for cropping.
 
-def get_pad_dims(spatial_shape: TypeSpatialShape, crop_shape: TypeSpatialShape):
+        Returns:
+            List[Tuple[int, int]]: Padding for each dimension as (front, back).
+    """
+    assert len(img_shape) == len(crop_shape)
+
     pad_dims = []
-    for i in range(3):
-        i_dim, c_dim = spatial_shape[i], crop_shape[i]
+    for i in range(len(img_shape)):
+        i_dim, c_dim = img_shape[i], crop_shape[i]
         if i_dim < c_dim:
             pad_size = c_dim - i_dim
             if pad_size % 2 != 0:
@@ -179,8 +214,20 @@ def get_pad_dims(spatial_shape: TypeSpatialShape, crop_shape: TypeSpatialShape):
             pad_dims.append((0, 0))
     return pad_dims
 
-
 def pad(img, pad_width, border_mode, cval, mask=True):
+    """
+        Apply padding to the input image or mask.
+
+        Args:
+            img (np.ndarray): The input image or mask to pad.
+            pad_width (List[Tuple[int, int]]): Padding width for each dimension (Z, Y, X or T) as (front, back).
+            border_mode (str): Padding mode (e.g., 'constant', 'linear_ramp', etc.).
+            cval (float): Value to fill for constant or linear ramp padding.
+            mask (bool, optional): Whether the input is a mask. Defaults to True.
+
+        Returns:
+            np.ndarray: The padded image or mask.
+    """
 
     if not mask:
         pad_width = [(0, 0)] + pad_width

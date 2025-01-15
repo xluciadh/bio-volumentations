@@ -45,7 +45,7 @@ from ..core.transforms_interface import DualTransform, ImageOnlyTransform
 from ..augmentations import functional as F
 from ..augmentations.spatial_funcional import get_affine_transform, parse_itk_interpolation
 from ..random_utils import uniform, sample_range_uniform
-from typing import List, Sequence, Tuple, Union
+from typing import List, Sequence, Tuple, Union, Optional
 from ..biovol_typing import *
 from .utils import parse_limits, parse_coefs, parse_pads, to_tuple, validate_bbox, get_spatio_temporal_domain_limit,\
     to_spatio_temporal
@@ -637,7 +637,7 @@ class CenterCrop(DualTransform):
         Args:
             shape (Tuple[int]): The desired shape of input.
 
-                Must be ``[Z, Y, X]``.
+                Must be ``[Z, Y, X]`` or ``[Z, Y, X, T]``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'reflect'``.
@@ -665,11 +665,11 @@ class CenterCrop(DualTransform):
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, shape: TypeSpatialShape, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
+    def __init__(self, shape: TypeShapes, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
-        self.output_shape = np.asarray(shape, dtype=np.intc)  # TODO: make it len 3
+        self.output_shape = np.asarray(shape, dtype=np.intc)
         self.border_mode = border_mode
         self.mask_mode = border_mode
         self.ival = ival
@@ -702,10 +702,11 @@ class CenterCrop(DualTransform):
 
     def get_params(self, **data):
         # get crop coordinates, position of the corner closest to the image origin
-        img_spatial_shape = np.array(data['image'].shape[1:4])
-        position: TypeSpatialCoordinate = (img_spatial_shape - self.output_shape) // 2
+        output_dims = len(self.output_shape)
+        img_shape = np.array(data['image'].shape[1:output_dims + 1])
+        position = (img_shape - self.output_shape) // 2
         position = np.maximum(position, 0).astype(int)
-        pad_dims = F.get_pad_dims(img_spatial_shape, self.output_shape)
+        pad_dims = F.get_pad_dims(img_shape, self.output_shape)
 
         return {'crop_position': position,
                 'pad_dims': pad_dims}
@@ -725,7 +726,7 @@ class RandomCrop(DualTransform):
         Args:
             shape (Tuple[int]): The desired shape of input.
 
-                Must be ``[Z, Y, X]``.
+                Must be ``[Z, Y, X]`` or ``[Z, Y, X, T]``.
             border_mode (str, optional): Values outside image domain are filled according to this mode.
 
                 Defaults to ``'reflect'``.
@@ -753,7 +754,7 @@ class RandomCrop(DualTransform):
         Targets:
             image, mask, float mask, key points, bounding boxes
     """
-    def __init__(self, shape: TypeSpatialShape, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
+    def __init__(self, shape: TypeShapes, border_mode: str = "reflect", ival: Union[Sequence[float], float] = (0, 0),
                  mval: Union[Sequence[float], float] = (0, 0), ignore_index: Union[float, None] = None,
                  always_apply: bool = False, p: float = 1.0):
         super().__init__(always_apply, p)
@@ -790,10 +791,11 @@ class RandomCrop(DualTransform):
 
     def get_params(self, **data):
         # get crop coordinates, position of the corner closest to the image origin
-        img_spatial_shape = np.array(data['image'].shape[1:4])
-        ranges: TypeSpatialShape = np.maximum(img_spatial_shape - self.output_shape, 0)
+        output_dims = len(self.output_shape)
+        img_shape = np.array(data['image'].shape[1:output_dims + 1])
+        ranges: TypeShapes = np.maximum(img_shape - self.output_shape, 0)
         position = np.array([random.randint(0, r) for r in ranges])
-        pad_dims = F.get_pad_dims(img_spatial_shape, self.output_shape)
+        pad_dims = F.get_pad_dims(img_shape, self.output_shape)
         return {'crop_position': position,
                 'pad_dims': pad_dims}
 
