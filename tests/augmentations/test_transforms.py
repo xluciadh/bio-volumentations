@@ -423,6 +423,29 @@ class TestCenterCrop(unittest.TestCase):
         for value, expected_value, msg in tests:
             self.assertGreater(value, expected_value * 0.5, msg)
 
+    def test_deflate_temporal(self):
+        # test which won't and will get cropped
+        img = create_test_img((1, 3, 3, 3, 3), [(1, 1, 1, 1), (0, 0, 0, 0)])
+        keypoints = [(1, 1, 1, 1), (0, 0, 0, 0)]
+
+        crop = Compose([CenterCrop(shape=(1, 1, 1, 1))])
+        cropped_sample = crop(image=img, keypoints=keypoints)
+
+        expected_img = create_test_img((1, 1, 1, 1, 1), [(0, 0, 0, 0)])
+        expected_keypoints = [(0, 0, 0, 0)]
+        self.assertTrue(evaluate_result(cropped_sample, expected_img, expected_keypoints))
+
+    def test_inflate_temporal(self):
+        img = create_test_img((1, 3, 3, 3, 3), [(1, 1, 1, 1)])
+        keypoints = [(1, 1, 1, 1)]
+
+        crop = Compose([CenterCrop(shape=(5, 5, 5, 5), border_mode="constant")])
+        cropped_sample = crop(image=img, keypoints=keypoints)
+
+        expected_img = create_test_img((1, 5, 5, 5, 5), [(2, 2, 2, 2)])
+        expected_keypoints = [(2, 2, 2, 2)]
+        self.assertTrue(evaluate_result(cropped_sample, expected_img, expected_keypoints))
+
 
 class TestRandomCrop(unittest.TestCase):
     def test_inflate(self):
@@ -450,6 +473,28 @@ class TestRandomCrop(unittest.TestCase):
         tests = get_keypoints_tests(RandomCrop, in_shape, params={'shape': (20, 21, 22)})
         for value, expected_value, msg in tests:
             self.assertGreater(value, expected_value * 0.5, msg)
+
+    def test_deflate_temporal(self):
+        img = create_test_img((1, 3, 3, 3, 3), [(1, 1, 1, 1)])
+
+        crop = Compose([RandomCrop(shape=(1, 1, 1, 1))])
+        cropped_sample = crop(image=img, keypoints=[])
+
+        self.assertTrue(
+            evaluate_result(cropped_sample, create_test_img((1, 1, 1, 1, 1), [(0, 0, 0, 0)]), [])
+            or evaluate_result(cropped_sample, create_test_img((1, 1, 1, 1, 1), []), [])
+        )
+
+    def test_inflate_temporal(self):
+        img = create_test_img((1, 3, 3, 3, 3), [(1, 1, 1, 1)])
+        keypoints = [(1, 1, 1, 1)]
+
+        crop = Compose([RandomCrop(shape=(5, 5, 5, 5), border_mode="constant")])
+        cropped_sample = crop(image=img, keypoints=keypoints)
+
+        expected_img = create_test_img((1, 5, 5, 5, 5), [(2, 2, 2, 2)])
+        expected_keypoints = [(2, 2, 2, 2)]
+        self.assertTrue(evaluate_result(cropped_sample, expected_img, expected_keypoints))
 
 
 class TestResize(unittest.TestCase):
