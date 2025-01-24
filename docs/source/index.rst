@@ -19,7 +19,10 @@ and with any major deep learning library.
    contributions
 
 The source codes and more details are also available
-`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1?ref_type=tags>`_.
+`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1?ref_type=tags>`_,
+code release is available from the project's
+`GitHub <https://github.com/xluciadh/bio-volumentations/releases/tag/1.3.1>`_
+and from `PyPI <https://pypi.org/project/bio-volumentations/>`_.
 
 Indices and tables
 ==================

@@ -18,5 +18,6 @@ This library builds upon widely used libraries such as Albumentations and TorchI
 
 The source codes are available
 `at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1?ref_type=tags>`_.
-The package can be installed via pip - see `the project's PyPI page <https://pypi.org/project/bio-volumentations/>`_.
+The package can be installed via `pip <https://pypi.org/project/bio-volumentations/>`_
+and is archived `at GitHub <https://github.com/xluciadh/bio-volumentations/releases/tag/1.3.1>`_.
 

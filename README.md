@@ -36,6 +36,8 @@ That's it :)
 
 For more details, see [the project's PyPI page](https://pypi.org/project/bio-volumentations/).
 
+Releases can also be found at [the project's GitHub page](https://github.com/xluciadh/bio-volumentations/releases).
+
 ### Requirements
 
 - [NumPy](https://numpy.org/)
@@ -43,6 +45,12 @@ For more details, see [the project's PyPI page](https://pypi.org/project/bio-vol
 - [Scikit-image](https://scikit-image.org/)
 - [SimpleITK](https://simpleitk.org/)
 
+### GitLab or GitHub?
+
+`Bio-Volumentations` are being actively developed by the [CBIA @ FI MUNI](https://cbia.fi.muni.cz/), therefore
+CBIA's official repository at [GitLab](https://gitlab.fi.muni.cz/cbia/bio-volumentations) is the primary repository
+at the moment. The project's [GitHub repository](https://github.com/xluciadh/bio-volumentations) holds releases 
+of our library and will be updated at important milestones and with new library versions.
 
 # Usage
 
