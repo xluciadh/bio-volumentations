@@ -27,8 +27,8 @@ import time
 import numpy as np
 
 # bio-volumentations
-import bio_volumentations.core.composition as biovol_compose
-import bio_volumentations.augmentations as biovol
+import src.core.composition as biovol_compose
+import src.augmentations as biovol
 
 # TorchIO: requires pytorch, torchIO (pip) (had networkx 2.8.8)
 import torchio

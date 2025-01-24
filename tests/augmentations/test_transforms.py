@@ -26,12 +26,12 @@
 
 
 import unittest
-from bio_volumentations.augmentations.transforms import (
+from src.augmentations.transforms import (
     GaussianNoise, PoissonNoise, Resize, Pad, Scale, Flip, CenterCrop, AffineTransform,
     RandomScale, RandomRotate90, RandomFlip, RandomCrop, RandomAffineTransform, RandomGamma,
     NormalizeMeanStd, GaussianBlur, Normalize, HistogramEqualization, RandomBrightnessContrast,
     RandomGaussianBlur, RemoveBackgroundGaussian, Rescale)
-from bio_volumentations.core.composition import Compose
+from src.core.composition import Compose
 import numpy as np
 
 DEBUG = False

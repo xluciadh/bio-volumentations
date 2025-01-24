@@ -26,8 +26,8 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
-from bio_volumentations.core.composition import *
-from bio_volumentations.augmentations import *
+from src.core.composition import *
+from src.augmentations import *
 
 import time
 
