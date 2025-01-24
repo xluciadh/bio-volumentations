@@ -18,7 +18,7 @@ See `the project's PyPI page <https://pypi.org/project/bio-volumentations/>`_ fo
 
 Importing
 *********
-You can import the `Bio-Volumentations` library into your project using:
+You can import `Bio-Volumentations` into your project using:
 
 .. code-block:: python
 
@@ -31,7 +31,7 @@ The `Bio-Volumentations` library processes 3D, 4D, and 5D images. Each image mus
 represented as :class:`numpy.ndarray` and must conform to the following conventions:
 
 - The order of dimensions is [C, Z, Y, X, T], where C is channel dimension, Z, Y, and X are spatial dimensions, and T is time dimension.
-- The three spatial (Z, Y, X) dimensions must always be present. To transform a 2D image, please create a dummy Z dimension. (Or consider using a more suitable library, such as `Albumentations <https://albumentations.ai/>`_.)
+- The three spatial (Z, Y, X) dimensions must always be present. To transform a 2D image, please create a dummy Z dimension first. (Or consider using a more suitable library, such as `Albumentations <https://albumentations.ai/>`_.)
 - The channel (C) dimension is optional for the input image. However, the output image will always be at least 4-dimensional. If the C dimension is not present in the input, the library will automatically create a dummy dimension in its place, so the output image shape will be [1, Z, Y, X].
 - The time (T) dimension is optional and can only be present if the channel (C) dimension is also present in the input data. To process single-channel time-lapse images, please create a dummy C dimension.
 
@@ -46,12 +46,12 @@ The shape of the output image will be either [C, Z, Y, X] (for cases 1 & 2) or [
 The images are type-casted to a floating-point datatype before being transformed, irrespective of their actual datatype.
 
 For the specification of image annotation conventions, please see
-`the respective sections below <https://biovolumentations.readthedocs.io/1.3.0/examples.html#example-transforming-images-with-annotations>`_.
+`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-images-with-annotations>`_.
 
-The transformations are implemented as callable classes inheriting from an abstract :class:`Transform` class.
+All transformations are implemented as callable classes inheriting from an abstract :class:`Transform` class.
 Upon instantiating a transformation object, one has to specify the parameters of the transformation.
 
-All transformations work in a fully 3D fashion. Individual channels and time points of a data volume
+The transformations work in a fully 3D fashion. Individual channels and time points of a data volume
 are usually transformed separately and in the same manner; however, certain transformations can also work
 along these dimensions. For instance, :class:`GaussianBlur` can perform the blurring along the temporal dimension and
 with different strength in individual channels.
@@ -65,7 +65,7 @@ If you call transformations outside of :class:`Compose`, we cannot guarantee the
 are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use the `Bio-Volumentations` library. You are also welcome to check
-`the API reference <https://biovolumentations.readthedocs.io/1.3.0/modules.html>`_ to learn more about the individual transforms.
+`the API reference <https://biovolumentations.readthedocs.io/1.3.1/modules.html>`_ to learn more about the individual transforms.
 
 Example: Transforming a Single Image
 ************************************
@@ -77,8 +77,8 @@ and then feed a list of these transformations into a new :class:`Compose` object
 Optionally, you can specify a datatype conversion transformation that will be applied after the last transformation
 in the list, for example from the default :class:`numpy.ndarray` to a PyTorch :class:`torch.Tensor`.
 You can also specify the probability of applying the whole pipeline as a number between 0 and 1.
-The default probability is 1; the pipeline is applied for each call. See the :class:`Compose`
-`docs <https://biovolumentations.readthedocs.io/1.3.0/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
+The default probability is 1 (i.e., the pipeline is applied in each call). See the :class:`Compose`
+`docs <https://biovolumentations.readthedocs.io/1.3.1/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
 for more details.
 
 Note: You can also toggle the probability of applying the individual transforms. To do so, you can
@@ -107,7 +107,7 @@ The default keyword for the image data is, unsurprisingly, :class:`'image'`.
     img = np.random.rand(1, 128, 256, 256)
 
     # Transform the image
-    # Notice that the image must be passed as a keyword argument to the transformation pipeline
+    # Please note that the image must be passed as a keyword argument to the transformation pipeline
     # and extracted from the outputted dictionary.
     data = {'image': img}
     aug_data = aug(**data)
@@ -131,29 +131,24 @@ target except for the channel (C) dimension which must not be included.
 For example, a :class:`mask` and/or :class:`float_mask` of shape ``[150, 300, 300]`` can correspond to
 images of shape ``[150, 300, 300]``, ``[1, 150, 300, 300]``, as well as ``[4, 150, 300, 300]``.
 If you want to use a multi-channel :class:`mask` or :class:`float_mask`, you have to split it into
-a set of single-channel :class:`mask` s or :class:`float_mask` s, respectively, and input them
-as stand-alone targets (see below how to transform multiple masks per image).
+a set of single-channel :class:`mask` or :class:`float_mask` targets, respectively, and input them
+as stand-alone targets (see
+`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-multiple-targets-of-the-same-type>`_.
+below on transforming multiple masks with a single image).
 
 The :class:`keypoints` target is represented as a list of tuples. Each tuple represents
 the absolute coordinates of a keypoint in the volume, so it must contain either 3 or 4 numbers
 (for volumetric and time-lapse volumetric data, respectively).
 
 The :class:`value` target can hold any other data whose value does not change during the transformation process.
-This can be for example image-level information such as a classification labels.
+This can be for example image-level information such as a classification label for the whole image.
 
-If a :class:`Random...` transform receives multiple targets on its input in a single call,
-the same transformation parameters are used to transform all of these targets.
-For example, :class:`RandomAffineTransform` applies the same geometric transformation to all target types in a single call.
-
-Some transformations, such as :class:`RandomGaussianNoise` or :class:`RandomGamma`,
-are only defined for the :class:`image` target
-and leave the other target types unchanged. Please consult the
-`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.3.0/modules.html>`_
-for more details.
-
-The corresponding targets are fed to the :class:`Compose` object call as keyword arguments and extracted from the outputted
+The corresponding targets (which form a single data sample) are fed to the transformation pipeline
+as keyword arguments of a call to the :class:`Compose` object. Consequently, they can be extracted from the outputted
 dictionary using the same keys. The default key values are :class:`'image'`, :class:`'mask'`, :class:`'float_mask'`,
 :class:`'keypoints'`, :class:`'bboxes'`, and :class:`'value'`.
+
+You cannot define your own target types; that would require re-implementing all existing transforms.
 
 .. code-block:: python
 
@@ -172,15 +167,30 @@ dictionary using the same keys. The default key values are :class:`'image'`, :cl
     lbl = np.random.randint(0, 1, size=(128, 256, 256), dtype=np.uint8)
 
     # Transform the images
-    # Notice that the images must be passed as keyword arguments to the transformation pipeline
+    # Please note that the images must be passed as keyword arguments to the transformation pipeline
     # and extracted from the outputted dictionary.
     data = {'image': img, 'mask': lbl}
     aug_data = aug(**data)
     transformed_img, transformed_lbl = aug_data['image'], aug_data['mask']
 
-Example: Transforming Multiple Images of the Same Target Type
-*************************************************************
-You can input arbitrary number of inputs to any transformation. To achieve this, you have to define the keywords
+If a :class:`Random...` transformation receives multiple targets on its input in a single call,
+the same transformation parameters are used to transform all of these targets.
+For example, :class:`RandomAffineTransform` applies the same geometric transformation to all target types in a single call.
+
+Some transformations, such as :class:`RandomGaussianNoise` or :class:`RandomGamma`,
+are only defined for the :class:`image` target
+and leave the other target types unchanged. Please consult the
+`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.3.1/modules.html>`_
+for more details.
+
+Another example of transforming an annotated image is available
+`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1/example?ref_type=tags>`_,
+where a runnable Python script and a test data sample are provided.
+See `the readme at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/README.md?ref_type=tags#the-first-example>`_ for more details.
+
+Example: Transforming Multiple Targets of the Same Type
+*******************************************************
+You can input arbitrary number of inputs to any transformation. To achieve this, you have to define keywords
 for the individual inputs when creating the :class:`Compose` object.
 The specified keywords will then be used to input the images to the transformation call as well as to extract the
 transformed images from the outputted dictionary.
@@ -191,15 +201,13 @@ must be a tuple of strings, each string representing a single keyword. Similarly
 for the respective target types.
 
 Importantly, there must always be an :class:`image`-type target with the keyword :class:`'image'`.
-Otherwise, the keywords can be any valid dictionary keys, and they must be unique within each target type.
+Otherwise, the keywords can be any valid dictionary keys, and they must be unique.
 
 You do not need to use all specified keywords in a transformation call. However, at least the target with
 the :class:`'image'` keyword must be present in each transformation call.
 In our example below, there are seven target keywords defined: four keywords defined explicitly (two for :class:`image`,
 one for :class:`mask`, and one for :class:`float_mask`) and three defined implicitly (for :class:`keypoints`,
 :class:`bounding_boxes`, and :class:`value`), but we only transform three targets.
-
-You cannot define your own target types; that would require re-implementing all existing transforms.
 
 
 .. code-block:: python
@@ -221,7 +229,7 @@ You cannot define your own target types; that would require re-implementing all 
     lbl = np.random.randint(0, 1, size=(128, 256, 256), dtype=np.uint8)
 
     # Transform the images
-    # Notice that the images must be passed as keyword arguments to the transformation pipeline
+    # Please note that the images must be passed as keyword arguments to the transformation pipeline
     # and extracted from the outputted dictionary.
     data = {'image': img, 'abc': img1, 'mask': lbl}
     aug_data = aug(**data)
@@ -263,7 +271,7 @@ for example, :class:`Flip` can be implemented as follows:
         def apply_to_keypoints(self, keypoints, **params):
             return F.flip_keypoints(keypoints, axes=params['axes'], img_shape=params['img_shape'])
 
-        # Get transformation parameters. This is useful especially for RandomXXX transforms
+        # Set transformation parameters. This is useful especially for RandomXXX transforms
         # to ensure consistent transformation of samples with multiple targets.
         def get_params(self, **data):
             axes = [1, 2, 3] if self.axes is None else self.axes

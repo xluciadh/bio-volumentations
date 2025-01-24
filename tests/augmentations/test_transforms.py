@@ -1,6 +1,7 @@
 # ============================================================================================= #
-#  Author:       Filip Lux                                                                      #
+#  Author:       Filip Lux, Lucia Hradecká                                                      #
 #  Copyright:    Filip Lux          : lux.filip@gmail.com                                       #
+#                Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #
 #                                                                                               #
 #  MIT License.                                                                                 #
 #                                                                                               #
@@ -25,12 +26,12 @@
 
 
 import unittest
-from bio_volumentations.augmentations.transforms import (
+from src.augmentations.transforms import (
     GaussianNoise, PoissonNoise, Resize, Pad, Scale, Flip, CenterCrop, AffineTransform,
     RandomScale, RandomRotate90, RandomFlip, RandomCrop, RandomAffineTransform, RandomGamma,
     NormalizeMeanStd, GaussianBlur, Normalize, HistogramEqualization, RandomBrightnessContrast,
-    RandomGaussianBlur)
-from bio_volumentations.core.composition import Compose
+    RandomGaussianBlur, RemoveBackgroundGaussian, Rescale)
+from src.core.composition import Compose
 import numpy as np
 
 DEBUG = False
@@ -493,7 +494,6 @@ class TestRandomAffineTransform(unittest.TestCase):
                 self.assertGreater(value, expected_value * 0.2, msg)
 
 
-
 class TestAffineTransform(unittest.TestCase):
     def test_shape(self):
 
@@ -645,6 +645,61 @@ class TestNormalize(unittest.TestCase):
             self.assertEqual(tr_img.dtype, data_type)
 
 
+class TestRescale(unittest.TestCase):
+    def test_shape(self):
+        in_shape = (31, 32, 33)
+        scale = 2
+        tests = get_shape_tests(Rescale, in_shape, params={'scales': scale, 'shape': np.asarray(in_shape) * scale})
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+        in_shape = (30, 33, 60)
+        scale = 1.0/3
+        tests = get_shape_tests(Rescale, in_shape, params={'scales': scale, 'shape': np.asarray(in_shape) * scale})
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+        in_shape = (30, 33, 60)
+        scale = (0.5, 3, 1.5)
+        tests = get_shape_tests(Rescale, in_shape, params={'scales': scale,
+                                                           'shape': np.asarray(in_shape) * np.asarray(scale)})
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+    def test_keypoints(self):
+        in_shape = (32, 31, 30)
+        scale = 2
+        tests = get_keypoints_tests(Rescale, in_shape, params={'scales': scale, 'shape': np.asarray(in_shape) * scale})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+        in_shape = (30, 33, 60)
+        scale = (0.5, 3, 1.5)
+        tests = get_keypoints_tests(Rescale, in_shape, params={'scales': scale,
+                                                               'shape': np.asarray(in_shape) * np.asarray(scale)})
+        for value, expected_value, msg in tests:
+            self.assertGreater(value, expected_value * 0.5, msg)
+
+
+class TestRemoveBackgroundGaussian(unittest.TestCase):
+    def test_shape(self):
+        tests = get_shape_tests(RemoveBackgroundGaussian, (31, 32, 33))
+        for tr_img, expected_shape, data_type in tests:
+            self.assertTupleEqual(tr_img.shape, expected_shape)
+            self.assertEqual(tr_img.dtype, data_type)
+
+    def test_shape_5d(self):
+        for params in [{'sigma': 1}, {'sigma': (1, 2, 2)}, {'sigma': (1, 2, 2, 3)},
+                       {'sigma': [1, 2]}, {'sigma': [(1, 2, 2), (1, 2, 2)]}, {'sigma': [(1, 2, 2, 3), (1, 2, 2, 3)]}]:
+            tests = get_shape_tests_5d(RemoveBackgroundGaussian, (2, 31, 32, 33, 5), params=params)
+            for tr_img, expected_shape, data_type in tests:
+                self.assertTupleEqual(tr_img.shape, expected_shape)
+                self.assertEqual(tr_img.dtype, data_type)
+
+
 class TestInputArgs(unittest.TestCase):
     def test_individual_transforms(self):
         tr = Compose([
@@ -682,6 +737,10 @@ class TestInputArgs(unittest.TestCase):
             HistogramEqualization(30),
             Pad(10), Pad((10, 30)), Pad((10, 20, 40, 15, 20, 20)),
             Normalize(2, 4), Normalize([1, 2], [1, 3]),
+            Rescale(0.8), Rescale((0.9, 0.3, 1.2)),
+            RemoveBackgroundGaussian(1), RemoveBackgroundGaussian((1, 2, 2)), RemoveBackgroundGaussian((1, 2, 2, 3)),
+            RemoveBackgroundGaussian([1, 2]), RemoveBackgroundGaussian([(1, 2, 2), (1, 2, 2)]),
+            RemoveBackgroundGaussian([(1, 2, 2, 3), (1, 2, 2, 3)]),
         ])
 
     def test_individual_transforms_incorrect_initialisation(self):

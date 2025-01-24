@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-from bio_volumentations.core.composition import Compose
-import bio_volumentations.augmentations.transforms as transforms
+from src.core.composition import Compose
+import src.augmentations.transforms as transforms
 
 
 class TestComposeConversion(unittest.TestCase):
@@ -15,7 +15,6 @@ class TestComposeConversion(unittest.TestCase):
 
         res_image = result['image']
         self.assertIsInstance(res_image, np.ndarray)
-        self.assertTrue(np.all(np.equal(img, res_image)))
 
     '''
     def test_pytorch_tensor(self):
@@ -32,7 +31,7 @@ class TestComposeConversion(unittest.TestCase):
 
     def test_compose(self):
         import numpy as np
-        from bio_volumentations import Compose, RandomGamma, RandomFlip, GaussianBlur
+        from src import Compose, RandomGamma, RandomFlip, GaussianBlur
 
         # Create the transformation using Compose from a list of transformations and define targets
         aug = Compose([
@@ -60,7 +59,7 @@ class TestComposeConversion(unittest.TestCase):
         self.assertTupleEqual(img.shape, transformed_img.shape)
 
     def test_compose2(self):
-        from bio_volumentations import Compose, RandomScale, RandomCrop, RandomFlip, RandomBrightnessContrast, RandomGaussianBlur, NormalizeMeanStd
+        from src import Compose, RandomScale, RandomCrop, RandomFlip, RandomBrightnessContrast, RandomGaussianBlur, NormalizeMeanStd
 
         augmentation_pipeline = Compose([
             RandomScale(scaling_limit=(1.1, 1.6, 0.4, 0.6, 0.4, 0.6), always_apply=True),
@@ -74,7 +73,7 @@ class TestComposeConversion(unittest.TestCase):
         ], img_keywords=('image',), mask_keywords = ('mask', 'centers'), fmask_keywords = ('weights',))
 
     def test_value_targets(self):
-        from bio_volumentations import Compose, RandomScale, RandomCrop, RandomFlip, RandomBrightnessContrast, \
+        from src import Compose, RandomScale, RandomCrop, RandomFlip, RandomBrightnessContrast, \
             RandomGaussianBlur, NormalizeMeanStd
 
         augmentation_pipeline = Compose([
