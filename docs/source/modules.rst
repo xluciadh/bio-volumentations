@@ -10,17 +10,17 @@ Here, you can find documentation pages for the individual transformations.
 .. toctree::
    :maxdepth: 2
 
-   bio_volumentations.augmentations
+   src.bio_volumentations.augmentations
 
 .. toctree::
    :maxdepth: 2
 
-   bio_volumentations.conversion
+   src.bio_volumentations.conversion
 
 .. toctree::
    :maxdepth: 3
 
-   bio_volumentations.core
+   src.bio_volumentations.core
 
 
 Runtime
@@ -28,4 +28,4 @@ Runtime
 
 The execution times of individual transformations from our library
 and their comparison to other libraries capable of processing volumetric image data
-are available `at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/README.md?ref_type=tags#runtime>`_.
+are available `at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.2/README.md?ref_type=tags#runtime>`_.

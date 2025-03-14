@@ -46,7 +46,7 @@ The shape of the output image will be either [C, Z, Y, X] (for cases 1 & 2) or [
 The images are type-casted to a floating-point datatype before being transformed, irrespective of their actual datatype.
 
 For the specification of image annotation conventions, please see
-`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-images-with-annotations>`_.
+`the respective section below <https://biovolumentations.readthedocs.io/1.3.2/examples.html#example-transforming-images-with-annotations>`_.
 
 All transformations are implemented as callable classes inheriting from an abstract :class:`Transform` class.
 Upon instantiating a transformation object, one has to specify the parameters of the transformation.
@@ -65,7 +65,7 @@ If you call transformations outside of :class:`Compose`, we cannot guarantee the
 are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use the `Bio-Volumentations` library. You are also welcome to check
-`the API reference <https://biovolumentations.readthedocs.io/1.3.1/modules.html>`_ to learn more about the individual transforms.
+`the API reference <https://biovolumentations.readthedocs.io/1.3.2/modules.html>`_ to learn more about the individual transforms.
 
 Example: Transforming a Single Image
 ************************************
@@ -78,7 +78,7 @@ Optionally, you can specify a datatype conversion transformation that will be ap
 in the list, for example from the default :class:`numpy.ndarray` to a PyTorch :class:`torch.Tensor`.
 You can also specify the probability of applying the whole pipeline as a number between 0 and 1.
 The default probability is 1 (i.e., the pipeline is applied in each call). See the :class:`Compose`
-`docs <https://biovolumentations.readthedocs.io/1.3.1/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
+`docs <https://biovolumentations.readthedocs.io/1.3.2/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
 for more details.
 
 Note: You can also toggle the probability of applying the individual transforms. To do so, you can
@@ -115,7 +115,7 @@ The default keyword for the image data is, unsurprisingly, :class:`'image'`.
 
 Example: Transforming Images with Annotations
 *********************************************
-Sometimes, it is necessary to transform an image with some corresponding additional targets.
+Sometimes, it is necessary to transform an image with some associated additional targets.
 To that end, `Bio-Volumentations` define several target types:
 
 - :class:`image` for the image data (:class:`numpy.ndarray` with floating-point datatype);
@@ -133,8 +133,8 @@ images of shape ``[150, 300, 300]``, ``[1, 150, 300, 300]``, as well as ``[4, 15
 If you want to use a multi-channel :class:`mask` or :class:`float_mask`, you have to split it into
 a set of single-channel :class:`mask` or :class:`float_mask` targets, respectively, and input them
 as stand-alone targets (see
-`the respective section below <https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-multiple-targets-of-the-same-type>`_.
-below on transforming multiple masks with a single image).
+`the respective section below <https://biovolumentations.readthedocs.io/1.3.2/examples.html#example-transforming-multiple-targets-of-the-same-type>`_
+on transforming multiple masks with a single image).
 
 The :class:`keypoints` target is represented as a list of tuples. Each tuple represents
 the absolute coordinates of a keypoint in the volume, so it must contain either 3 or 4 numbers
@@ -143,10 +143,15 @@ the absolute coordinates of a keypoint in the volume, so it must contain either 
 The :class:`value` target can hold any other data whose value does not change during the transformation process.
 This can be for example image-level information such as a classification label for the whole image.
 
-The corresponding targets (which form a single data sample) are fed to the transformation pipeline
+The associated targets (which form a single data sample) are fed to the transformation pipeline
 as keyword arguments of a call to the :class:`Compose` object. Consequently, they can be extracted from the outputted
 dictionary using the same keys. The default key values are :class:`'image'`, :class:`'mask'`, :class:`'float_mask'`,
 :class:`'keypoints'`, :class:`'bboxes'`, and :class:`'value'`.
+
+Prior to applying any user-defined transformation, the :class:`mask` and :class:`float_mask` targets are type-casted to
+integer and floating-point datatypes, respectively.
+
+Importantly, there must always be an :class:`image`-type target in the sample.
 
 You cannot define your own target types; that would require re-implementing all existing transforms.
 
@@ -180,13 +185,13 @@ For example, :class:`RandomAffineTransform` applies the same geometric transform
 Some transformations, such as :class:`RandomGaussianNoise` or :class:`RandomGamma`,
 are only defined for the :class:`image` target
 and leave the other target types unchanged. Please consult the
-`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.3.1/modules.html>`_
+`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.3.2/modules.html>`_
 for more details.
 
 Another example of transforming an annotated image is available
-`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1/example?ref_type=tags>`_,
+`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.2/example?ref_type=tags>`_,
 where a runnable Python script and a test data sample are provided.
-See `the readme at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/README.md?ref_type=tags#the-first-example>`_ for more details.
+See `the readme at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.2/README.md?ref_type=tags#the-first-example>`_ for more details.
 
 Example: Transforming Multiple Targets of the Same Type
 *******************************************************
@@ -198,10 +203,7 @@ transformed images from the outputted dictionary.
 Specifically, you can define :class:`image`-type target keywords using the :class:`img_keywords` parameter - its value
 must be a tuple of strings, each string representing a single keyword. Similarly, there are :class:`mask_keywords`,
 :class:`fmask_keywords`, :class:`keypoints_keywords`, :class:`bboxes_keywords`, and :class:`value_keywords` parameters
-for the respective target types.
-
-Importantly, there must always be an :class:`image`-type target with the keyword :class:`'image'`.
-Otherwise, the keywords can be any valid dictionary keys, and they must be unique.
+for the respective target types. The keywords can be any valid dictionary keys, and they must be unique.
 
 You do not need to use all specified keywords in a transformation call. However, at least the target with
 the :class:`'image'` keyword must be present in each transformation call.

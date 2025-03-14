@@ -39,107 +39,101 @@
 # ============================================================================================= #
 
 
-import random
+from warnings import warn
 
-# DEBUG only flag
-VERBOSE = False
+from ..random_utils import random
+from ..core.transforms_interface import DualTransform
+from ..conversion import functional as FCT
 
 
-class Transform:
-    """The base class for transformations.
+class ConversionToFormat(DualTransform):
+    """Check the very basic assumptions about the input images.
+
+        Add channel dimension to the 3D images without it. Check that shapes of individual target types are
+        consistent (to some extent).
 
         Args:
-            always_apply (bool, optional): Always apply this transformation.
+            always_apply (bool, optional): Always apply this transformation in composition.
 
-                Defaults to ``False``.
-            p (float, optional): Chance of applying this transformation.
+                Defaults to ``True``.
+            p (float, optional): Probability of applying this transformation in composition.
 
-                Defaults to ``0.5``.
+                Defaults to ``1``.
+
+        Targets:
+            image, mask
     """
-    def __init__(self, always_apply=False, p=0.5):
-        assert 0 <= p <= 1
-        self.p = p
-        self.always_apply = always_apply
+    def __init__(self, always_apply: bool = True, p: float = 1):
+        super().__init__(always_apply, p)
 
     def __call__(self, force_apply, targets, **data):
-        if force_apply or self.always_apply or random.random() < self.p:
-            params = self.get_params(**data)
+        if force_apply or self.always_apply or random() < self.p:
+            # params = self.get_params(**data)
 
-            if VERBOSE:
-                print('RUN', self.__class__.__name__, params)
+            img_shape = []
+            mask_shape = []
+            float_shape = []
+            for k, v in data.items():
+                if k in targets['img_keywords']:
+                    img_shape.append(v.shape) 
+                elif k in targets['mask_keywords']:
+                    mask_shape.append(v.shape) 
+                elif k in targets['fmask_keywords']:
+                    float_shape.append(v.shape) 
+            
+            if FCT.check_dimensions(img_shape):
+                warn(f'Input images shapes do not have same length,', UserWarning)
+            elif FCT.check_dimensions(mask_shape):
+                warn(f'Input masks shapes do not have same length,', UserWarning)
+            elif FCT.check_dimensions(float_shape):
+                warn(f'Float masks shapes do not have same length,', UserWarning)
 
             for k, v in data.items():
                 if k in targets['img_keywords']:
-                    data[k] = self.apply(v, **params)
-                else:
-                    # no transformation
-                    pass
+                    if len(v.shape) == 3:
+                        warn(f'Adding channel dimension to the image', UserWarning)
+                        data[k] = v[None, ...]
 
         return data
-
-    def get_params(self, **data):
-        # Shared parameters for one apply (usually random values).
-        return {}
 
     def apply(self, volume, **params):
-        raise NotImplementedError
-
-
-class DualTransform(Transform):
-    """The base class of transformations applied images and also to all target types.
-
-        Targets:
-            image, mask, float mask, key points, bounding boxes
-    """
-
-    def __call__(self, force_apply, targets, **data):
-        if force_apply or self.always_apply or random.random() < self.p:
-            params = self.get_params(**data)
-
-            if VERBOSE:
-                print('RUN', self.__class__.__name__, params)
-
-            for k, v in data.items():
-                if k in targets['img_keywords']:
-                    data[k] = self.apply(v, **params)
-                elif k in targets['mask_keywords']:
-                    data[k] = self.apply_to_mask(v, **params)
-                elif k in targets['fmask_keywords']:
-                    data[k] = self.apply_to_float_mask(v, **params)
-                elif k in targets['keypoint_keywords']:
-                    data[k] = self.apply_to_keypoints(v, **params)
-                elif k in targets['bbox_keywords']:
-                    data[k] = self.apply_to_bboxes(v, **params)
-                else:
-                    # no transformation
-                    pass
-
-        return data
+        return volume
 
     def apply_to_mask(self, mask, **params):
-        # default: use image transformation
-        return self.apply(mask, **params)
-    
-    def apply_to_float_mask(self, float_mask, **params):
-        # default: use mask transformation
-        return self.apply_to_mask(float_mask, **params)
+        return mask
 
-    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
-        # default: no transformation
-        return keypoints
+    def apply_to_float_mask(self, mask, **params):
+        return mask
 
-    def apply_to_bboxes(self, bboxes, **params):
-        # default: no transformation
-        return bboxes
+    def __repr__(self):
+        return f'ConversionToFormat({self.always_apply}, {self.p})'
 
 
-class ImageOnlyTransform(Transform):
-    """The base class of transformations applied to the `image` target only.
+class NoConversion(DualTransform):
+    """An identity transform.
+
+        Args:
+            always_apply (bool, optional): Always apply this transformation in composition.
+
+                Defaults to ``True``.
+            p (float, optional): Probability of applying this transformation in composition.
+
+                Defaults to ``1``.
 
         Targets:
-            image
+            image, mask
     """
-    @property
-    def targets(self):
-        return {"image": self.apply}
+    def __init__(self, always_apply: bool = True, p: float = 1):
+        super().__init__(always_apply, p)
 
+    def apply(self, volume, **params):
+        return volume
+
+    def apply_to_mask(self, mask, **params):
+        return mask
+
+    def apply_to_float_mask(self, mask, **params):
+        return mask
+
+    def __repr__(self):
+        return f'NoConversion({self.always_apply}, {self.p})'

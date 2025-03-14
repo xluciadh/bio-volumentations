@@ -6,7 +6,7 @@ Copyright
 Copyright (c) 2025 Samuel Šuľan, Lucia Hradecká, Filip Lux
 
 The `Bio-Volumentations` library is distributed under the MIT License.
-For more details, see `the licence file at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.1/LICENSE?ref_type=tags>`_.
+For more details, see `the licence file at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.2/LICENSE?ref_type=tags>`_.
 
 
 Contributions
@@ -36,4 +36,7 @@ We would thus like to thank their authors, namely `the Albumentations team <http
 Citation
 ********
 
-TBA
+If you find our library useful, please cite its `Zenodo record <https://doi.org/10.5281/zenodo.15023900>`_ as:
+
+Hradecká, L., & Lux, F. (2025). Bio-Volumentations (1.3.2). Zenodo. https://doi.org/10.5281/zenodo.15024087
+

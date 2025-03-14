@@ -4,5 +4,5 @@
 */*/*/__pycache__
 dist/
 dist-1/
-bio_volumentations.egg-info/
+src/bio_volumentations.egg-info
 docs/build

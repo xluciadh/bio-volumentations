@@ -1,6 +1,8 @@
 import unittest
+
 import numpy as np
-from src.conversion.transforms import *
+
+from src.bio_volumentations.conversion.transforms import *
 
 
 class TestNoConversion(unittest.TestCase):
@@ -20,7 +22,6 @@ class TestNoConversion(unittest.TestCase):
         img = np.empty(sh + (2,), dtype=float)
         lbl = np.empty(sh, dtype=float)
         tr = NoConversion()
-        # result = tr(force_apply=True, targets=[['image'], ['mask']], image=img, mask=lbl)
         result = tr(force_apply=True, targets={'img_keywords': ['image'], 'mask_keywords': ['mask']}, image=img, mask=lbl)
         self.assertIsInstance(result, dict)
         res_image = result['image']

@@ -21,7 +21,7 @@ segmentation, and object tracking.
 
 `Bio-Volumentations` build upon widely used libraries such as Albumentations and TorchIO 
 (see the _Contributions and Acknowledgements_ section below) and are accompanied by 
-[detailed documentation and a user guide](https://biovolumentations.readthedocs.io/1.3.1/). 
+[detailed documentation and a user guide](https://biovolumentations.readthedocs.io/1.3.2/). 
 Therefore, they can easily be adopted by developers.
 
 
@@ -44,6 +44,7 @@ Releases can also be found at [the project's GitHub page](https://github.com/xlu
 - [SciPy](https://scipy.org/)
 - [Scikit-image](https://scikit-image.org/)
 - [SimpleITK](https://simpleitk.org/)
+
 
 ### GitLab or GitHub?
 
@@ -132,7 +133,7 @@ If you call transformations outside of `Compose`, we cannot guarantee the all as
 are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use this library. You are also welcome to check 
-[our documentation pages](https://biovolumentations.readthedocs.io/1.3.1/).
+[our documentation pages](https://biovolumentations.readthedocs.io/1.3.2/).
 
 ### Example: Transforming a Single Image
 
@@ -144,7 +145,7 @@ Optionally, you can specify a datatype conversion transformation that will be ap
 in the list, e.g. from the default `numpy.ndarray` to a `torch.Tensor`. You can also specify the probability
 of actually applying the whole pipeline as a number between 0 and 1. 
 The default probability is 1 (i.e., the pipeline is applied in each call).
-See the [docs](https://biovolumentations.readthedocs.io/1.3.1/examples.html) for more details.
+See the [docs](https://biovolumentations.readthedocs.io/1.3.2/examples.html) for more details.
 
 The `Compose` object is callable. The data is passed as a keyword argument, and the call returns a dictionary 
 with the same keyword and the corresponding transformed image. This might look like an overkill for a single image, 
@@ -175,7 +176,7 @@ transformed_img = aug_data['image']
 
 ### Example: Transforming Images with Annotations
 
-Sometimes, it is necessary to transform an image with some corresponding additional targets.
+Sometimes, it is necessary to transform an image with some associated additional targets.
 To that end, `Bio-Volumentations` define several target types:
 
 - `image` for the image data;
@@ -184,10 +185,10 @@ To that end, `Bio-Volumentations` define several target types:
 - `keypoints` for a list of key points; and
 - `value` for non-transformed values.
 
-You cannot define your own target types; that would require re-implementing all existing transforms.
-
 For more information on the format of individual target types, see the 
-[Getting Started guide](https://biovolumentations.readthedocs.io/1.3.1/examples.html#example-transforming-images-with-annotations)
+[Getting Started guide](https://biovolumentations.readthedocs.io/1.3.2/examples.html#example-transforming-images-with-annotations)
+
+Please note that there must always be an `image`-type target in the sample.
 
 If a `Random...` transform receives multiple targets on its input in a single call,
 the same transformation parameters are used to transform all of these targets.
@@ -195,10 +196,11 @@ For example, `RandomAffineTransform` applies the same geometric transformation t
 
 Some transformations, such as `RandomGaussianNoise` or `RandomGamma`, are only defined for the `image` target 
 and leave the other targets unchanged. Please consult the 
-[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.3.1/modules.html) for more details.
+[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.3.2/modules.html) for more details.
 
-The corresponding targets are fed to the `Compose` object call as keyword arguments and extracted from the outputted
-dictionary using the same keys. The default key values are `'image'`, `'mask'`, `'float_mask'`, `'keypoints'`, and `'value'`.
+The associated targets are fed to the `Compose` object call as keyword arguments and extracted from the outputted
+dictionary using the same keywords. 
+The default key values are `'image'`, `'mask'`, `'float_mask'`, `'keypoints'`, and `'value'`.
 
 ```python
 import numpy as np
@@ -234,10 +236,8 @@ transformed images from the outputted dictionary.
 Specifically, you can define `image`-type target keywords using the `img_keywords` parameter - its value
 must be a tuple of strings, each string representing a single keyword. Similarly, there are `mask_keywords`,
 `fmask_keywords`, `value_keywords`, and `keypoints_keywords` parameters for the other target types. 
-Setting any of these parameters overwrites its default value.
-
-Please note that there must always be an `image`-type target with the keyword `'image'`.
-Otherwise, the keywords can be any valid dictionary keys, and they must be unique.
+Setting any of these parameters overwrites its default value. 
+The keywords can be any valid dictionary keys, and they must be unique.
 
 You do not need to use all specified keywords in a transformation call. However, at least the target with
 the `'image'` keyword must be present in each transformation call.
@@ -307,12 +307,13 @@ class Flip(DualTransform):
         return {"axes": axes}
 ```
 
+However, you cannot define your own target types, as that would require re-implementing all existing transforms.
 
 # Implemented Transforms
 
 ### A List of Implemented Transformations
 
-Point transformations:
+Intensity-based point transformations:
 ```python
 Normalize
 NormalizeMeanStd
@@ -323,14 +324,14 @@ RandomBrightnessContrast
 RandomGamma
 ```
 
-Local transformations:
+Intensity-based local transformations:
 ```python
 GaussianBlur 
 RandomGaussianBlur
 RemoveBackgroundGaussian
 ```
 
-Geometric transformations:
+Geometric (spatial) transformations:
 ```python
 AffineTransform
 Resize 
@@ -346,41 +347,49 @@ RandomFlip
 RandomCrop
 ```
 
+Other transformations:
+```python
+Contiguous
+StandardizeDatatype
+ConversionToFormat
+```
+
+
 ### Runtime
 
-Here, we present the execution times of individual transformations from our library 
+Here, we present the execution times (mean ± standard deviation) of individual transformations from our library 
 with respect to input image size.
 
 The shape (size) of inputs was [1, 32, 32, 32, 1] (32k voxels), [4, 32, 32, 32, 5] (655k voxels), 
 [4, 64, 64, 64, 5] (5M voxels), and [4, 128, 128, 128, 5] (42M voxels), respectively. 
 The runtimes, presented in milliseconds, were averaged over 100 runs.
-All measurements were done on a single workstation with an i7-7700 CPU @ 3.60GHz.
+All measurements were done on a single workstation with a Ryzen 7-3700X CPU @ 3.60GHz.
 
-| Transformation           | 32k voxels |  655k voxels |    5M voxels |  42M voxels |
-|:-------------------------|-----------:|-------------:|-------------:|------------:|
-| AffineTransform          |       3 ms |        26 ms |       113 ms |      845 ms |
-| RandomAffineTransform    |       2 ms |        19 ms |       110 ms |      899 ms |
-| Scale                    |       2 ms |        19 ms |       103 ms |      854 ms |
-| RandomScale              |       2 ms |        22 ms |       132 ms |      937 ms |
-| Flip                     |     < 1 ms |         1 ms |        11 ms |       86 ms |
-| RandomFlip               |     < 1 ms |         1 ms |         8 ms |       66 ms |
-| RandomRotate90           |     < 1 ms |         1 ms |        14 ms |      197 ms |
-| GaussianBlur             |       1 ms |         9 ms |        82 ms |      855 ms |
-| RandomGaussianBlur       |     < 1 ms |         8 ms |        74 ms |      788 ms |
-| GaussianNoise            |       1 ms |        15 ms |       124 ms |      989 ms |
-| PoissonNoise             |       1 ms |        21 ms |       176 ms |     1427 ms |
-| HistogramEqualization    |       2 ms |        35 ms |       285 ms |     2330 ms |
-| Normalize                |     < 1 ms |         2 ms |        17 ms |      158 ms |
-| NormalizeMeanStd         |     < 1 ms |         1 ms |         7 ms |       58 ms |
-| RandomBrightnessContrast |     < 1 ms |       < 1 ms |         4 ms |       38 ms |
-| RandomGamma              |     < 1 ms |         7 ms |        55 ms |      453 ms |
+| Transformation           | 32k voxels | 655k voxels |   5M voxels |    42M voxels |
+|:-------------------------|-----------:|------------:|------------:|--------------:|
+| AffineTransform          |   2 ± 0 ms |   23 ± 2 ms | 111 ± 11 ms |   988 ± 33 ms |
+| RandomAffineTransform    |   3 ± 1 ms |   24 ± 1 ms |  110 ± 7 ms |  1005 ± 28 ms |
+| Scale                    |   3 ± 1 ms |   25 ± 2 ms |  109 ± 9 ms |   990 ± 21 ms |
+| RandomScale              |   3 ± 1 ms |   25 ± 2 ms |  111 ± 9 ms |  1000 ± 30 ms |
+| Flip                     | < 1 ± 0 ms |    2 ± 0 ms |   14 ± 1 ms |    107 ± 8 ms |
+| RandomFlip               | < 1 ± 0 ms |    1 ± 1 ms |   13 ± 5 ms |    90 ± 31 ms |
+| RandomRotate90           | < 1 ± 0 ms |    2 ± 1 ms |   18 ± 5 ms |   150 ± 44 ms |
+| GaussianBlur             |   1 ± 0 ms |   13 ± 1 ms |  150 ± 3 ms | 5501 ± 148 ms |
+| RandomGaussianBlur       |   1 ± 0 ms |   11 ± 1 ms | 151 ± 18 ms | 5623 ± 176 ms |
+| GaussianNoise            | < 1 ± 0 ms |   10 ± 1 ms |   83 ± 3 ms |    687 ± 8 ms |
+| PoissonNoise             |   1 ± 0 ms |   20 ± 1 ms |  160 ± 1 ms |  1285 ± 18 ms |
+| HistogramEqualization    |   2 ± 0 ms |   35 ± 1 ms |  266 ± 5 ms |  2120 ± 18 ms |
+| Normalize                | < 1 ± 0 ms |    2 ± 1 ms |   32 ± 5 ms |   346 ± 24 ms |
+| NormalizeMeanStd         | < 1 ± 0 ms |    1 ± 0 ms |    9 ± 1 ms |     69 ± 5 ms |
+| RandomBrightnessContrast | < 1 ± 0 ms |    1 ± 0 ms |    6 ± 1 ms |     49 ± 8 ms |
+| RandomGamma              | < 1 ± 0 ms |    7 ± 0 ms |   59 ± 1 ms |    469 ± 6 ms |
 
 
 ### Runtime: Comparison to Other Libraries
 
-We also present the execution times of eight commonly used transformations, comparing the performance 
-of our `Bio-Volumentations` to other libraries capable of processing volumetric image data: 
-`TorchIO` [3], `Volumentations` [4, 5], and `Gunpowder` [6].
+We also present the execution times (mean ± standard deviation) of eight commonly used transformations, 
+comparing the performance of our `Bio-Volumentations` to other libraries capable of processing volumetric 
+image data: `TorchIO` [3], `Volumentations` [4, 5], and `Gunpowder` [6].
 
 Asterisks (*) denote transformations that only partially correspond to the desired functionality. 
 Dashes (-) denote transformations that are missing from the respective library. 
@@ -389,17 +398,17 @@ The runtimes, presented in milliseconds, were averaged over 100 runs.
 All measurements were done with a single-channel volumetric input image of size (256, 256, 256) 
 on a single workstation with a Ryzen 7-3700X CPU @ 3.60GHz.
 
-| Transformation                       |      `TorchIO` |     `Volumentations` |  `Gunpowder` | `Bio-Volumentations` |
-|:-------------------------------------|---------------:|---------------------:|-------------:|---------------------:|
-| Cropping                             |         *26 ms |                20 ms |     **7 ms** |                20 ms |
-| Flipping                             |          48 ms |                39 ms |    **31 ms** |                34 ms |
-| Affine transform                     |     **931 ms** |             *4177 ms |            - |              2719 ms |
-| Affine transform (anisotropic image) |              - |                    - |            - |            **2723 ms** |
-| Gaussian blur                        |        4699 ms |                    - |            - |          **3149 ms** |
-| Gaussian noise                       |     **182 ms** |               405 ms |      *340 ms |               400 ms |
-| Brightness and contrast change       |              - |                75 ms |       183 ms |            **28 ms** |
-| Padding                              |          68 ms |            **30 ms** |        54 ms |                43 ms |
-| Z-normalization                      |         214 ms |           **119 ms** |            - |               133 ms |
+| Transformation                 |       `TorchIO` | `Volumentations` |   `Gunpowder` | `Bio-Volumentations` |
+|:-------------------------------|----------------:|-----------------:|--------------:|---------------------:|
+| Cropping                       |      *27 ± 3 ms |        20 ± 3 ms |  **6 ± 1 ms** |            21 ± 3 ms |
+| Padding                        |      64 ± 10 ms |    **32 ± 6 ms** |     64 ± 4 ms |            43 ± 2 ms |
+| Flipping                       |      50 ± 13 ms |       40 ± 10 ms |     36 ± 3 ms |       **31 ± 11 ms** |
+| Affine transform               | **860 ± 24 ms** |   *3964 ± 816 ms |             - |         2595 ± 39 ms |
+| Affine transform (anisotropic) |               - |                - |             - |     **2608 ± 36 ms** |
+| Gaussian blur                  |   4417 ± 103 ms |                - |             - |     **3017 ± 84 ms** |
+| Gaussian noise                 |  **183 ± 7 ms** |       393 ± 5 ms |  *425 ± 14 ms |           266 ± 8 ms |
+| Brightness and contrast change |               - |        73 ± 2 ms |    197 ± 6 ms |        **29 ± 4 ms** |
+| Z-normalization                |     219 ± 11 ms |  **124 ± 19 ms** |             - |          136 ± 13 ms |
 
 [3] Pérez-García F, Sparks R, Ourselin S. TorchIO: A Python library for efficient loading, 
 preprocessing, augmentation and patch-based sampling of medical images in deep learning. 
@@ -437,7 +446,11 @@ We would thus like to thank their authors, namely [the Albumentations team](http
 
 # Citation
 
-TBA
+If you find our library useful, please cite its [Zenodo record](https://doi.org/10.5281/zenodo.15023900) as:
+
+```
+Hradecká, L., & Lux, F. (2025). Bio-Volumentations (1.3.2). Zenodo. https://doi.org/10.5281/zenodo.15024087
+```
 
 
 
