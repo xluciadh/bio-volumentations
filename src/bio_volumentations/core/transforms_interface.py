@@ -39,99 +39,110 @@
 # ============================================================================================= #
 
 
-import random
-from ..augmentations import transforms as T
-from ..conversion import transforms as CT
+from ..random_utils import random
+
+# DEBUG only flag
+VERBOSE = False
 
 
-class Compose:
-    """Compose a list of transformations into a callable transformation pipeline.
+class Transform:
+    """The base class for transformations.
 
-    **It is strongly recommended to use** ``Compose`` **to define and use the transformation pipeline.**
+        Args:
+            always_apply (bool, optional): Always apply this transformation.
 
-    In addition, basic input image checks and conversions are performed. Optionally, datatype conversion
-    (e.g. from ``numpy.ndarray`` to ``torch.Tensor``) is performed.
+                Defaults to ``False``.
+            p (float, optional): Probability of applying this transformation.
 
-    Args:
-        transforms (List[Transform]): A list of transforms (objects of type ``Transform``).
-
-        p (float, optional): The chance of applying the whole pipeline.
-
-            Defaults to ``1``.
-
-        img_keywords (Tuple[str], optional): List of `image` target names.
-
-            Defaults to ``('image',)``.
-
-        mask_keywords (Tuple[str], optional): List of `mask` target names.
-
-            Defaults to ``('mask',)``.
-
-        fmask_keywords (Tuple[str], optional): List of `float mask` target names.
-
-            Defaults to ``('float_mask',)``.
-
-        keypoints_keywords (Tuple[str], optional): List of `key points` target names.
-
-            Defaults to ``('keypoints',)``.
-
-        bboxes_keywords (Tuple[str], optional): List of `bounding boxes` target names.
-
-            Defaults to ``('bboxes',)``.
-
-        value_keywords (Tuple[str], optional): List of `value` target names.
-
-            Defaults to ``('value',)``.
-
-        conversion (Transform | None, optional): Image datatype conversion transform, applied after the transformations.
-
-            Defaults to ``None``.
+                Defaults to ``0.5``.
     """
-    def __init__(self,
-                 transforms, p=1.0,
-                 img_keywords=('image',),
-                 mask_keywords=('mask',),
-                 fmask_keywords=('float_mask',),
-                 keypoints_keywords=('keypoints',),
-                 bboxes_keywords=('bboxes',),
-                 value_keywords=('value',),
-                 conversion=None):
-
+    def __init__(self, always_apply=False, p=0.5):
         assert 0 <= p <= 1
-
-        self.transforms = ([T.StandardizeDatatype(always_apply=True),
-                            CT.ConversionToFormat(always_apply=True)] +
-                           transforms +
-                           [T.Contiguous(always_apply=True),
-                            CT.NoConversion() if conversion is None else conversion])
         self.p = p
-        self.targets = {'img_keywords': img_keywords,
-                        'mask_keywords': mask_keywords,
-                        'fmask_keywords': fmask_keywords,
-                        'keypoint_keywords': keypoints_keywords,
-                        'bbox_keywords': bboxes_keywords,
-                        'value_keywords': value_keywords}
+        self.always_apply = always_apply
 
-    def get_always_apply_transforms(self):
-        res = []
-        for tr in self.transforms:
-            if tr.always_apply:
-                res.append(tr)
-        return res
+    def __call__(self, force_apply, targets, **data):
+        if force_apply or self.always_apply or random() < self.p:
+            params = self.get_params(targets, **data)
 
-    def __call__(self, force_apply=False, **data):
-        need_to_run = force_apply or random.random() < self.p
-        transforms = self.transforms if need_to_run else self.get_always_apply_transforms()
+            if VERBOSE:
+                print('RUN', self.__class__.__name__, params)
 
-        # transformation pipeline
-        for tr in transforms:
-            data = tr(force_apply, self.targets, **data)
+            for k, v in data.items():
+                if k in targets['img_keywords']:
+                    data[k] = self.apply(v, **params)
+                else:
+                    # no transformation
+                    # by default, only apply the transformation to images
+                    pass
 
         return data
 
-    def __repr__(self):
-        return f'Compose({self.transforms[2:-2]}, {self.p}, {self.targets["img_keywords"]}, ' \
-               f'{self.targets["mask_keywords"]}, {self.targets["fmask_keywords"]}, ' \
-               f'{self.targets["keypoint_keywords"]}, {self.targets["bbox_keywords"]}, ' \
-               f'{self.targets["value_keywords"]}, {self.transforms[-1]})'
+    def get_params(self, targets, **data):
+        # Shared parameters for one apply (usually random values).
+        return {}
+
+    def apply(self, volume, **params):
+        raise NotImplementedError
+
+
+class DualTransform(Transform):
+    """The base class of transformations applied to all target types.
+
+        Targets:
+            image, mask, float mask, key points, bounding boxes
+    """
+
+    def __call__(self, force_apply, targets, **data):
+        # overwrite this method to also apply the transformation to other target types
+
+        if force_apply or self.always_apply or random() < self.p:
+            params = self.get_params(targets, **data)
+
+            if VERBOSE:
+                print('RUN', self.__class__.__name__, params)
+
+            for k, v in data.items():
+                if k in targets['img_keywords']:
+                    data[k] = self.apply(v, **params)
+                elif k in targets['mask_keywords']:
+                    data[k] = self.apply_to_mask(v, **params)
+                elif k in targets['fmask_keywords']:
+                    data[k] = self.apply_to_float_mask(v, **params)
+                elif k in targets['keypoint_keywords']:
+                    data[k] = self.apply_to_keypoints(v, **params)
+                elif k in targets['bbox_keywords']:
+                    data[k] = self.apply_to_bboxes(v, **params)
+                else:
+                    # no transformation
+                    pass
+
+        return data
+
+    def apply_to_mask(self, mask, **params):
+        # default: use image transformation
+        return self.apply(mask, **params)
+    
+    def apply_to_float_mask(self, float_mask, **params):
+        # default: use mask transformation
+        return self.apply_to_mask(float_mask, **params)
+
+    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+        # default: no transformation
+        return keypoints
+
+    def apply_to_bboxes(self, bboxes, **params):
+        # default: no transformation
+        return bboxes
+
+
+class ImageOnlyTransform(Transform):
+    """The base class of transformations applied to the `image` target only.
+
+        Targets:
+            image
+    """
+    @property
+    def targets(self):
+        return {'image': self.apply}
 

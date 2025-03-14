@@ -38,101 +38,73 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
+import numpy as np
 
-import random
-from ..core.transforms_interface import DualTransform
-from ..conversion import functional as FCT
-from warnings import warn
+from .biovol_typing import TypeSextetFloat, TypeTripletFloat
 
 
-class ConversionToFormat(DualTransform):
-    """Check the very basic assumptions about the input images.
+np_rng = np.random.default_rng()  # random number generator used in all the functions below
 
-        Adds channel dimension to the 3D images without it. Checks that shapes of individual target types are
-        consistent (to some extent).
 
-        Args:
-            always_apply (bool, optional): Always apply this transformation in composition.
+def uniform(low=0.0, high=1.0, size=None):
+    """Draw samples from a uniform distribution.
+    Samples are uniformly distributed over the half-open interval [low, high).
 
-                Defaults to ``True``.
-            p (float, optional): Chance of applying this transformation in composition.
-
-                Defaults to ``1``.
-
-        Targets:
-            image, mask
+    If size is None, returns a single value (or an array if low/high are arrays).
     """
-    def __init__(self, always_apply: bool = True, p: float = 1):
-        super().__init__(always_apply, p)
-
-    def __call__(self, force_apply, targets, **data):
-        if force_apply or self.always_apply or random.random() < self.p:
-            # params = self.get_params(**data)
-
-            img_shape = []
-            mask_shape = []
-            float_shape = []
-            for k, v in data.items():
-                if k in targets['img_keywords']:
-                    img_shape.append(v.shape) 
-                elif k in targets['mask_keywords']:
-                    mask_shape.append(v.shape) 
-                elif k in targets['fmask_keywords']:
-                    float_shape.append(v.shape) 
-            
-            if FCT.check_dimensions(img_shape):
-                warn(f"Input images shapes do not have same length,", UserWarning)
-            elif FCT.check_dimensions(mask_shape):
-                warn(f"Input masks shapes do not have same length,", UserWarning)
-            elif FCT.check_dimensions(float_shape):
-                warn(f"Float masks shapes do not have same length,", UserWarning)
-
-            for k, v in data.items():
-                if k in targets['img_keywords']:
-                    if len(v.shape) == 3:
-                        warn(f"Adding channel dimension to the image", UserWarning)
-                        data[k] = v[None, ...]
-
-        return data
-
-    def apply(self, volume, **params):
-        return volume
-
-    def apply_to_mask(self, mask, **params):
-        return mask
-
-    def apply_to_float_mask(self, mask, **params):
-        return mask
-
-    def __repr__(self):
-        return f'ConversionToFormat({self.always_apply}, {self.p})'
+    return np_rng.uniform(low, high, size)
 
 
-class NoConversion(DualTransform):
-    """An identity transform.
-
-        Args:
-            always_apply (bool, optional): Always apply this transformation in composition.
-
-                Defaults to ``True``.
-            p (float, optional): Chance of applying this transformation in composition.
-
-                Defaults to ``1``.
-
-        Targets:
-            image, mask
+def sample_range_uniform(limits: TypeSextetFloat) -> TypeTripletFloat:
+    """Draw samples from a uniform distribution.
+    Samples are uniformly distributed over the half-open interval [low, high).
     """
-    def __init__(self, always_apply: bool = True, p: float = 1):
-        super().__init__(always_apply, p)
+    return (np_rng.uniform(limits[0], limits[1]),
+            np_rng.uniform(limits[2], limits[3]),
+            np_rng.uniform(limits[4], limits[5]))
 
-    def apply(self, volume, **params):
-        return volume
 
-    def apply_to_mask(self, mask, **params):
-        return mask
+def random(size=None):
+    """Return random floats in the half-open interval [0.0, 1.0).
 
-    def apply_to_float_mask(self, mask, **params):
-        return mask
+    If size is None, return a single value.
+    """
+    return np_rng.random(size)
 
-    def __repr__(self):
-        return f'NoConversion({self.always_apply}, {self.p})'
+
+def normal(mean=0.0, std=1.0, size=None):
+    """Draw random samples from a normal (Gaussian) distribution.
+
+    If size is None, returns a single value (or an array if mean/std are arrays).
+    """
+    return np_rng.normal(loc=mean, scale=std, size=size)
+
+
+def poisson(lam=1.0, size=None):
+    """Draw samples from a Poisson distribution.
+
+    If size is None, returns a single value (or an array if lam is an array).
+    """
+    return np_rng.poisson(lam=lam, size=size)
+
+
+def randint(start, stop, size=None):
+    """Draw random integer from the closed interval [start, stop].
+
+    If size is None, returns a single value (or an array if start/stop are arrays).
+    """
+    return np_rng.integers(low=start, high=stop, endpoint=True, size=size)
+
+
+def shuffle(seq, **params):
+    """Shuffle the sequence in place.
+    The order of sub-arrays is changed but their contents remains the same.
+    """
+    return np_rng.shuffle(seq, **params)
+
+
+def sample(population, k, replacement=False, shuffle=False, **params):
+    """Return a k-length list of elements chosen from the population sequence.
+    """
+    return np_rng.choice(a=population, size=k, replace=replacement, shuffle=shuffle, **params)
+

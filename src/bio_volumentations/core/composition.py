@@ -38,56 +38,102 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
-import numpy as np
-from typing import Optional, Sequence, Union, Type, Any
-from .biovol_typing import TypeSextetFloat, TypeTripletFloat
-import random as random
 
-NumType = Union[int, float, np.ndarray]
-IntNumType = Union[int, np.ndarray]
-Size = Union[int, Sequence[int]]
+from ..random_utils import random
+from ..augmentations import transforms as T
+from ..conversion import transforms as CT
 
 
-def get_random_state() -> np.random.RandomState:
-    return np.random.RandomState(random.randint(0, (1 << 32) - 1))
+class Compose:
+    """Compose a list of transformations into a callable transformation pipeline.
 
+    **It is strongly recommended to use** ``Compose`` **to define and use the transformation pipeline.**
 
-def randint(
-        low: IntNumType,
-        high: Optional[IntNumType] = None,
-        size: Optional[Size] = None,
-        dtype: Type = np.int32,
-        random_state: Optional[np.random.RandomState] = None,
-) -> Any:
-    if random_state is None:
-        random_state = get_random_state()
-    return random_state.randint(low, high, size, dtype)
+    In addition, perform basic input image checks and conversions. Optionally, perform also datatype conversion
+    (e.g. from ``numpy.ndarray`` to ``torch.Tensor``).
 
+    Warning: All keywords (target names) must be mutually distinct!!!
 
-def uniform(
-        low: NumType = 0.0,
-        high: NumType = 1.0,
-        size: Optional[Size] = None,
-        random_state: Optional[np.random.RandomState] = None,
-) -> Any:
-    if random_state is None:
-        random_state = get_random_state()
-    return random_state.uniform(low, high, size)
+    Args:
+        transforms (List[Transform]): A list of transforms (objects of type ``Transform``).
 
+        p (float, optional): The probability of applying the whole pipeline.
 
-def normal(
-        loc: NumType = 0.0,
-        scale: NumType = 1.0,
-        size: Optional[Size] = None,
-        random_state: Optional[np.random.RandomState] = None,
-) -> Any:
-    if random_state is None:
-        random_state = get_random_state()
-    return random_state.normal(loc, scale, size)
+            Defaults to ``1``.
 
+        img_keywords (Tuple[str], optional): List of `image` target names.
 
-def sample_range_uniform(limits: TypeSextetFloat,
-                         random_state: Optional[np.random.RandomState] = None) -> TypeTripletFloat:
-    return (random.uniform(limits[0], limits[1]),
-            random.uniform(limits[2], limits[3]),
-            random.uniform(limits[4], limits[5]))
+            Defaults to ``('image',)``.
+
+        mask_keywords (Tuple[str], optional): List of `mask` target names.
+
+            Defaults to ``('mask',)``.
+
+        fmask_keywords (Tuple[str], optional): List of `float mask` target names.
+
+            Defaults to ``('float_mask',)``.
+
+        keypoints_keywords (Tuple[str], optional): List of `key points` target names.
+
+            Defaults to ``('keypoints',)``.
+
+        bboxes_keywords (Tuple[str], optional): List of `bounding boxes` target names.
+
+            Defaults to ``('bboxes',)``.
+
+        value_keywords (Tuple[str], optional): List of `value` target names.
+
+            Defaults to ``('value',)``.
+
+        conversion (Transform | None, optional): Image datatype conversion transform, applied after the transformations.
+
+            Defaults to ``None``.
+    """
+    def __init__(self,
+                 transforms, p=1.0,
+                 img_keywords=('image',),
+                 mask_keywords=('mask',),
+                 fmask_keywords=('float_mask',),
+                 keypoints_keywords=('keypoints',),
+                 bboxes_keywords=('bboxes',),
+                 value_keywords=('value',),
+                 conversion=None):
+
+        assert 0 <= p <= 1
+
+        self.transforms = ([T.StandardizeDatatype(always_apply=True),
+                            CT.ConversionToFormat(always_apply=True)] +
+                           transforms +
+                           [T.Contiguous(always_apply=True),
+                            CT.NoConversion() if conversion is None else conversion])
+        self.p = p
+        self.targets = {'img_keywords': img_keywords,
+                        'mask_keywords': mask_keywords,
+                        'fmask_keywords': fmask_keywords,
+                        'keypoint_keywords': keypoints_keywords,
+                        'bbox_keywords': bboxes_keywords,
+                        'value_keywords': value_keywords}
+
+    def get_always_apply_transforms(self):
+        res = []
+        for tr in self.transforms:
+            if tr.always_apply:
+                res.append(tr)
+        return res
+
+    def __call__(self, force_apply=False, **data):
+        need_to_run = force_apply or random() < self.p
+        transforms = self.transforms if need_to_run else self.get_always_apply_transforms()
+
+        # transformation pipeline
+        for tr in transforms:
+            data = tr(force_apply, self.targets, **data)
+
+        return data
+
+    def __repr__(self):
+        return f'Compose({self.transforms[2:-2]}, {self.p}, {self.targets["img_keywords"]}, ' \
+               f'{self.targets["mask_keywords"]}, {self.targets["fmask_keywords"]}, ' \
+               f'{self.targets["keypoint_keywords"]}, {self.targets["bbox_keywords"]}, ' \
+               f'{self.targets["value_keywords"]}, {self.transforms[-1]})'
+

@@ -17,7 +17,7 @@ can be used with **any major Python deep learning library**, including PyTorch, 
 This library builds upon widely used libraries such as Albumentations and TorchIO, and can thus be easily adopted by developers.
 
 The source codes are available
-`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.1?ref_type=tags>`_.
+`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.2?ref_type=tags>`_.
 The package can be installed via `pip <https://pypi.org/project/bio-volumentations/>`_
-and is archived `at GitHub <https://github.com/xluciadh/bio-volumentations/releases/tag/1.3.1>`_.
+and is archived `at GitHub <https://github.com/xluciadh/bio-volumentations/releases>`_.
 

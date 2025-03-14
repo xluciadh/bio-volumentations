@@ -7,9 +7,8 @@ from skimage import exposure
 def show_sample_np(img_np,
                    colormap=('green', 'red'),
                    scale=(1, 4, 1, 1)):
-
     viewer = napari.Viewer(ndisplay=3)
-    
+
     n_dims = len(img_np.shape)
     if n_dims == 3:
         img_np = np.expand_dims(np.expand_dims(img_np, axis=0), axis=-1)
@@ -17,15 +16,11 @@ def show_sample_np(img_np,
         print(f'Warning: cannot decide about the image shape {img_np.shape}')
         return
 
-
     for c in range(img_np.shape[0]):
-
-
         im = img_np[c]
 
         pL, pH = np.percentile(img_np, (.5, 99.5))
         im = exposure.rescale_intensity(im, in_range=(pL, pH))
-
 
         im = np.moveaxis(im, -2, 0)
         im = np.moveaxis(im, -1, 0)
@@ -37,13 +32,12 @@ def show_sample_np(img_np,
         viewer.layers[f'ch{c}'].scale = scale
         viewer.layers[f'ch{c}'].blending = 'additive'
         viewer.layers[f'ch{c}'].colormap = colormap[c % len(colormap)]
-        
+
 
 def show_sample(sample: dict,
                 colormap: tuple = ('green', 'red', 'blue'),
                 scale: tuple = (1, 1, 1, 1),
                 rescale_intensity: bool = True):
-
     viewer = napari.Viewer(ndisplay=3)
     if 'image' in sample.keys():
 
@@ -121,7 +115,6 @@ def show_sample(sample: dict,
                           blending='additive',
                           size=1)
 
-
     if ('bboxes' in sample.keys()) and (len(sample['bboxes']) > 0):
 
         bboxes = sample['bboxes']
@@ -130,12 +123,12 @@ def show_sample(sample: dict,
         for bbox in bboxes:
 
             np_bbox = np.array(bbox)
-            #print(np_bbox.shape)
+            # print(np_bbox.shape)
 
             if np_bbox.shape[1] == 3:
                 np_bbox = np.pad(np_bbox, ((0, 0), (1, 0)))
 
-            #print(np_bbox.shape, np_bbox[:3])
+            # print(np_bbox.shape, np_bbox[:3])
 
             np_bbox[:, 1:] = np.roll(np_bbox[:, 1:], 1, axis=1)
 
@@ -149,22 +142,15 @@ def show_sample(sample: dict,
                           edge_width=0.2,
                           opacity=0.1,
 
-        )
+                          )
 
 
-
-        
-           
 def concatenate_samples(samples: list,
                         axis: int = 1) -> dict:
-    
     imgs, masks = [], []
     for sample in samples:
         imgs.append(sample['image'])
         masks.append(sample['mask'])
-        
+
     return {'image': np.concatenate(imgs, axis=axis),
             'mask': np.concatenate(masks, axis=axis)}
-    
-
-        

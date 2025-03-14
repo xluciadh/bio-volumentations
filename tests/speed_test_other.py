@@ -26,10 +26,6 @@
 import time
 import numpy as np
 
-# bio-volumentations
-import src.core.composition as biovol_compose
-import src.augmentations as biovol
-
 # TorchIO: requires pytorch, torchIO (pip) (had networkx 2.8.8)
 import torchio
 # volumentations: with opencv (pip)
@@ -44,6 +40,11 @@ import volumentations
 # # albumentations: require albumentations
 # import albumentations
 
+# bio-volumentations
+import src.bio_volumentations.core.composition as biovol_compose
+import src.bio_volumentations.augmentations as biovol
+
+
 
 # libs = ['biovol', 'torchio', 'volum', 'gunpowder', 'torchvision', 'album']
 libs = ['volum', 'biovol', 'torchio']
@@ -53,9 +54,9 @@ num_repeat = 100
 # num_repeat = 10
 
 if 'gunpowder' in libs[0]:
-    out_file_name = f"./runtime-{num_repeat}_iterations-gunpowder.txt"
+    out_file_name = f'./runtime-{num_repeat}_iterations-gunpowder.txt'
 else:
-    out_file_name = f"./runtime-{num_repeat}_iterations-all-1.txt"
+    out_file_name = f'./runtime-{num_repeat}_iterations-all-1.txt'
 
 
 # image_shape_list = [(1, 256, 256, 256), (3, 256, 256, 256), (1, 256, 256, 256, 10), (3, 256, 256, 256, 10)]
@@ -76,6 +77,12 @@ constrast_limit = 0.2
 
 
 def get_transformation_list(lib):
+    """
+    Get list of instantiated transformation objects for the given library.
+
+    Transformations that are missing or that behave differently to Bio-Volumentations are indicated by the comments.
+    """
+
     if lib == 'biovol':
         # https://biovolumentations.readthedocs.io/latest/bio_volumentations.augmentations.html#
         return [
@@ -153,6 +160,10 @@ def get_transformation_list(lib):
 
 
 def init_compose(lib, transform):
+    """
+    Return instantiated transformation pipeline.
+    """
+
     if lib == 'biovol':
         return biovol_compose.Compose(transforms=[transform], p=1)
     if lib == 'torchio':
@@ -175,6 +186,10 @@ def init_compose(lib, transform):
 
 
 def get_input_data(lib, shape):
+    """
+    Return input data in the correct format.
+    """
+
     # Shape is given as ([C], D, H, W, [T])
 
     if lib == 'biovol':
@@ -209,6 +224,10 @@ def get_input_data(lib, shape):
 
 
 def transform_data(lib, data, pipeline):
+    """
+    Run the transformation pipeline and return shape of the resulting image.
+    """
+
     if lib == 'biovol':
         augm_data = pipeline(**data)
         return augm_data['image'].shape  # do something to enforce performing the action
@@ -230,10 +249,8 @@ def transform_data(lib, data, pipeline):
         pass
 
 
-def single_transform(iterations, shape, augmentation, lib):
-    cumulative = 0
-    maximum = 0
-
+def single_transform(iterations, shape, augmentation, lib) -> np.ndarray:
+    times = np.zeros(iterations)
     for i in range(iterations):
         # prepare data and transformation pipeline
         transformation_pipeline = init_compose(lib, augmentation)
@@ -243,17 +260,13 @@ def single_transform(iterations, shape, augmentation, lib):
         t_0 = time.time()
         _ = transform_data(lib, data, transformation_pipeline)
         time_spent = time.time() - t_0
+        times[i] = time_spent * 1000  # convert from seconds to milliseconds
 
-        # accumulate time
-        cumulative += time_spent
-        if time_spent > maximum:
-            maximum = time_spent
-
-    return maximum, cumulative
+    return times
 
 
 def transformation_speed_benchmark(iterations):
-    f = open(out_file_name, "w")
+    f = open(out_file_name, 'w')
 
     for lib in libs:
         print(f'*************** LIBRARY {lib} ***************')
@@ -271,16 +284,16 @@ def transformation_speed_benchmark(iterations):
                 data = get_input_data(lib, shape)
                 first_time = time.time()
                 _ = transform_data(lib, data, transformation_pipeline)
-                first_result = time.time() - first_time
+                first_result = time.time() - first_time  # this is in seconds !!!
 
                 # the measured runs
-                maximum, cumulative = single_transform(iterations, shape, augmentation, lib)
-                result_time = cumulative / iterations
+                times_arr = single_transform(iterations, shape, augmentation, lib)  # this is in milliseconds
 
                 # logging
-                log_message = f"Runtime in seconds. " \
-                              f"FirstRun: {first_result:.3f}, Average: {result_time:.3f}, Maximum: {maximum:.3f}. " \
-                              f"(Library: {lib}, Transform: {aug_name}, Iterations: {iterations}, ImageSize: {shape})\n"
+                log_message = f'Runtime in seconds. ' \
+                              f'FirstRun: {first_result:.3f}, Average: {times_arr.mean():.3f}, ' \
+                              f'Maximum: {times_arr.max():.3f}, Std: {times_arr.std():.3f}. ' \
+                              f'(Library: {lib}, Transform: {aug_name}, Iterations: {iterations}, ImageSize: {shape})\n'
                 f.write(log_message)
                 print(log_message)
 

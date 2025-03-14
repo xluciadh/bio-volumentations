@@ -1,6 +1,7 @@
 # ============================================================================================= #
-#  Author:       Filip Lux                                                                      #
+#  Author:       Filip Lux, Lucia Hradecká                                                      #
 #  Copyright:    Filip Lux          lux.filip@gmail.com                                         #
+#                Lucia Hradecká     lucia.d.hradecka@gmail.com                                  #
 #                                                                                               #
 #  MIT License.                                                                                 #
 #                                                                                               #
@@ -23,16 +24,17 @@
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
 
+from typing import Sequence, Union, Optional
 import numpy as np
-from ..biovol_typing import TypeTripletFloat
-from typing import Sequence, Optional
 import SimpleITK as sitk
 
-from .utils import get_image_center, ras_to_lps, np_to_sitk, sitk_to_np
+from ..biovol_typing import TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSpatialCoordinate
+
 
 DEBUG = False
 
-SITK_interpolation = {
+# Mapping from the public user-friendly interpolation constants to SITK interpolation constants:
+SITK_INTERPOLATION_CONSTANTS = {
     'nearest': 'sitkNearestNeighbor',
     'linear': 'sitkLinear',
     'bspline': 'sitkBSpline',
@@ -40,11 +42,66 @@ SITK_interpolation = {
 }
 
 
+def get_image_center(shape: Union[TypeSpatioTemporalCoordinate, TypeSpatialCoordinate],
+                     spacing: TypeTripletFloat = (1., 1., 1.), lps: bool = False) -> TypeTripletFloat:
+
+    center = (np.array(shape)[:3] - 1) / 2.0  # compute the center for the spatial dimensions
+
+    if lps:
+        center = ras_to_lps(center)
+
+    return center * np.array(spacing)
+
+
+# Simple ITK uses LPS coordinates format
+def ras_to_lps(triplet: Sequence[float]):
+    return np.array((-1, -1, 1), dtype=float) * np.asarray(triplet)
+
+
+def np_to_sitk(img: np.array) -> sitk.Image:
+
+    # image in format (c, s1, s2, s3, [t])
+    assert len(img.shape) == 5
+    channels, w, h, d, frames = img.shape
+
+    sample = np.moveaxis(img, 0, 3)
+    sample = sample.reshape((w, h, d, channels * frames))
+
+    # TODO: rather swap axis of parameters than data
+    sample = np.swapaxes(sample, 0, 2)
+
+    return sitk.GetImageFromArray(sample)
+
+
+def sitk_to_np(sitk_img: sitk.Image,
+               channels,
+               frames=1) -> np.array:
+
+    # shape (d, w, h, c*f)
+    img = sitk.GetArrayFromImage(sitk_img)
+
+    if len(img.shape) == 3:
+        img = np.expand_dims(img, 3)
+
+    assert channels * frames == img.shape[-1], (f'Number of channels ({channels}) and frames ({frames})'
+                                                f'does not correspond to the sitk vector size {img.shape[-1]}')
+
+    # split channels and frames
+    w, h, d = img.shape[:3]
+    img = img.reshape((w, h, d, channels, frames))
+
+    img = np.swapaxes(img, 0, 2)
+    img = np.moveaxis(img, 3, 0)
+
+    # shape (c, w, h, d, f)
+    return img
+
+
 def parse_itk_interpolation(interpolation: str) -> str:
 
-    assert interpolation in SITK_interpolation.keys(), f'parameter {interpolation} ' \
-                    f'is not in the list of supported interpolation techniques: {SITK_interpolation.keys()}'
-    return SITK_interpolation[interpolation]
+    assert interpolation in SITK_INTERPOLATION_CONSTANTS.keys(), f'parameter {interpolation} ' \
+                    f'is not in the list of supported interpolation techniques: {SITK_INTERPOLATION_CONSTANTS.keys()}'
+    return SITK_INTERPOLATION_CONSTANTS[interpolation]
 
 
 def get_affine_transform(domain_limit,
@@ -81,7 +138,7 @@ def get_affine_transform(domain_limit,
     )
 
     transforms = [scaling_transform,
-                  rotation_transform]
+                  rotation_transform]  # translation is included in the rotation_transform
 
     transform = sitk.CompositeTransform(transforms)
     transform = transform.GetInverse()
@@ -94,8 +151,8 @@ def get_scaling_transform(
         center_lps: Optional[TypeTripletFloat] = None,
 ) -> sitk.ScaleTransform:
 
-    # 1.5 means the objects look 1.5 times larger
-    transform = sitk.ScaleTransform(3)
+    # 1.5 means the objects look 1.5x larger
+    transform = sitk.ScaleTransform(3)  # 3 = #dims
     scaling_params_array = np.array(scaling_params).astype(float)
     transform.SetScale(scaling_params_array)
 
@@ -171,7 +228,7 @@ def apply_sitk_transform(
     if expanded:
         np_array = np_array.squeeze(4)
 
-    assert image.shape == np_array.shape, f"image.shape: {image.shape} np_array.shape:, {np_array.shape}"
+    assert image.shape == np_array.shape, f'image.shape: {image.shape} np_array.shape:, {np_array.shape}'
 
     # np_array = np_array.transpose()  # ITK to NumPy convention
     return np_array

@@ -26,13 +26,15 @@
 
 
 import unittest
-from src.augmentations.transforms import (
+
+import numpy as np
+
+from src.bio_volumentations.augmentations.transforms import (
     GaussianNoise, PoissonNoise, Resize, Pad, Scale, Flip, CenterCrop, AffineTransform,
     RandomScale, RandomRotate90, RandomFlip, RandomCrop, RandomAffineTransform, RandomGamma,
     NormalizeMeanStd, GaussianBlur, Normalize, HistogramEqualization, RandomBrightnessContrast,
     RandomGaussianBlur, RemoveBackgroundGaussian, Rescale)
-from src.core.composition import Compose
-import numpy as np
+from src.bio_volumentations.core.composition import Compose
 
 DEBUG = False
 
@@ -709,7 +711,7 @@ class TestInputArgs(unittest.TestCase):
             RandomScale((0.2, 0.4, 0.8, 0.9, 1.1, 1.2)),
             RandomRotate90([1]), RandomRotate90([1, 2, 3]), RandomRotate90(None), RandomRotate90([1, 1, 1]),
             Flip([1]), Flip([1, 2, 3]), Flip(None), Flip([1, 1, 1]),
-            RandomFlip([(1,), (2, 3)]), RandomFlip(None),
+            RandomFlip([1, 2]), RandomFlip(None), RandomFlip([]),
             CenterCrop((20, 30, 40)),
             RandomCrop((20, 30, 40)),
             RandomAffineTransform(angle_limit=45), RandomAffineTransform(angle_limit=(45, 60)),
@@ -779,6 +781,92 @@ class TestInputArgs(unittest.TestCase):
 
         # with self.assertRaises(BaseException):
         #     tr = Compose([Normalize(2, [3, 4])])
+
+
+class TestInvalidInput(unittest.TestCase):
+    def invalid_range_check(self, transform, sample=None, **params):
+        if sample is None:
+            img_shape = (4, 120, 120, 120)
+            img = np.ones(img_shape, dtype=np.float64)
+            mask = np.ones(img_shape[1:], dtype=np.int64)
+            fmask = np.ones(img_shape[1:], dtype=np.float64)
+        else:
+            img, mask, fmask = sample
+
+        tr = Compose([transform(p=1, **params)])
+
+        tr_img = tr(image=img, mask=mask, float_mask=fmask)
+
+        # some checks - we just need to make sure that the computation did not fail
+        self.assertTrue(np.issubdtype(tr_img['image'].dtype, np.floating))
+        self.assertTrue(np.issubdtype(tr_img['mask'].dtype, np.integer))
+        self.assertTrue(np.issubdtype(tr_img['float_mask'].dtype, np.floating))
+
+    def test_invalid_range_crop(self):
+        self.invalid_range_check(RandomCrop, shape=(10, 10, 10))
+        self.invalid_range_check(CenterCrop, shape=(10, 10, 10))
+
+    def test_invalid_range_scale(self):
+        self.invalid_range_check(Scale, scales=0.5)
+
+    def test_invalid_range_gamma(self):
+        img_shape = (4, 120, 120, 120)
+        img = np.ones(img_shape, dtype=np.float64) * 2
+        mask = np.ones(img_shape[1:], dtype=np.int64)
+        fmask = np.ones(img_shape[1:], dtype=np.float64)
+        self.invalid_range_check(RandomGamma, sample=(img, mask, fmask))
+
+    def test_invalid_range_gaussian_blur(self):
+        self.invalid_range_check(GaussianBlur)
+
+    def test_invalid_range_normalize(self):
+        img_shape = (4, 120, 120, 120)
+        img = np.ones(img_shape, dtype=np.float64)
+        mask = np.ones(img_shape[1:], dtype=np.int64)
+        fmask = np.ones(img_shape[1:], dtype=np.float64)
+        self.invalid_range_check(RandomGamma, sample=(img, mask, fmask))
+
+    def invalid_dtype_check(self, transform, **params):
+        img_shape = (4, 120, 120, 120)
+        img = np.ones(img_shape, dtype=int)
+        mask = np.ones(img_shape[1:], dtype=float)
+        fmask = np.ones(img_shape[1:], dtype=int)
+
+        tr = Compose([transform(p=1, **params)])
+
+        tr_img = tr(image=img, mask=mask, float_mask=fmask)
+
+        self.assertTrue(np.issubdtype(tr_img['image'].dtype, np.floating))
+        self.assertTrue(np.issubdtype(tr_img['mask'].dtype, np.integer))
+        self.assertTrue(np.issubdtype(tr_img['float_mask'].dtype, np.floating))
+
+    def test_invalid_dtype_crop(self):
+        self.invalid_dtype_check(RandomCrop, shape=(10, 10, 10))
+        self.invalid_dtype_check(CenterCrop, shape=(10, 10, 10))
+
+    def test_invalid_dtype_scale(self):
+        self.invalid_dtype_check(Scale, scales=0.5)
+
+    def test_invalid_dtype_gamma(self):
+        self.invalid_dtype_check(RandomGamma)
+
+    def test_invalid_dtype_gaussian_blur(self):
+        self.invalid_dtype_check(RandomGamma)
+
+    def test_invalid_size_crop(self):
+        img_shape = (4, 120, 120, 120)
+        img = np.ones(img_shape, dtype=np.float64)
+        mask = np.ones(img_shape[1:], dtype=np.int64)
+        fmask = np.ones(img_shape[1:], dtype=np.float64)
+
+        tr = Compose([CenterCrop(shape=(140, 120, 100), p=1)])
+
+        tr_img = tr(image=img, mask=mask, float_mask=fmask)
+
+        # some checks - we just need to make sure that the computation did not fail
+        self.assertTrue(np.issubdtype(tr_img['image'].dtype, np.floating))
+        self.assertTrue(np.issubdtype(tr_img['mask'].dtype, np.integer))
+        self.assertTrue(np.issubdtype(tr_img['float_mask'].dtype, np.floating))
 
 
 if __name__ == '__main__':
