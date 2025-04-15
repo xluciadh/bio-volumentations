@@ -452,5 +452,12 @@ If you find our library useful, please cite its [Zenodo record](https://doi.org/
 Hradecká, L., & Lux, F. (2025). Bio-Volumentations (1.3.2). Zenodo. https://doi.org/10.5281/zenodo.15024087
 ```
 
+and its [journal publication](https://doi.org/10.1016/j.softx.2025.102151) as:
 
+```
+Lucia Hradecká, Filip Lux, Samuel Šuľan, Petr Matula. Bio-Volumentations: A Python library for augmentation 
+of volumetric image sequences. SoftwareX, 2025, vol. 30, 102151. DOI: 10.1016/j.softx.2025.102151.
+```
+
+Thank you! :)
 
