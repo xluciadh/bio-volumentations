@@ -21,7 +21,7 @@ segmentation, and object tracking.
 
 `Bio-Volumentations` build upon widely used libraries such as Albumentations and TorchIO 
 (see the _Contributions and Acknowledgements_ section below) and are accompanied by 
-[detailed documentation and a user guide](https://biovolumentations.readthedocs.io/1.3.2/). 
+[detailed documentation and a user guide](https://biovolumentations.readthedocs.io/1.3.3/). 
 Therefore, they can easily be adopted by developers.
 
 
@@ -57,18 +57,18 @@ of our library and will be updated at important milestones and with new library 
 
 ### The First Example
 
-To check out our library on test data, you can run the example provided in the `example` folder.
+To check out our library on test data, you can run the example script provided in the `examples/simple_example` folder.
 
 There, you will find a test sample consisting of a 3D image (`image.tif`) with an associated binary mask
 (`segmentation_mask.tif`), a runnable Python script, and the transformed sample (`image_transformed.tif` and 
 `segmentation_mask_transformed.tif`).
 
-To run the example, please download the `example` folder and 
+To run the example, please download the `examples/simple_example` folder and 
 install the `bio-volumentations`, `tiffile` and `imagecodecs` packages to your Python environment. 
 Then run the following from the command line:
 
 ```commandline
-cd example
+cd examples/simple_example
 python transformation_example.py
 ```
 
@@ -133,7 +133,7 @@ If you call transformations outside of `Compose`, we cannot guarantee the all as
 are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use this library. You are also welcome to check 
-[our documentation pages](https://biovolumentations.readthedocs.io/1.3.2/).
+[our documentation pages](https://biovolumentations.readthedocs.io/1.3.3/).
 
 ### Example: Transforming a Single Image
 
@@ -145,7 +145,7 @@ Optionally, you can specify a datatype conversion transformation that will be ap
 in the list, e.g. from the default `numpy.ndarray` to a `torch.Tensor`. You can also specify the probability
 of actually applying the whole pipeline as a number between 0 and 1. 
 The default probability is 1 (i.e., the pipeline is applied in each call).
-See the [docs](https://biovolumentations.readthedocs.io/1.3.2/examples.html) for more details.
+See the [docs](https://biovolumentations.readthedocs.io/1.3.3/examples.html) for more details.
 
 The `Compose` object is callable. The data is passed as a keyword argument, and the call returns a dictionary 
 with the same keyword and the corresponding transformed image. This might look like an overkill for a single image, 
@@ -183,10 +183,11 @@ To that end, `Bio-Volumentations` define several target types:
 - `mask` for integer-valued label images;
 - `float_mask` for real-valued label images;
 - `keypoints` for a list of key points; and
+- `bboxes` for a list of bounding boxes; and
 - `value` for non-transformed values.
 
 For more information on the format of individual target types, see the 
-[Getting Started guide](https://biovolumentations.readthedocs.io/1.3.2/examples.html#example-transforming-images-with-annotations)
+[Getting Started guide](https://biovolumentations.readthedocs.io/1.3.3/examples.html#example-transforming-images-with-annotations)
 
 Please note that there must always be an `image`-type target in the sample.
 
@@ -196,33 +197,54 @@ For example, `RandomAffineTransform` applies the same geometric transformation t
 
 Some transformations, such as `RandomGaussianNoise` or `RandomGamma`, are only defined for the `image` target 
 and leave the other targets unchanged. Please consult the 
-[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.3.2/modules.html) for more details.
+[documentation of the individual transforms](https://biovolumentations.readthedocs.io/1.3.3/modules.html) for more details.
+
+Bounding boxes are accepted in `'voc'`, `'coco'`, `'albumentations'` and `'yolo'` formats. The input format of your data
+can be specified in the `Compose` constructor with ``bbox_format`` parameter.
+For the normalized formats, the size of the picture is taken from the `image` target and is correctly updated as transformations are applied.
 
 The associated targets are fed to the `Compose` object call as keyword arguments and extracted from the outputted
 dictionary using the same keywords. 
-The default key values are `'image'`, `'mask'`, `'float_mask'`, `'keypoints'`, and `'value'`.
+The default key values are `'image'`, `'mask'`, `'float_mask'`, `'keypoints'`, `'bboxes'` and `'value'`.
 
 ```python
 import numpy as np
-from bio_volumentations import Compose, RandomGamma, RandomRotate90, GaussianBlur
+from bio_volumentations import Compose, RandomGamma, RandomRotate90, GaussianBlur, RandomScale
 
-# Create the transformation using Compose
+# Define a helper function to convert a numpy ndarray to a tuple
+def np_to_tuple(arr: np.ndarray):
+    return tuple(arr.tolist())
+
+# Create the transformation using Compose from a list of transformations
 aug = Compose([
-        RandomGamma(gamma_limit = (0.8, 1.2), p = 0.8),
-        RandomRotate90(axes = [1, 2, 3], p = 1),
-        GaussianBlur(sigma = 1.2, p = 0.8)
-      ])
+    RandomGamma(gamma_limit = (0.8, 1.2), p = 0.8),
+    RandomRotate90(axes = [1, 2, 3], p = 1),
+    GaussianBlur(sigma = 1.2, p = 0.8),
+    RandomScale((0.8, 1.1))
+])
 
 # Generate image and a corresponding labeled image
 img = np.random.rand(1, 128, 256, 256)
 lbl = np.random.randint(0, 1, size=(128, 256, 256), dtype=np.uint8)
 
+# Generate keypoints
+keypts = [np_to_tuple(np.random.randint(0, 127, 3)) for _ in range(20)]
+
+# Generate random bboxes
+bboxes = [(np_to_tuple(np.random.randint(0, 127, 3)),
+           np_to_tuple(np.random.randint(128, 256, 3)),
+           0) for _ in range(20)]
+
 # Transform the images
-# Please note that the images must be passed as keyword arguments to the transformation pipeline
+# Please note that the images and annotations must be passed as keyword arguments to the transformation pipeline
 # and extracted from the outputted dictionary.
-data = {'image': img, 'mask': lbl}
+data = {'image': img, 'mask': lbl, 'keypoints': keypts, 'bboxes': bboxes}
+
 aug_data = aug(**data)
-transformed_img, transformed_lbl = aug_data['image'], aug_data['mask']
+transformed_img = aug_data['image']
+transformed_lbl = aug_data['mask']
+transformed_keypts = aug_data['keypoints']
+transformed_bbox = aug_data['bboxes']
 ```
 
 
@@ -297,11 +319,15 @@ class Flip(DualTransform):
         return np.flip(mask, axis=[item - 1 for item in params["axes"]])
     
     # Transform the float-valued mask
-    # By default, float_mask uses the implementation of mask, unless it is overridden (see the implementation of DualTransform).
+    # By default, float_mask uses the implementation of mask, unless it is overridden 
+    # (see the implementation of DualTransform).
     #def apply_to_float_mask(self, float_mask, **params):
     #    return self.apply_to_mask(float_mask, **params)
+    
+    # ... we need to also add the implementation of apply_to_keypoints and apply_to_bboxes ...
 
-    # Set transformation parameters. Useful especially for RandomXXX transforms to ensure consistent transformation of image tuples.
+    # Set transformation parameters. Useful especially for RandomXXX transforms 
+    # to ensure consistent transformation of image tuples.
     def get_params(self, **data):
         axes = self.axes if self.axes is not None else [1, 2, 3]
         return {"axes": axes}
@@ -345,13 +371,6 @@ RandomScale
 RandomRotate90
 RandomFlip 
 RandomCrop
-```
-
-Other transformations:
-```python
-Contiguous
-StandardizeDatatype
-ConversionToFormat
 ```
 
 
@@ -426,7 +445,7 @@ GitHub, 2024 [cited 2024 Dec 16]. https://github.com/funkelab/gunpowder
 
 # Contributions and Acknowledgements
 
-Authors of `Bio-Volumentations`: Samuel Šuľan, Lucia Hradecká, Filip Lux.
+Authors of `Bio-Volumentations`: Lucia Hradecká, Filip Lux, Samuel Šuľan, Jakub Polonský.
 - Lucia Hradecká: lucia.d.hradecka@gmail.com   
 - Filip Lux: lux.filip@gmail.com     
 
@@ -446,10 +465,10 @@ We would thus like to thank their authors, namely [the Albumentations team](http
 
 # Citation
 
-If you find our library useful, please cite its [Zenodo record](https://doi.org/10.5281/zenodo.15023900) as:
+If you find our library useful, please cite its [Zenodo record](https://doi.org/10.5281/zenodo.15024087) as:
 
 ```
-Hradecká, L., & Lux, F. (2025). Bio-Volumentations (1.3.2). Zenodo. https://doi.org/10.5281/zenodo.15024087
+Hradecká, L. (2026). Bio-Volumentations (1.3.3). Zenodo. https://doi.org/10.5281/zenodo.20814589
 ```
 
 and its [journal publication](https://doi.org/10.1016/j.softx.2025.102151) as:

@@ -1,6 +1,6 @@
 # ============================================================================================= #
 #  Author:       Pavel Iakubovskii, ZFTurbo, ashawkey, Dominik Müller,                          #
-#                Samuel Šuľan, Lucia Hradecká, Filip Lux                                        #
+#                Samuel Šuľan, Lucia Hradecká, Filip Lux, Jakub Polonský                        #
 #  Copyright:    albumentations:    : https://github.com/albumentations-team                    #
 #                Pavel Iakubovskii  : https://github.com/qubvel                                 #
 #                ZFTurbo            : https://github.com/ZFTurbo                                #
@@ -40,8 +40,8 @@
 
 
 from ..random_utils import random
-from ..augmentations import transforms as T
 from ..conversion import transforms as CT
+from . import utils
 
 
 class Compose:
@@ -88,7 +88,13 @@ class Compose:
         conversion (Transform | None, optional): Image datatype conversion transform, applied after the transformations.
 
             Defaults to ``None``.
+
+        bbox_format (str): Format the bounding boxes are supplied in.
+            Supported formats: 'voc', 'coco', 'yolo', 'albumentations'
+
+            Defaults to `'voc'`.
     """
+
     def __init__(self,
                  transforms, p=1.0,
                  img_keywords=('image',),
@@ -97,15 +103,24 @@ class Compose:
                  keypoints_keywords=('keypoints',),
                  bboxes_keywords=('bboxes',),
                  value_keywords=('value',),
-                 conversion=None):
+                 conversion=None,
+                 bbox_format='voc',
+                 ):
 
         assert 0 <= p <= 1
+        assert utils.are_mutually_disjoint(img_keywords, mask_keywords, fmask_keywords, keypoints_keywords,
+                                           bboxes_keywords, value_keywords)
 
-        self.transforms = ([T.StandardizeDatatype(always_apply=True),
-                            CT.ConversionToFormat(always_apply=True)] +
+        self.transforms = ([CT.StandardizeDatatype(always_apply=True),
+                            CT.ConversionToFormat(always_apply=True),
+                            CT.ConvertToBBoxes(always_apply=True, bbox_format=bbox_format),
+                            ] +
                            transforms +
-                           [T.Contiguous(always_apply=True),
-                            CT.NoConversion() if conversion is None else conversion])
+                           [CT.Contiguous(always_apply=True),
+                            CT.KeypointsFixDatatype(always_apply=True),
+                            CT.NoConversion() if conversion is None else conversion,
+                            CT.ConvertFromBBoxes(always_apply=True),
+                            ])
         self.p = p
         self.targets = {'img_keywords': img_keywords,
                         'mask_keywords': mask_keywords,
@@ -136,4 +151,3 @@ class Compose:
                f'{self.targets["mask_keywords"]}, {self.targets["fmask_keywords"]}, ' \
                f'{self.targets["keypoint_keywords"]}, {self.targets["bbox_keywords"]}, ' \
                f'{self.targets["value_keywords"]}, {self.transforms[-1]})'
-

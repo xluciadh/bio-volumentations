@@ -43,13 +43,8 @@ SITK_INTERPOLATION_CONSTANTS = {
 
 
 def get_image_center(shape: Union[TypeSpatioTemporalCoordinate, TypeSpatialCoordinate],
-                     spacing: TypeTripletFloat = (1., 1., 1.), lps: bool = False) -> TypeTripletFloat:
-
+                     spacing: TypeTripletFloat = (1., 1., 1.)) -> TypeTripletFloat:
     center = (np.array(shape)[:3] - 1) / 2.0  # compute the center for the spatial dimensions
-
-    if lps:
-        center = ras_to_lps(center)
-
     return center * np.array(spacing)
 
 
@@ -62,15 +57,12 @@ def np_to_sitk(img: np.array) -> sitk.Image:
 
     # image in format (c, s1, s2, s3, [t])
     assert len(img.shape) == 5
-    channels, w, h, d, frames = img.shape
+    channels, d, h, w, frames = img.shape
 
     sample = np.moveaxis(img, 0, 3)
-    sample = sample.reshape((w, h, d, channels * frames))
+    sample = sample.reshape((d, h, w, channels * frames))
 
-    # TODO: rather swap axis of parameters than data
-    sample = np.swapaxes(sample, 0, 2)
-
-    return sitk.GetImageFromArray(sample)
+    return sitk.GetImageFromArray(sample)  # changes [Z, Y, X] to [X, Y, Z]
 
 
 def sitk_to_np(sitk_img: sitk.Image,
@@ -78,7 +70,7 @@ def sitk_to_np(sitk_img: sitk.Image,
                frames=1) -> np.array:
 
     # shape (d, w, h, c*f)
-    img = sitk.GetArrayFromImage(sitk_img)
+    img = sitk.GetArrayFromImage(sitk_img)  # changes [X, Y, Z] to [Z, Y, X]
 
     if len(img.shape) == 3:
         img = np.expand_dims(img, 3)
@@ -87,13 +79,12 @@ def sitk_to_np(sitk_img: sitk.Image,
                                                 f'does not correspond to the sitk vector size {img.shape[-1]}')
 
     # split channels and frames
-    w, h, d = img.shape[:3]
-    img = img.reshape((w, h, d, channels, frames))
+    d, h, w = img.shape[:3]
+    img = img.reshape((d, h, w, channels, frames))
 
-    img = np.swapaxes(img, 0, 2)
     img = np.moveaxis(img, 3, 0)
 
-    # shape (c, w, h, d, f)
+    # shape (c, d, h, w, f)
     return img
 
 
@@ -110,14 +101,12 @@ def get_affine_transform(domain_limit,
                          translation: TypeTripletFloat,
                          spacing: TypeTripletFloat,
                          keep_scale: bool = True) -> sitk.Euler3DTransform:
-    # copy arrays
+    # copy arrays: but beware of the LPS format!
     scaling = np.asarray(scales)
     rotation = np.asarray(degrees)
-    translation = np.asarray(translation)  # * np.asarray(spacing)
+    translation = np.asarray(translation, dtype=float)  # * np.asarray(spacing)
 
-    center_lps = get_image_center(domain_limit,
-                                  spacing=spacing,
-                                  lps=False)
+    center_lps = get_image_center(domain_limit, spacing=spacing)
 
     scaling_transform = get_scaling_transform(
         scaling,
@@ -169,11 +158,13 @@ def get_rotation_transform(
 ) -> sitk.Euler3DTransform:
 
     transform = sitk.Euler3DTransform()
+    transform.SetComputeZYX(True)
+
     radians = np.radians(degrees).tolist()
 
     # SimpleITK uses LPS
-    radians_lps = ras_to_lps(radians)
-    translation_lps = ras_to_lps(translation)
+    radians_lps = (radians)
+    translation_lps = (translation)
 
     if DEBUG:
         print('radians_lps', radians_lps)
@@ -187,7 +178,7 @@ def get_rotation_transform(
     if center_lps is not None:
         transform.SetCenter(center_lps)
 
-    return transform.GetInverse()
+    return transform
 
 
 def apply_sitk_transform(

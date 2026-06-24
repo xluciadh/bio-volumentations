@@ -37,10 +37,18 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE                #
 #  SOFTWARE.                                                                                    #
 # ============================================================================================= #
+import numpy as np
 
 
-def check_dimensions(list_of_shapes: list):
-    for i in range(1, len(list_of_shapes)):
-        if len(list_of_shapes[i]) != len(list_of_shapes[i - 1]):
-            return True
-    return False
+def check_shapes_equal(list_of_shapes: list):
+    return len(set(list_of_shapes)) == 1
+
+
+def get_keypoints_dim(list_of_kpts: list):
+    try:
+        return np.asarray(list_of_kpts).shape[1]
+    except ValueError as ex:
+        if 'inhomogeneous shape' in str(ex):
+            raise RuntimeError(f'Keypoints have inconsistent dimensionality.')
+        else:
+            raise ex

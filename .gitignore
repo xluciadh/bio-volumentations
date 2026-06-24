@@ -6,3 +6,5 @@ dist/
 dist-1/
 src/bio_volumentations.egg-info
 docs/build
+wip
+.vscode

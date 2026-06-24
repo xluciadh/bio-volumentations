@@ -46,7 +46,7 @@ from scipy.ndimage import gaussian_filter
 from warnings import warn
 
 from .sitk_utils import get_affine_transform, apply_sitk_transform
-from .utils import is_included, get_nonchannel_axes, atleast_kd
+from .utils import is_included, atleast_kd
 from ..biovol_typing import TypeTripletFloat, TypeSpatioTemporalCoordinate, TypeSextetInt, TypeSpatialShape
 from ..random_utils import normal, poisson
 
@@ -71,42 +71,19 @@ But for parameters use primarily ints.
 """
 
 
-# TODO parameter
-# Anti-aliasing - gaussian filter to smooth. using automatically when downsampling, except when integer
-# and interpolation is 0. (so mask)
-# float mask - how, for now no gaussian filter.
-def resize(img, input_new_shape, interpolation=1, border_mode='reflect', cval=0, mask=False,
+def resize(img, input_new_shape: TypeSpatialShape, interpolation=1, border_mode='reflect', cval=0, mask=False,
            anti_aliasing_downsample=True):
-    # TODO: random fix, check if it is correct
-    new_shape = list(input_new_shape)[:-1]
 
-    # Zero or negative check
-    if np.any(np.asarray(new_shape) <= 0):
-        warn(f'Resize(): shape: {new_shape} contains zero or negative number, continuing without Resize.',
-             UserWarning)
+    if input_new_shape is None:
         return img
 
-    # shape check
-    if mask:
-        # too many or few dimensions of new_shape
-        if len(new_shape) < len(img.shape) - 1 or len(new_shape) > len(img.shape):
-            warn(f'Resize(): wrong parameter shape:  {new_shape},' +
-                 f'expecting something with dimensions of {img.shape} or {img.shape[0:-1]}, ' +
-                 'continuing without resizing ', UserWarning)
-            return img
-        # Adding time dimension
-        elif len(new_shape) == len(img.shape) - 1:
-            new_shape = np.append(new_shape, img.shape[-1])
-    else:
-        if len(new_shape) < len(img.shape[1:]) - 1 or len(new_shape) > len(img.shape[1:]):
-            warn(f'Resize(): wrong dimensions of shape:  {new_shape},' +
-                 f'expecting something with dimensions of {img.shape[1:]} or {img.shape[1:-1]}, continuing ' +
-                 'without resizing ', UserWarning)
-            return img
-        # adding time dimension
-        elif len(new_shape) == len(img.shape[1:]) - 1:
-            new_shape = np.append(new_shape, img.shape[-1])
+    new_shape = list(input_new_shape)
 
+    # shape adjustment (time-lapse data)
+    if len(new_shape) < len(img.shape) - 1:
+        new_shape = new_shape + [img.shape[-1]]
+
+    # resize mask and fmask
     anti_aliasing = False
     if mask:
         new_img = skt.resize(
@@ -120,6 +97,7 @@ def resize(img, input_new_shape, interpolation=1, border_mode='reflect', cval=0,
         )
         return new_img
 
+    # resize image
     if anti_aliasing_downsample and np.any(np.array(img.shape[1:]) < np.array(new_shape)):
         anti_aliasing = True
 
@@ -142,47 +120,41 @@ def resize(img, input_new_shape, interpolation=1, border_mode='reflect', cval=0,
 
 
 def resize_keypoints(keypoints,
-                     domain_limit: TypeSpatioTemporalCoordinate,
-                     new_shape: TypeSpatioTemporalCoordinate):
-    assert len(domain_limit) == len(new_shape) == 4
+                     domain_limit: TypeSpatialShape,
+                     new_shape: TypeSpatialShape):
+    if new_shape is None:
+        return keypoints
+
+    assert len(domain_limit) == len(new_shape) == 3
 
     # for each dim compute ratio
-    ratio = np.array(new_shape[:3]) / np.array(domain_limit[:3])
+    ratio = np.array(new_shape) / np.array(domain_limit)
 
-    # (we suppose here that length of keypoint is 3)
-    return list(map(tuple, np.asarray(keypoints) * ratio))
+    keys = np.asarray(keypoints)
+    if keys.shape[1] == 4:
+        ratio = np.append(ratio, 1)  # add the "resizing" constant for the temporal dimension
+
+    return list(map(tuple, keys * ratio))
 
 
 def affine(img: np.array,
-           degrees: TypeTripletFloat = (0, 0, 0),
-           scales: TypeTripletFloat = (1, 1, 1),
-           translation: TypeTripletFloat = (0, 0, 0),
+           transform,
            interpolation: str = 'linear',
-           border_mode: str = 'constant',
            value: float = 0,
            spacing: TypeTripletFloat = (1, 1, 1)):
     """Compute affine transformation of a multi-channel image.
 
     Args:
-        img: image data in the following format: (channel, ax1, ax2, ax3, [time]).
-        degrees: rotation (in degrees) for the three spatial axes
-        scales: scaling for the three spatial axes
-        translation: translation for the three spatial axes
+        img: image data (np.ndarray) in the following format: (channel, Z, Y, X, [time])
+        transform: sitk transformation to be applied to the image
         interpolation: interpolation type
-        border_mode: border mode (not used)
         value: default pixel value
-        spacing: relative voxel size
+        spacing: relative voxel size (in XYZ format)
 
     Returns:
-        np.ndarray: Transformed image.
+        np.ndarray: Transformed image (np.ndarray).
     """
-    shape = img.shape[1:]  # ignore the channel dimension
-    transform = get_affine_transform(shape,
-                                     scales=scales,
-                                     degrees=degrees,
-                                     translation=translation,
-                                     spacing=spacing)
-
+    # apply the transformation (we need to change order of axes of spacing to XYZ)
     return apply_sitk_transform(img,
                                 sitk_transform=transform,
                                 interpolation=interpolation,
@@ -191,48 +163,41 @@ def affine(img: np.array,
 
 
 def affine_keypoints(keypoints: list,
+                     transform,
                      domain_limit: TypeSpatioTemporalCoordinate,
-                     degrees: TypeTripletFloat = (0, 0, 0),
-                     scales: TypeTripletFloat = (1, 1, 1),
-                     translation: TypeTripletFloat = (0, 0, 0),
-                     border_mode: str = 'constant',
                      keep_all: bool = False,
-                     spacing: TypeTripletFloat = (1, 1, 1)):
+                     ):
     """Compute affine transformation of a set of keypoints.
 
     Args:
-        keypoints: list of input keypoints
-        domain_limit: limit of the domain, there keyp-points can appear, it is used to define center of transforms
+        keypoints: list of input keypoints (in ZYX format)
+        transform: sitk transformation to be applied to the keypoints
+        domain_limit: limit of the domain (in ZYXT format), there keypoints can appear, it is used to define center of transforms
                 and to filter out output key-point from the outside of the domain
-        degrees: rotation (in degrees) for the three spatial axes
-        scales: scaling for the three spatial axes
-        translation: translation for the three spatial axes
-        border_mode: not used
-        keep_all: True to keep also key_point frou poutside the domain
-        spacing: relative voxel size
+        keep_all: True to keep also keypoints outside the image domain
 
     Returns:
-        list: A list of transformed key-points.
+        list: A list of transformed keypoints (in ZYX format).
 
     """
-    transform = get_affine_transform(domain_limit,  # domain_limit is image shape without the channel axis
-                                     scales=scales,
-                                     degrees=degrees,
-                                     translation=translation,
-                                     spacing=spacing)
 
     transform = transform.GetInverse()
 
     res = []
     for point in keypoints:
-        transformed_point = transform.TransformPoint(point)
-        if keep_all or is_included(domain_limit, transformed_point):
+        # we need to change the order of axes of points to XYZ for the transformation and then back to ZYX
+        point_spatial = point[:3]
+        transformed_point = transform.TransformPoint(point_spatial[::-1])[::-1] + point[3:]
+        if keep_all or is_included(domain_limit, transformed_point[:3]):
             res.append(transformed_point)
     return res
 
 
 # Used in rot90_keypoints
 def flip_keypoints(keypoints, axes, img_shape):
+    if len(axes) == 0:
+        return keypoints
+
     # all values in axes are in [1, 2, 3]
     assert np.all(np.array([ax in [1, 2, 3] for ax in axes])), f'{axes} does not contain values from [1, 2, 3]'
 
@@ -247,7 +212,7 @@ def flip_keypoints(keypoints, axes, img_shape):
 
     keys = keys * mult + add
 
-    return list(map(tuple, keys))
+    return [tuple(k) for k in keys.tolist()]
 
 
 # Used in rot90_keypoints
@@ -261,22 +226,30 @@ def transpose_keypoints(keypoints, ax1, ax2):
     keys[:, axis1], keys[:, axis2] = keys[:, axis2], keys[:, axis1].copy()
 
     # Return a list of tuples
-    return list(map(tuple, keys))
+    return [tuple(k) for k in keys.tolist()]
 
 
 def rot90_keypoints(keypoints, factor, axes, img_shape):
+    """
+    Rotates keypoints by 0, 90, 180, and 270 degrees.
+    Returns rotated keypoints and the shape of the rotated image domain.
+    """
+    img_shape = np.array(img_shape)
+
     if factor == 1:
         keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
         keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
+        img_shape[axes[0] - 1], img_shape[axes[1] - 1] = img_shape[axes[1] - 1], img_shape[axes[0] - 1]
 
     elif factor == 2:
         keypoints = flip_keypoints(keypoints, axes, img_shape)
 
     elif factor == 3:
         keypoints = transpose_keypoints(keypoints, axes[0], axes[1])
+        img_shape[axes[0] - 1], img_shape[axes[1] - 1] = img_shape[axes[1] - 1], img_shape[axes[0] - 1]
         keypoints = flip_keypoints(keypoints, [axes[1]], img_shape)
 
-    return keypoints
+    return keypoints, img_shape
 
 
 def pad_keypoints(keypoints, pad_size):
@@ -286,7 +259,7 @@ def pad_keypoints(keypoints, pad_size):
     padding = np.asarray((a, c, e) if keys.shape[1] == 3 else (a, c, e, 0))  # we only need the 'before' pad size
 
     # Return a list of tuples
-    return list(map(tuple, keys + padding))
+    return [tuple(k) for k in (keys + padding).tolist()]
 
 
 def pad_pixels(img, input_pad_width: TypeSextetInt, border_mode, cval, mask=False):
@@ -340,6 +313,10 @@ def crop(input_array: np.array,
          crop_position: TypeSpatialShape,
          pad_dims,
          border_mode, cval, mask):
+
+    if crop_shape is None:
+        return input_array
+
     input_spatial_shape = get_spatial_shape(input_array, mask)  # get shape for the spatial dims only
 
     # if we want larger crop than is the size of the image (in any axis), we must pad the axis
@@ -372,20 +349,25 @@ def crop_keypoints(keypoints,
                    crop_position: TypeSpatialShape,
                    pad_dims,
                    keep_all: bool):
+
+    if crop_shape is None:
+        return keypoints
+
     # Get padding information
     px, _, py, _, pz, _ = pad_dims  # we only need the 'before' padding size
     pad = np.asarray((px, py, pz))
 
     # Compute new keypoint positions
-    keys = np.asarray(keypoints)[:, :3] - np.asarray(crop_position) + pad  # ignore the time dimension of keypoints
+    keys = np.asarray(keypoints)[:, :3] - np.asarray(crop_position) + pad  # ignore the time dimension of keypoints for the computation
+    keys = np.concat([keys, np.asarray(keypoints)[:, 3:]], axis=-1)  # add the time dimension to the transformed positions
 
     # Filter the keypoints
     if not keep_all:
-        mask = (keys >= 0) & (keys + .5 < np.asarray(crop_shape))
+        mask = (keys[:, :3] >= 0) & (keys[:, :3] + .5 < np.asarray(crop_shape))
         keys = keys[np.sum(mask, axis=1) == 3, :]
 
     # Return a list of tuples
-    return list(map(tuple, keys))
+    return [tuple(k) for k in keys.tolist()]
 
 
 def gaussian_blur(img, input_sigma, border_mode, cval):
@@ -394,29 +376,33 @@ def gaussian_blur(img, input_sigma, border_mode, cval):
     # if sigma is of type list, we have different sigma for each channel --> delegate to function gaussian_blur_stack()
     if isinstance(sigma, list):
         if img.shape[0] != len(sigma):
-            warn(f'GaussianBlur(): wrong list size ({len(sigma)}), it should equal the number of channels '
-                 f'({img.shape[0]}). Skipping the transformation.', UserWarning)
+            warn(f'gaussian blur: sigma list length ({len(sigma)}) should equal the number of '
+                 f'channels ({img.shape[0]}). Skipping the transformation.', UserWarning)
             return img
         return gaussian_blur_stack(img, sigma, border_mode, cval)
 
-    # replicate sigma for each dimension if necessary
     if isinstance(sigma, (int, float)):
-        sigma = np.repeat(sigma, len(img.shape))
-        sigma[0] = 0
+        # replicate sigma for all spatial dimensions and add dummy sigma for C and T dimensions
+
+        sigma = [sigma] * len(img.shape)
+        sigma[0] = 0  # channel dim = no blur
         # Checking for time dimension
         if len(img.shape) > 4:
-            sigma[-1] = 0
+            sigma[-1] = 0  # time dime = no blur
     else:
-        # TODO what to expect in the input.
-        if len(sigma) == len(img.shape) - 2:
-            sigma = np.append(sigma, 0)
-        if len(sigma) == len(img.shape) - 1:
-            sigma = np.insert(sigma, 0, 0)
+        # sigma is a tuple
 
-    # check if we have correct format of sigma
-    # TODO better warning
+        sigma = (0,) + sigma  # channel dim = no blur
+
+        if len(sigma) < len(img.shape):
+            sigma = sigma + (0,)  # time dim without blur
+        elif len(sigma) > len(img.shape):  # time dim in sigma [0, sz, sy, sx, st] but not in the image [C, Z, Y, X]
+            warn(f'gaussian blur: Too many values for sigma ({sigma[1:]}), only using the first three values.')
+            sigma = sigma[:len(img.shape)]
+
+    # check if we have a correct format of sigma
     if len(sigma) != len(img.shape):
-        warn(f'GaussianBlur(): wrong sigma tuple (length does not equal the number of affected dimensions). '
+        warn(f'gaussian blur: wrong sigma tuple (length does not equal the number of affected dimensions). '
              f'Skipping the transformation.', UserWarning)
         return img
 
@@ -425,26 +411,44 @@ def gaussian_blur(img, input_sigma, border_mode, cval):
 
 
 def gaussian_blur_stack(img, input_sigma, border_mode, cval):
-    sigma = list(np.asarray(input_sigma).copy())
+    sigma = (np.asarray(input_sigma).copy()).tolist()
 
     # simple sigma check
     for channel in sigma:
         if not isinstance(channel, (float, int, tuple)):
-            warn(f'GaussianBlur(): wrong sigma format: the list can only contain tuple, float or int. '
+            warn(f'gaussian blur: wrong sigma format: the list can only contain elements of type tuple, float or int. '
                  f'Skipping the transformation.', UserWarning)
             return img
 
-    # TODO try different techniques for better optimization
+    # check if we have a value for each channel
+    if len(sigma) != img.shape[0]:
+        warn(f'gaussian blur: the number of sigma values ({len(sigma)}) does not equal the number of image channels '
+             f'({img.shape[0]}). Skipping the transformation.', UserWarning)
+        return img
+
+    image_dim_without_channels = len(img.shape) - 1
+    res = np.empty_like(img)
     for i in range(len(sigma)):  # for each channel
-        if isinstance(sigma[i], (float, int)):  # replicate sigma for each dimension if necessary
-            sigma[i] = np.repeat(sigma[i], len(img.shape) - 1)
-            if len(sigma[i]) >= 4:
-                sigma[i][-1] = 0
+
+        if isinstance(sigma[i], (float, int)):
+            # replicate sigma for all spatial dimensions and add dummy sigma for C and T dimensions
+
+            sigma[i] = [sigma[i]] * image_dim_without_channels  # no channel dim
+            if image_dim_without_channels > 3:
+                sigma[i][-1] = 0  # time dime = no blur
+
         else:
-            if len(sigma[i]) == len(img.shape) - 2:
-                sigma[i] = np.append(sigma[i], 0)
-        img[i] = gaussian_filter(img[i], sigma=sigma[i], mode=border_mode, cval=cval)  # compute
-    return img
+            # sigma is a tuple
+
+            if len(sigma[i]) < image_dim_without_channels:
+                sigma[i] = sigma[i] + (0,)  # time dim without blur
+            elif len(sigma[i]) > image_dim_without_channels:  # time dim in sigma [sz, sy, sx, st] but not in the image [(C,) Z, Y, X]
+                warn(f'gaussian blur: Too many values for channel sigma ({sigma[i]}), only using the first three values.')
+                sigma[i] = sigma[i][:image_dim_without_channels]
+
+        res[i, ...] = gaussian_filter(img[i], sigma=sigma[i], mode=border_mode, cval=cval)  # compute
+
+    return res
 
 
 def brightness_contrast_adjust(img, alpha=1, beta=0):
@@ -475,16 +479,15 @@ def gaussian_noise(img, mean, sigma):
     return img + noise
 
 
-def poisson_noise(img, peak):
-    img = img.astype('float32')
-    return img + poisson(img).astype(np.float32)
+def poisson_noise(img):
+    return img.astype(np.float32) + poisson(img).astype(np.float32)
 
 
 def value_to_list(value, length):
     if isinstance(value, (float, int)):
         return [value] * length
     else:
-        return value  # TODO: maybe return list(value)?
+        return list(value)
 
 
 def correct_length_list(list_to_check, length, value_to_fill=1, list_name='###Default###'):

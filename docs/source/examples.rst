@@ -46,7 +46,7 @@ The shape of the output image will be either [C, Z, Y, X] (for cases 1 & 2) or [
 The images are type-casted to a floating-point datatype before being transformed, irrespective of their actual datatype.
 
 For the specification of image annotation conventions, please see
-`the respective section below <https://biovolumentations.readthedocs.io/1.3.2/examples.html#example-transforming-images-with-annotations>`_.
+:ref:`the respective section below <transforming_with_annotations>`.
 
 All transformations are implemented as callable classes inheriting from an abstract :class:`Transform` class.
 Upon instantiating a transformation object, one has to specify the parameters of the transformation.
@@ -65,7 +65,7 @@ If you call transformations outside of :class:`Compose`, we cannot guarantee the
 are checked and enforced, so you might encounter unexpected behaviour.
 
 Below, there are several examples of how to use the `Bio-Volumentations` library. You are also welcome to check
-`the API reference <https://biovolumentations.readthedocs.io/1.3.2/modules.html>`_ to learn more about the individual transforms.
+:doc:`the API reference </modules>` to learn more about the individual transforms.
 
 Example: Transforming a Single Image
 ************************************
@@ -78,13 +78,13 @@ Optionally, you can specify a datatype conversion transformation that will be ap
 in the list, for example from the default :class:`numpy.ndarray` to a PyTorch :class:`torch.Tensor`.
 You can also specify the probability of applying the whole pipeline as a number between 0 and 1.
 The default probability is 1 (i.e., the pipeline is applied in each call). See the :class:`Compose`
-`docs <https://biovolumentations.readthedocs.io/1.3.2/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
+`docs <https://biovolumentations.readthedocs.io/1.3.3/bio_volumentations.core.html#module-bio_volumentations.core.composition>`_
 for more details.
 
 Note: You can also toggle the probability of applying the individual transforms. To do so, you can
 use the parameters :class:`p` and :class:`always_apply` when instantiating the transformation objects.
-If :class:`always_apply==True`, the transformation is applied every time the pipeline is called;
-otherwise, it is applied with probability :class:`p`, which must be a number between 0 and 1.
+If :class:`always_apply==True`, the transformation is applied every time the pipeline is called, irrespective of the value of :class:`p`;
+if :class:`always_apply==False`, the transformation is applied with probability :class:`p`, which must be a number between 0 and 1.
 
 The :class:`Compose` object is callable. The data is passed as keyword arguments, and the call returns a dictionary
 with the same keywords and corresponding transformed data. This might look like an overkill for a single image,
@@ -113,6 +113,9 @@ The default keyword for the image data is, unsurprisingly, :class:`'image'`.
     aug_data = aug(**data)
     transformed_img = aug_data['image']
 
+
+.. _transforming_with_annotations:
+
 Example: Transforming Images with Annotations
 *********************************************
 Sometimes, it is necessary to transform an image with some associated additional targets.
@@ -121,10 +124,9 @@ To that end, `Bio-Volumentations` define several target types:
 - :class:`image` for the image data (:class:`numpy.ndarray` with floating-point datatype);
 - :class:`mask` for integer-valued label images (:class:`numpy.ndarray` with integer datatype);
 - :class:`float_mask` for real-valued label images (:class:`numpy.ndarray` with floating-point datatype);
-- :class:`keypoints` for a list of key points (a list of tuples); and
+- :class:`keypoints` for a list of keypoints;
+- :class:`bboxes` for a list of bounding boxes; and
 - :class:`value` for any non-transformed data.
-
-Apart from these, a :class:`bounding_boxes` target type is defined but not implemented yet.
 
 The :class:`mask` and :class:`float_mask` targets are expected to have the same shape as the :class:`image`
 target except for the channel (C) dimension which must not be included.
@@ -133,12 +135,31 @@ images of shape ``[150, 300, 300]``, ``[1, 150, 300, 300]``, as well as ``[4, 15
 If you want to use a multi-channel :class:`mask` or :class:`float_mask`, you have to split it into
 a set of single-channel :class:`mask` or :class:`float_mask` targets, respectively, and input them
 as stand-alone targets (see
-`the respective section below <https://biovolumentations.readthedocs.io/1.3.2/examples.html#example-transforming-multiple-targets-of-the-same-type>`_
-on transforming multiple masks with a single image).
+:ref:`the section below on transforming multiple targets of the same type <transforming_multiple_targets>`).
 
 The :class:`keypoints` target is represented as a list of tuples. Each tuple represents
 the absolute coordinates of a keypoint in the volume, so it must contain either 3 or 4 numbers
 (for volumetric and time-lapse volumetric data, respectively).
+
+The :class:`bboxes` target is represented as a list of bounding boxes. Each bounding box is represented by a tuple of 3 or 4 values:
+
+.. code-block:: python
+
+    Triplet = Tuple[float, float, float]
+
+    Bbox = Tuple[Triplet, Triplet, float, Optional[str]]
+
+where:
+ - the two Triplets are representations of the bounding box in the specified format (see below),
+ - the float value represents a time point,
+ - the optional fourth value in the tuple, Optional[str], is a class label of the bounding box.
+
+Bounding boxes are accepted in `voc`, `coco`, `albumentations` and `yolo` :ref:`formats <bbox_formats>`.
+The input format of your data can be specified in the :class:`Compose` constructor with ``bbox_format`` parameter.
+For the normalized formats, image domain size is inferred from the :class:`image` target and is correctly updated
+as transformations are being applied.
+The time point is a compulsory parameter when defining a bounding box even for static data; in this case,
+set it to an arbitrary value (we recommend ``0``).
 
 The :class:`value` target can hold any other data whose value does not change during the transformation process.
 This can be for example image-level information such as a classification label for the whole image.
@@ -152,6 +173,8 @@ Prior to applying any user-defined transformation, the :class:`mask` and :class:
 integer and floating-point datatypes, respectively.
 
 Importantly, there must always be an :class:`image`-type target in the sample.
+It is also expected that all :class:`image`, :class:`mask`, and :class:`float_mask` targets are of the same shape
+(except for the number of channels) and that all keypoints and bounding boxes are fully contained in the image domain.
 
 You cannot define your own target types; that would require re-implementing all existing transforms.
 
@@ -185,13 +208,59 @@ For example, :class:`RandomAffineTransform` applies the same geometric transform
 Some transformations, such as :class:`RandomGaussianNoise` or :class:`RandomGamma`,
 are only defined for the :class:`image` target
 and leave the other target types unchanged. Please consult the
-`documentation of the individual transforms <https://biovolumentations.readthedocs.io/1.3.2/modules.html>`_
-for more details.
+:doc:`documentation of the individual transforms </modules>` for more details.
+
+.. code-block:: python
+
+    import numpy as np
+    from bio_volumentations import Compose, RandomGamma, RandomRotate90, GaussianBlur, RandomScale
+
+    # Define a helper function to convert a numpy ndarray to a tuple
+    def np_to_tuple(arr: np.ndarray):
+        return tuple(arr.tolist())
+
+    # Create the transformation using Compose from a list of transformations
+    aug = Compose([
+        RandomGamma(gamma_limit = (0.8, 1.2), p = 0.8),
+        RandomRotate90(axes = [1, 2, 3], p = 1),
+        GaussianBlur(sigma = 1.2, p = 0.8),
+        RandomScale((0.8, 1.1))
+    ])
+
+    # Generate image and a corresponding labeled image
+    img = np.random.rand(1, 128, 256, 256)
+    lbl = np.random.randint(0, 1, size=(128, 256, 256), dtype=np.uint8)
+
+    # Generate keypoints
+    keypts = [np_to_tuple(np.random.randint(0, 127, 3)) for _ in range(20)]
+
+    # Generate random bboxes
+    bboxes = [(np_to_tuple(np.random.randint(0, 127, 3)),
+               np_to_tuple(np.random.randint(128, 256, 3)),
+               0) for _ in range(20)]
+
+    # Transform the images
+    # Please note that the images and annotations must be passed as keyword arguments to the transformation pipeline
+    # and extracted from the outputted dictionary.
+    data = {'image': img, 'mask': lbl, 'keypoints': keypts, 'bboxes': bboxes}
+
+    aug_data = aug(**data)
+    transformed_img = aug_data['image']
+    transformed_lbl = aug_data['mask']
+    transformed_keypts = aug_data['keypoints']
+    transformed_bbox = aug_data['bboxes']
+
+
+In this case, :class:`keypoints` and :class:`bboxes` are only transformed by :class:`RandomRotate90` and :class:`RandomScale`,
+while :class:`image` and :class:`mask` are transformed by all four transformations.
+
 
 Another example of transforming an annotated image is available
-`at the project's GitLab page <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.2/example?ref_type=tags>`_,
+`at the project's GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/tree/1.3.3/examples/simple_example?ref_type=tags>`_,
 where a runnable Python script and a test data sample are provided.
-See `the readme at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.2/README.md?ref_type=tags#the-first-example>`_ for more details.
+See `the readme at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.3/README.md?ref_type=tags#the-first-example>`_ for more details.
+
+.. _transforming_multiple_targets:
 
 Example: Transforming Multiple Targets of the Same Type
 *******************************************************
@@ -209,7 +278,7 @@ You do not need to use all specified keywords in a transformation call. However,
 the :class:`'image'` keyword must be present in each transformation call.
 In our example below, there are seven target keywords defined: four keywords defined explicitly (two for :class:`image`,
 one for :class:`mask`, and one for :class:`float_mask`) and three defined implicitly (for :class:`keypoints`,
-:class:`bounding_boxes`, and :class:`value`), but we only transform three targets.
+:class:`bboxes`, and :class:`value`), but we only transform three targets.
 
 
 .. code-block:: python
@@ -251,6 +320,7 @@ for example, :class:`Flip` can be implemented as follows:
     import numpy as np
     from typing import List
     from bio_volumentations import DualTransform
+    import my_package  # a package with backend functionality (such as keypoint/bbox flipping)
 
     class Flip(DualTransform):
         # Initialize the transform
@@ -269,9 +339,13 @@ for example, :class:`Flip` can be implemented as follows:
         # Transform the float-valued mask - no need to implement. By default, apply_to_float_mask() uses
         # the implementation of apply_to_mask(), unless it is overridden (see the implementation of DualTransform).
 
-        # Transform the key points
+        # Transform the keypoints
         def apply_to_keypoints(self, keypoints, **params):
-            return F.flip_keypoints(keypoints, axes=params['axes'], img_shape=params['img_shape'])
+            return my_package.flip_keypoints(keypoints, axes=params['axes'], img_shape=params['img_shape'])
+
+        # Transform the bounding boxes
+        def apply_to_bboxes(self, keypoints, **params):
+            return my_package.flip_bboxes(keypoints, axes=params['axes'], img_shape=params['img_shape'])
 
         # Set transformation parameters. This is useful especially for RandomXXX transforms
         # to ensure consistent transformation of samples with multiple targets.
@@ -280,3 +354,57 @@ for example, :class:`Flip` can be implemented as follows:
             img_shape = np.array(data['image'].shape[1:4])
             return {"axes": axes, "img_shape": img_shape}
 
+.. _auto_augmentation:
+
+Example: Using Bio-Volumentations with automatic augmentation frameworks
+************************************************************************
+Bio-Volumentations can also be used with existing automatic augmentation frameworks.
+We prepared examples of using it with `AutoAugment <https://arxiv.org/abs/1805.09501>`_
+and `RandAugment <https://arxiv.org/abs/1909.13719>`_ - they are available
+in `the respective file at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.3/examples/auto_augmentation.py?ref_type=tags>`_.
+
+.. _bbox_formats:
+
+Bounding box examples in different formats
+******************************************
+
+This section showcases how a single bounding box is represented in different formats. Suppose we have
+a time-lapse image sequence of shape ``[1, 10, 10, 10, 20]`` (i.e., with a single channel and 20 time points)
+and a bounding box stretching from pixel ``[2, 3, 5]`` to pixel ``[6, 5, 8]`` in time point ``14``.
+
+:class:`voc`: absolute coordinates, minimal and maximal corners of the bounding box
+
+.. code:: python
+
+    bbox = (2, 3, 5), (6, 5, 8), 14
+
+:class:`coco`: absolute coordinates, minimal corner and depth, height, width of the bounding box
+
+.. code:: python
+
+    bbox = (2, 3, 5), (4, 2, 3), 14
+
+:class:`albumentations`: normalized coordinates, minimal and maximal corners of the bounding box
+
+.. code:: python
+
+    bbox = (0.2, 0.3, 0.5), (0.6, 0.5, 0.8), 14
+
+:class:`yolo`: normalized coordinates, central point and depth, height, width of the bounding box
+
+.. code:: python
+
+    bbox = (0.4 0.4 0.65), (0.4 0.2 0.3), 14
+
+Optionally, we can specify a class label as the fourth parameter of the bounding box:
+
+.. code:: python
+
+    bbox = (2, 3, 5), (6, 5, 8), 14, 'class_label'
+
+If you are wondering which bbox format we are using internally... it is :class:`voc`.
+The list of tuples representing a list of bounding boxes you input to the transformation pipeline
+(the instantiated :class:`Compose` object) is, in fact, first converted to our internal representation
+that is based on the :class:`voc` format right before the user-defined transformations are applied.
+The result is then converted back to a list of tuples in the original bbox format right before returning
+the new list of bboxes from the :class:`Compose` object to the user.
