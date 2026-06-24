@@ -1,9 +1,37 @@
+# ============================================================================================= #
+#  Author:       Filip Lux, Lucia Hradecká                                                      #
+#  Copyright:    Filip Lux          : lux.filip@gmail.com                                       #
+#                Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #
+#                                                                                               #
+#  MIT License.                                                                                 #
+#                                                                                               #
+#  Permission is hereby granted, free of charge, to any person obtaining a copy                 #
+#  of this software and associated documentation files (the "Software"), to deal                #
+#  in the Software without restriction, including without limitation the rights                 #
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell                    #
+#  copies of the Software, and to permit persons to whom the Software is                        #
+#  furnished to do so, subject to the following conditions:                                     #
+#                                                                                               #
+#  The above copyright notice and this permission notice shall be included in all               #
+#  copies or substantial portions of the Software.                                              #
+#                                                                                               #
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR                   #
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                     #
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                  #
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                       #
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                #
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE                #
+#  SOFTWARE.                                                                                    #
+# ============================================================================================= #
+
+
 import unittest
 
 import numpy as np
 
 from src.bio_volumentations.core.composition import Compose
-import src.bio_volumentations.augmentations.transforms as transforms
+from src.bio_volumentations.augmentations.transforms import RandomGamma, RandomFlip, GaussianBlur, RandomScale, \
+    RandomCrop, RandomBrightnessContrast, RandomGaussianBlur, NormalizeMeanStd
 
 
 class TestComposeConversion(unittest.TestCase):
@@ -11,8 +39,7 @@ class TestComposeConversion(unittest.TestCase):
         sh = (36, 200, 250, 3)
         img = np.zeros(sh)
 
-        tr = Compose([transforms.NormalizeMeanStd(mean=[0],
-                                                  std=[0])])
+        tr = Compose([NormalizeMeanStd(mean=(0,), std=(0,))])
         result = tr(image=img)
 
         res_image = result['image']
@@ -32,10 +59,7 @@ class TestComposeConversion(unittest.TestCase):
     '''
 
     def test_compose(self):
-        import numpy as np
-        from src import Compose, RandomGamma, RandomFlip, GaussianBlur
-
-        # Create the transformation using Compose from a list of transformations and define targets
+        # Create the transformation using `Compose` from a list of transformations and define targets
         aug = Compose([
             RandomGamma(gamma_limit=(0.8, 1.2), p=0.8),
             RandomFlip(axes_to_choose=[1, 2, 3], p=1),
@@ -61,9 +85,6 @@ class TestComposeConversion(unittest.TestCase):
         self.assertTupleEqual(img.shape, transformed_img.shape)
 
     def test_compose2(self):
-        from src import Compose, RandomScale, RandomCrop, RandomFlip, RandomBrightnessContrast, RandomGaussianBlur, \
-            NormalizeMeanStd
-
         augmentation_pipeline = Compose([
             RandomScale(scaling_limit=(1.1, 1.6, 0.4, 0.6, 0.4, 0.6), always_apply=True),
             # match the size of nuclei in target data: enlarge in z axis and shrink in x and y axes
@@ -76,9 +97,6 @@ class TestComposeConversion(unittest.TestCase):
         ], img_keywords=('image',), mask_keywords=('mask', 'centers'), fmask_keywords=('weights',))
 
     def test_value_targets(self):
-        from src import Compose, RandomScale, RandomCrop, RandomFlip, RandomBrightnessContrast, \
-            RandomGaussianBlur, NormalizeMeanStd
-
         augmentation_pipeline = Compose([
             RandomScale(scaling_limit=(1.1, 1.6, 0.4, 0.6, 0.4, 0.6), always_apply=True),
             # match the size of nuclei in target data: enlarge in z axis and shrink in x and y axes

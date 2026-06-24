@@ -3,10 +3,10 @@ Copyright
 
 Copyright
 *********
-Copyright (c) 2025 Samuel Šuľan, Lucia Hradecká, Filip Lux
+Copyright (c) 2026 Lucia Hradecká, Filip Lux, Samuel Šuľan, Jakub Polonský
 
 The `Bio-Volumentations` library is distributed under the MIT License.
-For more details, see `the licence file at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.2/LICENSE?ref_type=tags>`_.
+For more details, see `the licence file at GitLab <https://gitlab.fi.muni.cz/cbia/bio-volumentations/-/blob/1.3.3/LICENSE?ref_type=tags>`_.
 
 
 Contributions
@@ -14,9 +14,10 @@ Contributions
 
 Authors of the `Bio-Volumentations` library are:
 
-- Samuel Šuľan
 - Lucia Hradecká: lucia.d.hradecka@gmail.com
 - Filip Lux: lux.filip@gmail.com
+- Samuel Šuľan
+- Jakub Polonský
 
 The `Bio-Volumentations` library is based on the following image augmentation libraries:
 
@@ -36,7 +37,14 @@ We would thus like to thank their authors, namely `the Albumentations team <http
 Citation
 ********
 
-If you find our library useful, please cite its `Zenodo record <https://doi.org/10.5281/zenodo.15023900>`_ as:
+If you find our library useful, please cite its `Zenodo record <https://doi.org/10.5281/zenodo.15024087>`_ as:
 
-Hradecká, L., & Lux, F. (2025). Bio-Volumentations (1.3.2). Zenodo. https://doi.org/10.5281/zenodo.15024087
+    Hradecká, L. (2026). Bio-Volumentations (1.3.3). Zenodo. https://doi.org/10.5281/zenodo.20814589
+
+and its `journal publication <https://doi.org/10.1016/j.softx.2025.102151>`_ as:
+
+    Lucia Hradecká, Filip Lux, Samuel Šuľan, Petr Matula. Bio-Volumentations: A Python library for augmentation
+    of volumetric image sequences. SoftwareX, 2025, vol. 30, 102151. DOI: 10.1016/j.softx.2025.102151.
+
+Thank you! :)
 

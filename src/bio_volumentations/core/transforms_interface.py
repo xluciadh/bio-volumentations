@@ -122,12 +122,12 @@ class DualTransform(Transform):
     def apply_to_mask(self, mask, **params):
         # default: use image transformation
         return self.apply(mask, **params)
-    
+
     def apply_to_float_mask(self, float_mask, **params):
         # default: use mask transformation
         return self.apply_to_mask(float_mask, **params)
 
-    def apply_to_keypoints(self, keypoints, keep_all=False, **params):
+    def apply_to_keypoints(self, keypoints, **params):
         # default: no transformation
         return keypoints
 

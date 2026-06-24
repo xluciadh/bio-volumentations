@@ -1,3 +1,29 @@
+# ============================================================================================= #
+#  Author:       Lucia Hradecká                                                                 #
+#  Copyright:    Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #
+#                                                                                               #
+#  MIT License.                                                                                 #
+#                                                                                               #
+#  Permission is hereby granted, free of charge, to any person obtaining a copy                 #
+#  of this software and associated documentation files (the "Software"), to deal                #
+#  in the Software without restriction, including without limitation the rights                 #
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell                    #
+#  copies of the Software, and to permit persons to whom the Software is                        #
+#  furnished to do so, subject to the following conditions:                                     #
+#                                                                                               #
+#  The above copyright notice and this permission notice shall be included in all               #
+#  copies or substantial portions of the Software.                                              #
+#                                                                                               #
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR                   #
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                     #
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                  #
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                       #
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                #
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE                #
+#  SOFTWARE.                                                                                    #
+# ============================================================================================= #
+
+
 import unittest
 
 import numpy as np
@@ -6,8 +32,7 @@ from src.bio_volumentations import Compose, RandomAffineTransform, GaussianBlur,
 
 
 raf_transform = RandomAffineTransform(angle_limit=(20, 20, 20,), translation_limit=(0, 0, 0),
-                                      scaling_limit=(0.93, 1.07), border_mode='constant', ival=0, mval=0,
-                                      always_apply=True)
+                                      scaling_limit=(0.93, 1.07), ival=0, mval=0, always_apply=True)
 gb_transform = GaussianBlur(always_apply=True)
 f_transform = Flip(always_apply=True)
 
@@ -44,7 +69,6 @@ class DataKeywordTests(unittest.TestCase):
         self.assertIsInstance(self.usecase1('image', 'gt_mask'), dict)
 
     def test_duplicate_keyword(self):
-        # TODO: we are not checking if keywords are OK --> this test fails (it is the responsibility of the user)
         self.assertRaises(Exception, self.usecase1, 'image', 'image')
 
     def test_no_image(self):

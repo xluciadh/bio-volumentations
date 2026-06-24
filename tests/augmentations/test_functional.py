@@ -1,9 +1,37 @@
+# ============================================================================================= #
+#  Author:       Filip Lux, Lucia Hradecká                                                      #
+#  Copyright:    Filip Lux          : lux.filip@gmail.com                                       #
+#                Lucia Hradecká     : lucia.d.hradecka@gmail.com                                #
+#                                                                                               #
+#  MIT License.                                                                                 #
+#                                                                                               #
+#  Permission is hereby granted, free of charge, to any person obtaining a copy                 #
+#  of this software and associated documentation files (the "Software"), to deal                #
+#  in the Software without restriction, including without limitation the rights                 #
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell                    #
+#  copies of the Software, and to permit persons to whom the Software is                        #
+#  furnished to do so, subject to the following conditions:                                     #
+#                                                                                               #
+#  The above copyright notice and this permission notice shall be included in all               #
+#  copies or substantial portions of the Software.                                              #
+#                                                                                               #
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR                   #
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,                     #
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE                  #
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                       #
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,                #
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE                #
+#  SOFTWARE.                                                                                    #
+# ============================================================================================= #
+
+
 import unittest
 
 import time
 import numpy as np
 
-from src.bio_volumentations.augmentations import functional, atleast_kd, get_nonchannel_axes
+from src.bio_volumentations.augmentations import functional, atleast_kd
+from src.bio_volumentations.augmentations.utils import get_nonchannel_axes
 
 
 class TestNormalization(unittest.TestCase):
@@ -52,7 +80,7 @@ class TestNormalization(unittest.TestCase):
             self.assertAlmostEqual(img[i].mean(), mean[i])
             self.assertAlmostEqual(img[i].std(), std[i])
 
-    def test_runtime(self):
+    def n_test_runtime(self):  # executable test but unnecessary to always re-run it
         n = 30
         img_size = (3, 256, 256, 256)
         img_size = (3, 130, 130, 100, 4)
@@ -118,16 +146,29 @@ class TestGaussianBlur(unittest.TestCase):
         # When axes is specified, any tuples used for sigma, order, mode and/or radius must match the length of axes.
         # The ith entry in any of these tuples corresponds to the ith entry in axes.
         # return functional.gaussian_filter(img, sigma=sigma, mode=border_mode, cval=cval, axes=[0])  # compute
-        return gaussian(img, sigma=sigma, channel_axis=0, preserve_range=True)  # compute
+        # return gaussian(img, sigma=sigma, channel_axis=0, preserve_range=True)  # compute
+        return gaussian(img, sigma=sigma)  # compute
 
-    def test_gaussian_blur_fn_1(self):
+    def test_gaussian_blur_1(self):
         img = np.random.random(size=(3, 100, 101, 120))
         sigma = [2, 1, 1.5]
 
-        res = self.gaussian_blur_vect(img, sigma, 'reflect', 0)
         res1 = functional.gaussian_blur_stack(img, sigma, 'reflect', 0)
 
-        self.assertTrue(np.allclose(res, res1))
+        res2 = np.stack([
+            functional.gaussian_blur(img[0:1, ...], sigma[0], 'reflect', 0).squeeze(),
+            functional.gaussian_blur(img[1:2, ...], sigma[1], 'reflect', 0).squeeze(),
+            functional.gaussian_blur(img[2:3, ...], sigma[2], 'reflect', 0).squeeze()
+        ])
+
+        self.assertTrue(np.allclose(res1, res2))
+
+        res = np.stack([
+            self.gaussian_blur_vect(img[0, ...], [sigma[0], sigma[0], sigma[0]], 'reflect', 0),
+            self.gaussian_blur_vect(img[1, ...], [sigma[1], sigma[1], sigma[1]], 'reflect', 0),
+            self.gaussian_blur_vect(img[2, ...], [sigma[2], sigma[2], sigma[2]], 'reflect', 0)
+        ])
+        self.assertTrue(np.allclose(res[:, 30:-30, 30:-30, 30:-30], res1[:, 30:-30, 30:-30, 30:-30], atol=1e-5))
 
 
 class TestCropPadEtc(unittest.TestCase):
@@ -359,6 +400,35 @@ class TestCropPadEtc(unittest.TestCase):
         self.assertEqual(len(res), 5)
         self.assertTupleEqual(tuple(res[0]), (23, 2, 21, 0))
         self.assertTupleEqual(tuple(res[4]), (20, 5, 24, 1))
+
+    def test_flip_transpose_rot90_keypoints(self):
+        keypoints = [(1, 2, 3, 0), (2, 2, 2, 1), (10, 2, 1, 3), (20, 23, 20, 1), (4, 5, 0, 1)]
+        img_shape = (25, 25, 25)
+
+        keys = functional.flip_keypoints(keypoints, axes=[1, 2, 3], img_shape=img_shape)
+        self.assertIsInstance(keys, list)
+        self.assertIsInstance(keys[0], tuple)
+        self.assertTrue(isinstance(keys[0][0], int) or isinstance(keys[0][0], float))
+
+        keys = functional.transpose_keypoints(keypoints, 1, 3)
+        self.assertIsInstance(keys, list)
+        self.assertIsInstance(keys[0], tuple)
+        self.assertTrue(isinstance(keys[0][0], int) or isinstance(keys[0][0], float))
+
+        keys, _ = functional.rot90_keypoints(keypoints, factor=1, axes=[1, 2, 3], img_shape=img_shape)
+        self.assertIsInstance(keys, list)
+        self.assertIsInstance(keys[0], tuple)
+        self.assertTrue(isinstance(keys[0][0], int) or isinstance(keys[0][0], float))
+
+        keys = functional.pad_keypoints(keypoints, pad_size=(1, 1, 1, 1, 1, 1))
+        self.assertIsInstance(keys, list)
+        self.assertIsInstance(keys[0], tuple)
+        self.assertTrue(isinstance(keys[0][0], int) or isinstance(keys[0][0], float))
+
+        keys = functional.crop_keypoints(keypoints, crop_shape=(22, 22, 22), crop_position=(1, 1, 1), pad_dims=(0, 0, 0, 0, 0, 0), keep_all=True)
+        self.assertIsInstance(keys, list)
+        self.assertIsInstance(keys[0], tuple)
+        self.assertTrue(isinstance(keys[0][0], int) or isinstance(keys[0][0], float))
 
 
 if __name__ == '__main__':

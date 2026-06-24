@@ -50,7 +50,7 @@ def atleast_kd(array, k):
     return array.reshape(new_shape)
 
 
-def get_sigma_axiswise(min_sigma, max_sigma):
+def get_sigma_axiswise(min_sigma, max_sigma) -> Union[int, float, tuple]:
     """Randomly choose a single sigma for all axes and channels (if max_sigma is int or float)
     or a sigma for each axis (except the channel axis).
     """
@@ -59,7 +59,7 @@ def get_sigma_axiswise(min_sigma, max_sigma):
 
     if isinstance(max_sigma, tuple):
         # If tuple on input, we must return a tuple (not np.ndarray)
-        sigma = tuple(sigma)
+        sigma = tuple(np.asarray(sigma).tolist())
 
     return sigma
 
@@ -190,6 +190,8 @@ def parse_coefs(coefs: Union[float, tuple], identity_element: float = 1, dim4: b
     elif (len(coefs) == 3) or (dim4 and len(coefs) == 4):
         return coefs
 
+    raise RuntimeError(f'Invalid input: {coefs}')
+
 
 def get_first_img_keyword(targets: dict = None):
     """Get the first 'image'-type keyword from the targets dictionary.
@@ -223,6 +225,9 @@ def get_spatio_temporal_domain_limit(sample: dict, targets: dict = None) -> Type
     elif len(shape) == 5:
         # 3D image with channels and the time axis
         limit = shape[1:5]
+
+    else:
+        raise RuntimeError(f'Invalid image shape: {shape}. Expected an image with 3-5 dimensions.')
 
     assert len(limit) == 4
     return tuple(limit)
@@ -290,7 +295,3 @@ def get_bbox_size(bbox: tuple) -> float:
         volume *= v_max - v_min
 
     return volume
-
-
-
-
